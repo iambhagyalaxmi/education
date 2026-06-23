@@ -2,18 +2,9 @@
   "version": 2,
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "npm install && cd api && npm install --prefer-offline 2>/dev/null || true",
+  "installCommand": "npm install",
   "framework": null,
-  "functions": {
-    "api/chat.ts": {
-      "runtime": "@vercel/node@5"
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api/chat",
-      "destination": "/api/chat"
-    },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
