@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String
+  email         String         @unique
+  googleId      String?        @unique
+  role          String         @default("student") // student, agent, admin
+  createdAt     DateTime       @default(now())
+  
+  conversations Conversation[]
+  tickets       Ticket[]
+}
+
+model Conversation {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  status    String    @default("active") // active, closed
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  user      User       @relation(fields: [userId], references: [id])
+  messages  Message[]
+  feedback  Feedback[]
+}
+
+model Message {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @db.Uuid
+  sender         String       // "user" or "bot" or "agent"
+  content        String
+  timestamp      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model Ticket {
+  id           String   @id @default(uuid()) @db.Uuid
+  ticketNumber String   @unique
+  userId       String   @db.Uuid
+  title        String
+  description  String
+  category     String
+  priority     String   @default("medium") // low, medium, high, critical
+  status       String   @default("open") // open, in-progress, resolved, closed
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Feedback {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @db.Uuid
+  rating         Int          // e.g., 1 to 5
+  comments       String?
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
