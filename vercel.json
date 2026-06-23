@@ -1,25 +1,21 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backend/src/index.ts",
-      "use": "@vercel/node"
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "npm install && cd api && npm install --prefer-offline 2>/dev/null || true",
+  "framework": null,
+  "functions": {
+    "api/chat.ts": {
+      "runtime": "@vercel/node@5"
     }
-  ],
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/backend/src/index.ts"
+      "source": "/api/chat",
+      "destination": "/api/chat"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]

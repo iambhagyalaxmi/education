@@ -25,7 +25,8 @@ export default function ChatWidget() {
   
   // Use a random session ID to track conversation history on the server
   const [sessionId] = useState(() => Math.random().toString(36).substring(7));
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  const CHAT_ENDPOINT = `${API_URL}/api/chat`;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,7 +46,7 @@ export default function ChatWidget() {
     setShowQuickReplies(false);
 
     try {
-      const response = await fetch(`${API_URL}/api/chat/message`, {
+      const response = await fetch(CHAT_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg, sessionId })
@@ -73,10 +74,10 @@ export default function ChatWidget() {
     setMessages([]);
     setShowQuickReplies(true);
     try {
-      await fetch(`${API_URL}/api/chat/reset`, {
+      await fetch(CHAT_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId })
+        body: JSON.stringify({ sessionId, action: 'reset' })
       });
     } catch (e) {
       // ignore

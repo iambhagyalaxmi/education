@@ -1,0 +1,12 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "groq-sdk": "^1.3.0"
+  },
+  "devDependencies": {
+    "@vercel/node": "^5.0.0",
+    "typescript": "^6.0.3"
+  }
+}
