@@ -191,6 +191,7 @@ async function generateResponse(message: string, sessionId: string): Promise<{ t
     messages,
     tools,
     tool_choice: 'auto',
+    temperature: 0.7,
   });
 
   let responseMessage = response.choices[0]?.message;
@@ -230,6 +231,7 @@ async function generateResponse(message: string, sessionId: string): Promise<{ t
       model: MODEL,
       messages,
       tools,
+      temperature: 0.7,
     });
     responseMessage = response.choices[0]?.message;
   }
