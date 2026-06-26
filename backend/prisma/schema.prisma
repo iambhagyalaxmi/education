@@ -109,9 +109,11 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now()) @updatedAt
 
-  conversations Conversation[]
-  tickets       Ticket[]
-  auditLogs     AuditLog[]
+  conversations     Conversation[]
+  tickets           Ticket[]
+  auditLogs         AuditLog[]
+  uploadedDocs      Document[]
+  documentDownloads DocumentDownload[]
 }
 
 model Conversation {
@@ -183,4 +185,49 @@ model AuditLog {
   @@index([tableName, recordId])
   @@index([actionType])
   @@index([createdAt])
+}
+
+// ─── Document Management System ──────────────────────────────────────────────
+
+model DocumentCategory {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique
+  description String?
+  documents   Document[]
+}
+
+model Document {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String
+  categoryId   String   @db.Uuid
+  description  String
+  keywords     String[] // PostgreSQL supports String[]
+  academicYear String?
+  department   String?
+  version      String   @default("1.0")
+  fileUrl      String
+  fileType     String   // PDF, DOCX, XLSX
+  fileSize     Int      // Size in bytes
+  language     String   @default("English")
+  status       String   @default("active") // active, archived
+  uploadedById String?  @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category     DocumentCategory   @relation(fields: [categoryId], references: [id])
+  uploadedBy   User?              @relation(fields: [uploadedById], references: [id])
+  downloads    DocumentDownload[]
+
+  @@index([title])
+}
+
+model DocumentDownload {
+  id           String   @id @default(uuid()) @db.Uuid
+  documentId   String   @db.Uuid
+  userId       String?  @db.Uuid
+  sessionId    String?
+  downloadDate DateTime @default(now())
+
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

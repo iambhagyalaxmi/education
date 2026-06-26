@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Send, RotateCcw } from 'lucide-react';
+import { X, Send, RotateCcw, FileText, Download, Eye } from 'lucide-react';
 
 interface Message {
   sender: 'user' | 'bot' | 'system';
@@ -92,6 +92,33 @@ export default function ChatWidget() {
   const formatTime = (date: Date) =>
     date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+  const parseMessageContent = (content: string) => {
+    try {
+      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
+      if (jsonMatch) {
+        const text = content.replace(/```json\n([\s\S]*?)\n```/, '').trim();
+        const data = JSON.parse(jsonMatch[1]);
+        return { text, data };
+      }
+    } catch (e) {
+      // ignore
+    }
+    return { text: content, data: null };
+  };
+
+  const handleDownload = async (docId: string, url: string) => {
+    try {
+      await fetch(`${API_URL}/api/documents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'log_download', documentId: docId, sessionId })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 font-sans">
       {isOpen && (
@@ -158,7 +185,45 @@ export default function ChatWidget() {
                           : 'text-slate-800 dark:text-slate-200 rounded-tl-sm shadow-sm border border-slate-200/60 dark:border-slate-700 bg-white dark:bg-slate-800'
                         }`}
                     >
-                      {msg.content}
+                      {parseMessageContent(msg.content).text}
+                      
+                      {/* Document Cards */}
+                      {parseMessageContent(msg.content).data?.documents && (
+                        <div className="mt-4 flex flex-col gap-3">
+                          {parseMessageContent(msg.content).data.documents.map((doc: any) => (
+                            <div key={doc.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-lg shrink-0">
+                                  <FileText size={20} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-slate-800 dark:text-slate-200 text-[13px] truncate">{doc.title}</h4>
+                                  <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{doc.description}</p>
+                                  <div className="flex items-center gap-2 mt-1.5 text-[10px] text-slate-400 font-medium">
+                                    <span>{doc.academicYear}</span>
+                                    <span>•</span>
+                                    <span>Updated {doc.lastUpdated}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-700">
+                                <button 
+                                  onClick={() => handleDownload(doc.id, doc.fileUrl)}
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-semibold transition-colors"
+                                >
+                                  <Eye size={14} /> Preview
+                                </button>
+                                <button 
+                                  onClick={() => handleDownload(doc.id, doc.fileUrl)}
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-semibold transition-colors"
+                                >
+                                  <Download size={14} /> Download
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium px-1 uppercase tracking-wider">
                       {formatTime(msg.timestamp)}

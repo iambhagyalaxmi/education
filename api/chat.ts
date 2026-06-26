@@ -44,6 +44,26 @@ You have tools to fetch LIVE data from the database. Use them whenever asked abo
 - Student Statistics / Batch Enrollment (getBatchStatistics)
 - Course Comparison (compareCourses)
 - Counselor Handoff / Complaints (createSupportTicket)
+- Official Documents / Forms / Brochures (searchDocuments)
+
+### Document Formatting
+When a user asks for a document, use the searchDocuments tool. If documents are found, respond normally but ALSO include a structured JSON block at the end of your message to render the document cards in the UI. 
+Format it EXACTLY like this:
+```json
+{
+  "documents": [
+    {
+      "id": "doc_id",
+      "title": "Document Title",
+      "description": "Short description",
+      "academicYear": "2026-27",
+      "lastUpdated": "2026-06-25",
+      "fileUrl": "/docs/file.pdf"
+    }
+  ]
+}
+```
+If multiple documents match, return up to 5 in the JSON array and ask the user which one they need. If no documents are found, politely suggest similar ones or handoff.
 
 ### Suggestions Requirement
 At the end of EVERY response, suggest 2-3 short follow-up questions the user can ask. Format them EXACTLY like this on new lines at the very end of your message:
@@ -170,6 +190,20 @@ const tools: Groq.Chat.ChatCompletionTool[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'searchDocuments',
+      description: 'Search for official institute documents, forms, brochures, fee structures, policies, and certificates.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'The search query or keyword (e.g., "hostel form", "admission brochure")' }
+        },
+        required: ['query'],
+      },
+    },
+  },
 ];
 
 async function queryAuditLogs(tableName?: string, actionType?: string, limit: number = 5) {
@@ -186,6 +220,23 @@ async function queryAuditLogs(tableName?: string, actionType?: string, limit: nu
 
   if (logs.length === 0) return JSON.stringify({ message: "No audit logs found matching criteria." });
   return JSON.stringify(logs);
+}
+
+async function searchDocuments(query: string) {
+  const docs = await prisma.document.findMany({
+    where: {
+      status: 'active',
+      OR: [
+        { title: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } }
+      ]
+    },
+    take: 5,
+    orderBy: { updatedAt: 'desc' }
+  });
+
+  if (docs.length === 0) return JSON.stringify({ message: "No document found matching this query." });
+  return JSON.stringify(docs);
 }
 
 async function generateResponse(message: string, sessionId: string): Promise<{ text: string, suggestions: string[] }> {
@@ -246,6 +297,8 @@ async function generateResponse(message: string, sessionId: string): Promise<{ t
           toolResult = await createSupportTicket(args.title, args.description, args.userEmail, sessionId);
         } else if (toolCall.function.name === 'queryAuditLogs') {
           toolResult = await queryAuditLogs(args.tableName, args.actionType, args.limit);
+        } else if (toolCall.function.name === 'searchDocuments') {
+          toolResult = await searchDocuments(args.query);
         }
       } catch (e: any) {
         toolResult = JSON.stringify({ error: e.message });

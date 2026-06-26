@@ -349,8 +349,105 @@ async function main() {
   console.log('✅ Sample audit logs created');
 
   console.log('\n🎉 Database seeded successfully!');
+
+  // ─── 6. Document Categories & Documents ──────────────────────────────────────────
+  console.log('Seeding Documents...');
+
+  const catBrochure = await prisma.documentCategory.upsert({
+    where: { name: 'Brochures' },
+    update: {},
+    create: { name: 'Brochures', description: 'Official course and admission brochures' },
+  });
+
+  const catForms = await prisma.documentCategory.upsert({
+    where: { name: 'Forms' },
+    update: {},
+    create: { name: 'Forms', description: 'Application and request forms' },
+  });
+
+  const catPolicies = await prisma.documentCategory.upsert({
+    where: { name: 'Policies' },
+    update: {},
+    create: { name: 'Policies', description: 'Institute rules, regulations, and policies' },
+  });
+
+  const documentsData = [
+    {
+      title: 'Admission Brochure 2026-27',
+      categoryId: catBrochure.id,
+      description: 'Complete information about courses, eligibility, admission process, fee structure, scholarships, hostel facilities, and placement.',
+      keywords: ['admission', 'brochure', 'courses', 'eligibility', 'prospectus'],
+      academicYear: '2026-27',
+      department: 'Admissions',
+      version: '1.0',
+      fileUrl: '/docs/admission-brochure-2026.pdf',
+      fileType: 'PDF',
+      fileSize: 2500000,
+    },
+    {
+      title: 'Hostel Application Form',
+      categoryId: catForms.id,
+      description: 'Official form to apply for on-campus hostel accommodation for the upcoming academic year.',
+      keywords: ['hostel', 'accommodation', 'form', 'housing', 'application'],
+      academicYear: '2026-27',
+      department: 'Hostel Management',
+      version: '1.1',
+      fileUrl: '/docs/hostel-application.pdf',
+      fileType: 'PDF',
+      fileSize: 450000,
+    },
+    {
+      title: 'Code of Conduct',
+      categoryId: catPolicies.id,
+      description: 'The official student handbook outlining rules, regulations, and disciplinary policies.',
+      keywords: ['rules', 'regulations', 'conduct', 'handbook', 'discipline', 'policy'],
+      academicYear: '2026-27',
+      department: 'Student Affairs',
+      version: '2.0',
+      fileUrl: '/docs/code-of-conduct.pdf',
+      fileType: 'PDF',
+      fileSize: 1200000,
+    },
+    {
+      title: 'BCA Fee Structure',
+      categoryId: catBrochure.id,
+      description: 'Detailed breakdown of tuition, admission, and semester fees for the BCA program.',
+      keywords: ['fee', 'bca', 'tuition', 'cost', 'payment'],
+      academicYear: '2026-27',
+      department: 'Finance',
+      version: '1.0',
+      fileUrl: '/docs/bca-fees-2026.pdf',
+      fileType: 'PDF',
+      fileSize: 300000,
+    },
+    {
+      title: 'Scholarship Application Form',
+      categoryId: catForms.id,
+      description: 'Application form for merit-based and need-based financial scholarships.',
+      keywords: ['scholarship', 'financial aid', 'form', 'application'],
+      academicYear: '2026-27',
+      department: 'Financial Aid',
+      version: '1.0',
+      fileUrl: '/docs/scholarship-form.pdf',
+      fileType: 'PDF',
+      fileSize: 250000,
+    },
+  ];
+
+  await prisma.document.deleteMany({});
+  
+  await prisma.document.createMany({
+    data: documentsData,
+  });
+
+  console.log('✅ Documents seeded successfully');
 }
 
 main()
-  .catch((e) => { console.error(e); })
-  .finally(async () => { await prisma.$disconnect(); });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
