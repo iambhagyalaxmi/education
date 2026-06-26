@@ -97,7 +97,7 @@ export default function ChatWidget() {
       {isOpen && (
         <div
           className="w-[380px] max-w-[calc(100vw-2rem)] flex flex-col rounded-3xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200/60 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 transition-colors duration-300"
-          style={{ height: '600px', maxHeight: 'calc(100vh - 6rem)' }}
+          style={{ height: '600px', maxHeight: 'calc(100vh - 10rem)' }}
         >
           {/* Header */}
           <div
