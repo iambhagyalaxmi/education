@@ -132,7 +132,7 @@ export default function ChatWidget() {
           <div className="flex-1 overflow-y-auto px-5 py-6 space-y-5 scroll-smooth bg-slate-50/50 dark:bg-slate-900/50">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center px-4 animate-in fade-in duration-500">
-                <div className="w-20 h-20 rounded-full overflow-hidden mb-4 shadow-lg border-4 border-blue-100 dark:border-blue-900/40">
+                <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden mb-4 shadow-lg border-4 border-blue-100 dark:border-blue-900/40 flex items-center justify-center">
                   <img src="/child_book_avatar.png" alt="EduBot" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-slate-800 dark:text-slate-200 font-bold text-lg mb-1">How can we help?</h3>
