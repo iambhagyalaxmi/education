@@ -6,6 +6,7 @@ import AuthLogin from './components/AuthLogin';
 import AuditDashboard from './components/AuditDashboard';
 import LandingPage from './components/LandingPage';
 import DocumentDashboard from './components/DocumentDashboard';
+import GalleryDashboard from './components/GalleryDashboard';
 import { Moon, Sun, ArrowLeft } from 'lucide-react';
 
 export default function App() {
@@ -77,6 +78,7 @@ export default function App() {
               <AnalyticsDashboard />
               <TicketDashboard />
               <DocumentDashboard />
+              <GalleryDashboard />
               <AuditDashboard />
             </main>
           </div>
