@@ -16,11 +16,16 @@ model Course {
   durationYears  Int
   description    String?
   createdAt      DateTime        @default(now())
-
-  feeStructures  FeeStructure[]
-  batches        Batch[]
-  students       Student[]
-  applications   Application[]
+  feeStructures       FeeStructure[]
+  batches             Batch[]
+  students            Student[]
+  applications        Application[]
+  eligibilityCriteria EligibilityCriteria?
+  scholarships        Scholarship[]
+  placement           Placement?
+  careerPaths         CareerPath[]
+  brochureUrl         String? 
+  applyUrl            String? 
 }
 
 model FeeStructure {
@@ -230,4 +235,49 @@ model DocumentDownload {
 
   document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// ─── AI Course Recommendation Models ──────────────────────────────────────────
+
+model EligibilityCriteria {
+  id                  String   @id @default(uuid()) @db.Uuid
+  courseId            String   @unique @db.Uuid
+  requiredQuals       String[] 
+  allowedStreams      String[] 
+  minPercentage       Float    
+  description         String?
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Scholarship {
+  id              String   @id @default(uuid()) @db.Uuid
+  courseId        String?  @db.Uuid
+  name            String
+  description     String?
+  eligibility     String
+  minPercentage   Float?
+  amount          String
+  deadline        DateTime?
+
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+}
+
+model Placement {
+  id              String   @id @default(uuid()) @db.Uuid
+  courseId        String   @unique @db.Uuid
+  placementRate   Float    
+  averageSalary   String   
+  topRecruiters   String[]
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model CareerPath {
+  id              String   @id @default(uuid()) @db.Uuid
+  courseId        String   @db.Uuid
+  roleName        String
+  industryDemand  String?
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }

@@ -166,6 +166,79 @@ async function main() {
   const [bca, bsc, mca, btech] = courses;
   console.log('✅ Courses created');
 
+  // ─── 1.5 AI Recommendation Data (Eligibility, Scholarships, Placements, Careers) ───
+  await prisma.eligibilityCriteria.deleteMany({});
+  await prisma.scholarship.deleteMany({});
+  await prisma.placement.deleteMany({});
+  await prisma.careerPath.deleteMany({});
+
+  const aiData = [
+    {
+      courseId: btech.id,
+      eligibility: { requiredQuals: ['12th'], allowedStreams: ['Science'], minPercentage: 60, description: 'Must have Physics and Mathematics as core subjects.' },
+      placement: { placementRate: 92.5, averageSalary: '₹6,50,000', topRecruiters: ['TCS', 'Infosys', 'Google', 'Microsoft'] },
+      scholarships: [
+        { name: 'Merit Scholarship', eligibility: 'Above 90% in 12th', amount: '₹50,000/year' },
+        { name: 'Women in Tech', eligibility: 'Female candidates with >80%', amount: '₹25,000/year' }
+      ],
+      careers: ['Software Engineer', 'Data Scientist', 'System Architect']
+    },
+    {
+      courseId: bca.id,
+      eligibility: { requiredQuals: ['12th'], allowedStreams: ['Science', 'Commerce', 'Arts'], minPercentage: 50, description: 'Mathematics preferred but not mandatory.' },
+      placement: { placementRate: 85.0, averageSalary: '₹4,00,000', topRecruiters: ['Wipro', 'Cognizant', 'Accenture'] },
+      scholarships: [
+        { name: 'Excellence Award', eligibility: 'Above 85% in 12th', amount: '₹20,000/year' }
+      ],
+      careers: ['Web Developer', 'UI/UX Designer', 'System Analyst']
+    },
+    {
+      courseId: bsc.id,
+      eligibility: { requiredQuals: ['12th'], allowedStreams: ['Science'], minPercentage: 55, description: 'Must have Mathematics.' },
+      placement: { placementRate: 78.0, averageSalary: '₹3,50,000', topRecruiters: ['IBM', 'Capgemini', 'Local Tech Firms'] },
+      scholarships: [
+        { name: 'Science Pioneer', eligibility: 'Above 80% in 12th', amount: '₹15,000/year' }
+      ],
+      careers: ['Data Analyst', 'Research Assistant', 'IT Support']
+    },
+    {
+      courseId: mca.id,
+      eligibility: { requiredQuals: ['Graduation'], allowedStreams: ['Science', 'Commerce', 'Any'], minPercentage: 50, description: 'BCA or B.Sc (Computer Science/IT) preferred. Mathematics in 12th mandatory.' },
+      placement: { placementRate: 95.0, averageSalary: '₹7,00,000', topRecruiters: ['Amazon', 'Microsoft', 'Oracle', 'TCS'] },
+      scholarships: [
+        { name: 'PG Merit', eligibility: 'Above 8.0 CGPA in Graduation', amount: '₹30,000/year' }
+      ],
+      careers: ['Senior Software Engineer', 'IT Project Manager', 'Cloud Architect']
+    }
+  ];
+
+  for (const data of aiData) {
+    await prisma.eligibilityCriteria.create({
+      data: { courseId: data.courseId, ...data.eligibility }
+    });
+    await prisma.placement.create({
+      data: { courseId: data.courseId, ...data.placement }
+    });
+    for (const schol of data.scholarships) {
+      await prisma.scholarship.create({
+        data: { courseId: data.courseId, ...schol }
+      });
+    }
+    for (const career of data.careers) {
+      await prisma.careerPath.create({
+        data: { courseId: data.courseId, roleName: career }
+      });
+    }
+  }
+  
+  // Update Course URLs
+  await prisma.course.update({ where: { id: btech.id }, data: { brochureUrl: '/docs/btech-brochure.pdf', applyUrl: '/apply/btech' }});
+  await prisma.course.update({ where: { id: bca.id }, data: { brochureUrl: '/docs/bca-brochure.pdf', applyUrl: '/apply/bca' }});
+  await prisma.course.update({ where: { id: bsc.id }, data: { brochureUrl: '/docs/bsc-brochure.pdf', applyUrl: '/apply/bsc' }});
+  await prisma.course.update({ where: { id: mca.id }, data: { brochureUrl: '/docs/mca-brochure.pdf', applyUrl: '/apply/mca' }});
+
+  console.log('✅ AI Recommendation Data seeded');
+
   // ─── 2. Fee Structures ──────────────────────────────────────────────────────
   const feeData = [
     // BCA Fees

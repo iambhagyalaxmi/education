@@ -45,6 +45,33 @@ You have tools to fetch LIVE data from the database. Use them whenever asked abo
 - Course Comparison (compareCourses)
 - Counselor Handoff / Complaints (createSupportTicket)
 - Official Documents / Forms / Brochures (searchDocuments)
+- Course Recommendations & Eligibility (recommendCourses)
+
+### Course Recommendation Workflow
+When a user asks for course recommendations (e.g. "Which course is best after 12th?", "I scored 75% in Science"):
+1. If you don't have enough information (like qualification, stream, or percentage), ask ONE follow-up question at a time. Do not overwhelm them.
+2. Once you have enough context, call the \`recommendCourses\` tool.
+3. Use the tool's response to output a beautifully formatted JSON block at the end of your message so the UI can render Course Cards.
+Format it EXACTLY like this:
+```json
+{
+  "courses": [
+    {
+      "id": "course_id",
+      "name": "Course Name",
+      "duration": "4 Years",
+      "annualFee": "₹95,000",
+      "eligibility": "✅ Eligible",
+      "scholarship": "Merit Scholarship Available",
+      "placementRate": "92%",
+      "careers": "Software Engineer, Data Analyst",
+      "brochureUrl": "/docs/brochure.pdf",
+      "applyUrl": "/apply"
+    }
+  ]
+}
+```
+If they are NOT eligible, clearly state why and suggest alternatives. Never invent courses or fees.
 
 ### Document Formatting
 When a user asks for a document, use the searchDocuments tool. If documents are found, respond normally but ALSO include a structured JSON block at the end of your message to render the document cards in the UI. 
@@ -204,6 +231,23 @@ const tools: Groq.Chat.ChatCompletionTool[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'recommendCourses',
+      description: 'Recommend courses based on student profile (qualification, stream, percentage).',
+      parameters: {
+        type: 'object',
+        properties: {
+          qualification: { type: 'string', description: 'e.g., 12th, Graduation' },
+          stream: { type: 'string', description: 'e.g., Science, Commerce, Arts' },
+          percentage: { type: 'number', description: 'e.g., 75' },
+          careerInterest: { type: 'string' }
+        },
+        required: [],
+      },
+    },
+  },
 ];
 
 async function queryAuditLogs(tableName?: string, actionType?: string, limit: number = 5) {
@@ -237,6 +281,53 @@ async function searchDocuments(query: string) {
 
   if (docs.length === 0) return JSON.stringify({ message: "No document found matching this query." });
   return JSON.stringify(docs);
+}
+
+async function recommendCourses(qualification?: string, stream?: string, percentage?: number, careerInterest?: string) {
+  const courses = await prisma.course.findMany({
+    include: {
+      eligibilityCriteria: true,
+      scholarships: true,
+      placement: true,
+      careerPaths: true,
+      feeStructures: { orderBy: { academicYear: 'desc' }, take: 1 }
+    }
+  });
+
+  let recommended = courses.map(course => {
+    let isEligible = true;
+    let missingReason = '';
+
+    const ec = course.eligibilityCriteria;
+    if (ec) {
+      if (qualification && ec.requiredQuals.length > 0 && !ec.requiredQuals.includes(qualification)) {
+        isEligible = false;
+        missingReason = `Requires ${ec.requiredQuals.join(' or ')}`;
+      }
+      if (stream && ec.allowedStreams.length > 0 && !ec.allowedStreams.includes('Any') && !ec.allowedStreams.includes(stream)) {
+        isEligible = false;
+        missingReason = `Stream must be ${ec.allowedStreams.join(' or ')}`;
+      }
+      if (percentage && ec.minPercentage && percentage < ec.minPercentage) {
+        isEligible = false;
+        missingReason = `Requires minimum ${ec.minPercentage}%`;
+      }
+    }
+
+    return {
+      course,
+      isEligible,
+      missingReason
+    };
+  });
+
+  // Simple sorting: eligible first
+  recommended.sort((a, b) => (a.isEligible === b.isEligible ? 0 : a.isEligible ? -1 : 1));
+
+  return JSON.stringify({
+    message: "Use this data to format your JSON response for the course cards.",
+    results: recommended.slice(0, 4)
+  });
 }
 
 async function generateResponse(message: string, sessionId: string): Promise<{ text: string, suggestions: string[] }> {
@@ -299,6 +390,8 @@ async function generateResponse(message: string, sessionId: string): Promise<{ t
           toolResult = await queryAuditLogs(args.tableName, args.actionType, args.limit);
         } else if (toolCall.function.name === 'searchDocuments') {
           toolResult = await searchDocuments(args.query);
+        } else if (toolCall.function.name === 'recommendCourses') {
+          toolResult = await recommendCourses(args.qualification, args.stream, args.percentage, args.careerInterest);
         }
       } catch (e: any) {
         toolResult = JSON.stringify({ error: e.message });

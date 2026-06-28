@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Send, RotateCcw, FileText, Download, Eye } from 'lucide-react';
+import { X, Send, RotateCcw, FileText, Download, Eye, GraduationCap, Briefcase, IndianRupee } from 'lucide-react';
 
 interface Message {
   sender: 'user' | 'bot' | 'system';
@@ -224,6 +224,78 @@ export default function ChatWidget() {
                           ))}
                         </div>
                       )}
+
+                      {/* Course Cards */}
+                      {parseMessageContent(msg.content).data?.courses && (
+                        <div className="mt-4 flex flex-col gap-4">
+                          {parseMessageContent(msg.content).data.courses.map((course: any) => (
+                            <div key={course.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                              
+                              {/* Header */}
+                              <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                                <div className="flex justify-between items-start gap-2 mb-2">
+                                  <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-tight">{course.name}</h4>
+                                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${course.eligibility.includes('Eligible') && !course.eligibility.includes('Not') ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'}`}>
+                                    {course.eligibility}
+                                  </span>
+                                </div>
+                                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-xs text-slate-600 dark:text-slate-400">
+                                  <div className="flex items-center gap-1.5">
+                                    <GraduationCap size={14} className="text-blue-500" />
+                                    {course.duration}
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <IndianRupee size={14} className="text-amber-500" />
+                                    {course.annualFee} / yr
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <Briefcase size={14} className="text-indigo-500" />
+                                    {course.placementRate} Placed
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Body */}
+                              <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                                {course.scholarship && (
+                                  <div className="flex items-start gap-2 text-xs">
+                                    <span className="shrink-0 w-1.5 h-1.5 mt-1.5 rounded-full bg-emerald-500"></span>
+                                    <div>
+                                      <span className="font-semibold text-slate-700 dark:text-slate-300">Scholarship: </span>
+                                      <span className="text-slate-600 dark:text-slate-400">{course.scholarship}</span>
+                                    </div>
+                                  </div>
+                                )}
+                                {course.careers && (
+                                  <div className="flex items-start gap-2 text-xs">
+                                    <span className="shrink-0 w-1.5 h-1.5 mt-1.5 rounded-full bg-blue-500"></span>
+                                    <div>
+                                      <span className="font-semibold text-slate-700 dark:text-slate-300">Careers: </span>
+                                      <span className="text-slate-600 dark:text-slate-400">{course.careers}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Footer Actions */}
+                              <div className="flex p-3 gap-2 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                                {course.brochureUrl && (
+                                  <button onClick={() => window.open(course.brochureUrl, '_blank')} className="flex-1 flex justify-center items-center gap-1.5 py-2 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                                    <Download size={14} /> Brochure
+                                  </button>
+                                )}
+                                {course.applyUrl && (
+                                  <button onClick={() => window.open(course.applyUrl, '_blank')} className="flex-1 flex justify-center items-center gap-1.5 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm hover:shadow transition-all">
+                                    Apply Now
+                                  </button>
+                                )}
+                              </div>
+
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                     </div>
                     <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium px-1 uppercase tracking-wider">
                       {formatTime(msg.timestamp)}
