@@ -32,7 +32,7 @@ export default function DocumentDashboard() {
     try {
       const res = await fetch(`${API_URL}/api/documents`);
       const data = await res.json();
-      setDocuments(data);
+      setDocuments(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
     } finally {

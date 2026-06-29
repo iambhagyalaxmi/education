@@ -14,48 +14,31 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Education Chatbot API is running on Vercel' });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/tickets', ticketRoutes);
-app.use('/api/chat', chatRoutes);
+import analyticsHandler from './api/analytics';
+import auditHandler from './api/audit';
+import chatHandler from './api/chat';
+import documentsHandler from './api/documents';
+import galleryHandler from './api/gallery';
+import ticketsHandler from './api/tickets';
 
-// Store conversation history in memory (Note: In production serverless, use Redis or Postgres)
-const conversationHistories = new Map<string, { role: string; content: string }[]>();
+app.use('/api/auth', authRoutes); // Keep legacy auth
 
-app.post('/api/chat/message', async (req, res) => {
-  const { message, sessionId } = req.body;
+// Map Vercel serverless functions to Express routes
+app.all('/api/analytics', analyticsHandler as any);
+app.all('/api/audit', auditHandler as any);
+app.all('/api/chat', chatHandler as any);
+app.all('/api/documents', documentsHandler as any);
+app.all('/api/gallery', galleryHandler as any);
+app.all('/api/tickets', ticketsHandler as any);
 
-  if (!message || typeof message !== 'string' || !message.trim()) {
-    return res.status(400).json({ error: 'Message is required' });
-  }
+// For local development or non-Vercel deployments, serve the frontend
+import path from 'path';
 
-  const id = sessionId || 'default-session';
-  const history = conversationHistories.get(id) || [];
+const publicPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(publicPath));
 
-  try {
-    const { intent, confidence } = await AIService.detectIntent(message);
-    let responseText: string;
-
-    if (confidence < 0.5) {
-      responseText = "I'm not sure I fully understood your question. Could you rephrase it? Or if you need immediate help, please contact our support team at support@educationportal.com.";
-    } else {
-      responseText = await AIService.generateResponse(message, intent, history);
-    }
-
-    history.push({ role: 'user', content: message });
-    history.push({ role: 'assistant', content: responseText });
-    conversationHistories.set(id, history);
-
-    res.json({ sender: 'bot', content: responseText });
-  } catch (error) {
-    console.error('Chat endpoint error:', error);
-    res.status(500).json({ error: 'Something went wrong on our end.' });
-  }
-});
-
-app.post('/api/chat/reset', (req, res) => {
-  const { sessionId } = req.body;
-  if (sessionId) conversationHistories.delete(sessionId);
-  res.json({ status: 'ok' });
+app.use((req, res) => {
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 // For local development

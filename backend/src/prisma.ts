@@ -12,7 +12,7 @@ export async function withAuditContext<T>(
   },
   callback: (tx: any) => Promise<T>
 ): Promise<T> {
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async (tx: any) => {
     // Set local session variables for the transaction
     if (context.userId) await tx.$executeRawUnsafe(`SELECT set_config('app.current_user_id', '${context.userId}', true)`);
     if (context.userRole) await tx.$executeRawUnsafe(`SELECT set_config('app.current_user_role', '${context.userRole}', true)`);
