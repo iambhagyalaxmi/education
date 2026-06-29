@@ -22,7 +22,7 @@ const FALLBACK_IMAGES = {
     { id: 'h3', url: 'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086', title: 'Bright and clean learning environment', description: '', category: 'Hero', order: 3 },
   ],
   campus: [
-    { id: 'c1', url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070', title: 'Institute Front Gate', description: 'Our grand entrance welcoming future leaders.', category: 'Campus', order: 1 },
+    { id: 'c1', url: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?q=80&w=2070', title: 'Institute Front Gate', description: 'Our grand entrance welcoming future leaders.', category: 'Campus', order: 1 },
     { id: 'c2', url: 'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086', title: 'Main Academic Building', description: 'State-of-the-art infrastructure for advanced learning.', category: 'Campus', order: 2 },
     { id: 'c3', url: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2070', title: 'Smart Classroom', description: 'Interactive boards and modern tech for every student.', category: 'Campus', order: 3 },
     { id: 'c4', url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070', title: 'Computer Laboratory', description: 'High-end workstations with the latest software.', category: 'Campus', order: 4 },
@@ -44,7 +44,7 @@ const FALLBACK_IMAGES = {
     { id: 'f6', url: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070', title: 'Laboratories', description: 'Hands-on learning through advanced laboratories.', category: 'Featured', order: 6 },
   ],
   slider: [
-    { id: 's1', url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070', title: 'Institute Front Gate', description: '', category: 'Slider', order: 1 },
+    { id: 's1', url: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?q=80&w=2070', title: 'Institute Front Gate', description: '', category: 'Slider', order: 1 },
     { id: 's2', url: 'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086', title: 'Campus View', description: '', category: 'Slider', order: 2 },
     { id: 's3', url: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2070', title: 'Classroom', description: '', category: 'Slider', order: 3 },
     { id: 's4', url: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070', title: 'Laboratory', description: '', category: 'Slider', order: 4 },
