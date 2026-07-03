@@ -151,6 +151,59 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
     </div>
   );
 
+  const renderEmailNotifications = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Email Notifications</h2>
+        <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+          <Mail size={18} /> Compose New Email
+        </button>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex gap-4 bg-slate-50/50">
+          <div className="relative flex-1">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text"
+              placeholder="Search emails..."
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+            />
+          </div>
+          <select className="px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm text-slate-700 bg-white">
+            <option>All Mail</option>
+            <option>Sent Mail</option>
+            <option>Drafts</option>
+          </select>
+        </div>
+
+        <div className="divide-y divide-slate-100">
+          {[
+            { subject: 'Important: Assignment 2 Deadline Extension', to: 'Batch B Students', time: '10:30 AM', preview: 'Dear Students, the deadline for...', read: false },
+            { subject: 'Mid-Term 1 Syllabus', to: 'CS401 All Students', time: 'Yesterday', preview: 'Please find attached the syllabus...', read: true },
+            { subject: 'Re: Attendance Query', to: 'Alice Smith', time: 'Oct 24', preview: 'Yes, your medical certificate has been...', read: true },
+          ].map((email, i) => (
+            <div key={i} className={`p-4 flex flex-col md:flex-row md:items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors ${!email.read ? 'bg-slate-50/50' : ''}`}>
+              <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                <Mail size={20} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start mb-1">
+                  <h4 className={`font-semibold text-slate-800 truncate pr-4 ${!email.read ? 'font-bold' : ''}`}>{email.subject}</h4>
+                  <span className="text-xs text-slate-400 whitespace-nowrap">{email.time}</span>
+                </div>
+                <div className="text-sm text-slate-500 flex items-center gap-2 mb-1">
+                  <span className="bg-slate-100 px-2 py-0.5 rounded text-xs font-medium text-slate-600">To: {email.to}</span>
+                </div>
+                <p className="text-sm text-slate-500 truncate">{email.preview}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (title: string, icon: React.ElementType) => {
     const Icon = icon;
     return (
@@ -174,7 +227,7 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
     case 'comm-announcements':
       return renderAnnouncements();
     case 'comm-email':
-      return renderPlaceholder('Email Notifications', Mail);
+      return renderEmailNotifications();
     default:
       return renderPlaceholder('Communication', MessageSquare);
   }
