@@ -9,6 +9,9 @@ import AdminAnalytics from './AdminAnalytics';
 import AdminFaculty from './AdminFaculty';
 import AdminCourses from './AdminCourses';
 import AdminStaff from './AdminStaff';
+import AdminDepartments from './AdminDepartments';
+import AdminTimetable from './AdminTimetable';
+import AdminExaminations from './AdminExaminations';
 
 // Placeholders
 const Placeholder = ({ title }: { title: string }) => (
@@ -48,6 +51,15 @@ export default function AdminDashboard() {
     }
     if (activeTab.startsWith('staff-')) {
       return <AdminStaff activeTab={activeTab} />;
+    }
+    if (activeTab.startsWith('dept-')) {
+      return <AdminDepartments activeTab={activeTab} />;
+    }
+    if (activeTab.startsWith('timetable-')) {
+      return <AdminTimetable activeTab={activeTab} />;
+    }
+    if (activeTab.startsWith('exams-')) {
+      return <AdminExaminations activeTab={activeTab} />;
     }
     
     // Convert activeTab ID to a readable title for placeholders
