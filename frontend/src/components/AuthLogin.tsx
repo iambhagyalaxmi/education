@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-export default function AuthLogin({ onLogin }: { onLogin: () => void }) {
+export default function AuthLogin({ onLogin }: { onLogin: (role: string) => void }) {
   const [email, setEmail] = useState('');
   const { role } = useParams<{ role: string }>();
   
@@ -11,7 +11,7 @@ export default function AuthLogin({ onLogin }: { onLogin: () => void }) {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if(email) {
-      onLogin();
+      onLogin(role || '');
     }
   };
 
@@ -69,7 +69,7 @@ export default function AuthLogin({ onLogin }: { onLogin: () => void }) {
 
             <div className="mt-6">
               <button
-                onClick={onLogin}
+                onClick={() => onLogin(role || '')}
                 className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
               >
                 <img className="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
