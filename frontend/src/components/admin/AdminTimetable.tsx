@@ -1,8 +1,20 @@
-import { useState } from 'react';
-import { Search, Filter, Plus, Clock, Edit, Calendar, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Filter, Plus, Clock, Edit, Calendar, MapPin, Trash2 } from 'lucide-react';
 
 export default function AdminTimetable({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [entries, setEntries] = useState<any[]>([]);
+
+  const fetchEntries = () => {
+    fetch('/api/timetable').then(res => res.json()).then(data => setEntries(Array.isArray(data) ? data : [])).catch(console.error);
+  };
+
+  useEffect(() => { fetchEntries(); }, []);
+
+  const deleteEntry = async (id: string) => {
+    await fetch(`/api/timetable?id=${id}`, { method: 'DELETE' });
+    fetchEntries();
+  };
 
   const renderSchedule = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -22,7 +34,7 @@ export default function AdminTimetable({ activeTab }: { activeTab: string }) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
-              placeholder="Search by program, semester or faculty..." 
+              placeholder="Search by subject, faculty or room..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 text-sm"
@@ -35,28 +47,48 @@ export default function AdminTimetable({ activeTab }: { activeTab: string }) {
           </div>
         </div>
 
-        <div className="p-6 text-center">
-          <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Clock size={32} className="text-indigo-600 dark:text-indigo-400" />
+        {entries.length === 0 ? (
+          <div className="p-6 text-center">
+            <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Clock size={32} className="text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">No Timetable Entries Yet</h3>
+            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">Add class schedules using the button above to populate the timetable.</p>
           </div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">Weekly Schedule View</h3>
-          <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">Select a program and semester from the filter to view the detailed day-by-day timetable.</p>
-          <div className="flex justify-center gap-3">
-            <select className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 font-medium">
-              <option>B.Tech Computer Science</option>
-              <option>B.Tech Information Tech</option>
-              <option>BBA</option>
-            </select>
-            <select className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 font-medium">
-              <option>Semester 1</option>
-              <option>Semester 3</option>
-              <option>Semester 5</option>
-            </select>
-            <button className="px-6 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 font-medium transition-colors">
-              View Timetable
-            </button>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                  <th className="p-4 pl-6">Day</th>
+                  <th className="p-4">Time</th>
+                  <th className="p-4">Subject</th>
+                  <th className="p-4">Faculty</th>
+                  <th className="p-4">Room</th>
+                  <th className="p-4">Course</th>
+                  <th className="p-4 pr-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {entries.filter(e => e.subject.toLowerCase().includes(searchTerm.toLowerCase()) || e.faculty.toLowerCase().includes(searchTerm.toLowerCase())).map((entry, i) => (
+                  <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                    <td className="p-4 pl-6 font-bold text-slate-800 dark:text-slate-200">{entry.day}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400 font-mono text-sm">{entry.time}</td>
+                    <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{entry.subject}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400">{entry.faculty}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400">{entry.room}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400">{entry.course}</td>
+                    <td className="p-4 pr-6 text-right">
+                      <button onClick={() => deleteEntry(entry.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

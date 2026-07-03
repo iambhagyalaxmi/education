@@ -1,8 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Book, Upload, Link as LinkIcon, Edit, Trash2 } from 'lucide-react';
 
 export default function AdminLibrary({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [books, setBooks] = useState<any[]>([]);
+
+  const fetchBooks = () => {
+    fetch('/api/library').then(res => res.json()).then(data => setBooks(Array.isArray(data) ? data : [])).catch(console.error);
+  };
+
+  useEffect(() => { fetchBooks(); }, []);
+
+  const deleteBook = async (id: string) => {
+    await fetch(`/api/library?id=${id}`, { method: 'DELETE' });
+    fetchBooks();
+  };
 
   const renderBooks = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -48,11 +60,7 @@ export default function AdminLibrary({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { title: 'Introduction to Algorithms', author: 'Thomas H. Cormen', isbn: '978-0262033848', cat: 'Computer Science', qty: 12, status: 'In Stock' },
-                { title: 'Engineering Mechanics', author: 'S.S. Bhavikatti', isbn: '978-8122423747', cat: 'Mechanical', qty: 4, status: 'Low Stock' },
-                { title: 'Advanced Calculus', author: 'Patrick M. Fitzpatrick', isbn: '978-0821847916', cat: 'Mathematics', qty: 0, status: 'Out of Stock' },
-              ].map((book, i) => (
+              {books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())).map((book, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -66,7 +74,7 @@ export default function AdminLibrary({ activeTab }: { activeTab: string }) {
                     </div>
                   </td>
                   <td className="p-4 font-mono text-xs text-slate-600 dark:text-slate-400">{book.isbn}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{book.cat}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{book.category}</td>
                   <td className="p-4 font-bold text-slate-700 dark:text-slate-300">{book.qty}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 text-xs font-bold rounded-md ${
@@ -82,7 +90,7 @@ export default function AdminLibrary({ activeTab }: { activeTab: string }) {
                       <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                      <button onClick={() => deleteBook(book.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
                         <Trash2 size={18} />
                       </button>
                     </div>

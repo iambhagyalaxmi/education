@@ -421,3 +421,42 @@ model Examination {
   updatedAt DateTime @updatedAt
 }
 
+
+// --- Library, Departments & Timetable (Phase 5) -----------------------------
+
+model LibraryBook {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  author    String
+  isbn      String   @unique
+  category  String
+  qty       Int      @default(1)
+  status    String   @default("In Stock") // In Stock, Low Stock, Out of Stock
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  code      String   @unique
+  hod       String?
+  faculty   Int      @default(0)
+  students  Int      @default(0)
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TimetableEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  day       String
+  time      String
+  subject   String
+  faculty   String
+  room      String
+  course    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
