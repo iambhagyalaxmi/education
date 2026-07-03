@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-export default function AdminTopbar() {
+export default function AdminTopbar({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
@@ -110,7 +110,12 @@ export default function AdminTopbar() {
                   <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><Clock size={12} /> 02:00 PM - Main Hall</p>
                 </div>
               </div>
-              <a href="#" className="block p-3 text-center text-sm text-indigo-600 dark:text-indigo-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">View Full Calendar</a>
+              <button
+                onClick={() => { closeAll(); setActiveTab('timetable-schedule'); }}
+                className="block w-full p-3 text-center text-sm text-indigo-600 dark:text-indigo-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700"
+              >
+                View Full Calendar
+              </button>
             </div>
           )}
         </div>
@@ -149,7 +154,12 @@ export default function AdminTopbar() {
                   </div>
                 </div>
               </div>
-              <a href="#" className="block p-3 text-center text-sm text-indigo-600 dark:text-indigo-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">Open Inbox</a>
+              <button
+                onClick={() => { closeAll(); setActiveTab('comm-chat'); }}
+                className="block w-full p-3 text-center text-sm text-indigo-600 dark:text-indigo-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700"
+              >
+                Open Inbox
+              </button>
             </div>
           )}
         </div>
@@ -211,12 +221,18 @@ export default function AdminTopbar() {
                 <p className="text-sm font-bold text-slate-800 dark:text-white">Admin User</p>
                 <p className="text-xs text-slate-500">Super Admin</p>
               </div>
-              <a href="#" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              <button
+                onClick={() => { closeAll(); setActiveTab('settings'); }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
                 <User size={16} /> My Profile
-              </a>
-              <a href="#" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              </button>
+              <button
+                onClick={() => { closeAll(); setActiveTab('settings'); }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
                 <Settings size={16} /> Settings
-              </a>
+              </button>
               <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
               <a href="/" className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium">
                 <LogOut size={16} /> Logout

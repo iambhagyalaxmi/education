@@ -150,7 +150,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-      <AdminTopbar />
+      <AdminTopbar setActiveTab={setActiveTab} />
       
       {/* Mobile Menu Button - Fixed below topbar */}
       <button 
