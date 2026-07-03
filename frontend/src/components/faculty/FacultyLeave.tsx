@@ -146,6 +146,73 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
     </div>
   );
 
+  const renderLeaveStatus = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Leave Status Tracking</h2>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 max-w-3xl mx-auto mt-8">
+        <div className="flex items-center gap-4 border-b border-slate-100 pb-6 mb-6">
+          <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center shrink-0">
+            <Clock size={32} />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-800">Casual Leave Application</h3>
+            <p className="text-sm text-slate-500 flex items-center gap-2 mt-1">
+              <Calendar size={14} /> Nov 01, 2023 (1 Day)
+            </p>
+          </div>
+          <div className="ml-auto">
+            <span className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-bold rounded-full">Pending</span>
+          </div>
+        </div>
+
+        <div className="relative pl-8 space-y-8 before:absolute before:inset-y-0 before:left-[15px] before:w-0.5 before:bg-slate-200">
+          
+          <div className="relative">
+            <div className="absolute left-[-32px] top-1 w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-[0_0_0_4px_white]">
+              <CheckCircle2 size={16} />
+            </div>
+            <h4 className="font-bold text-slate-800">Application Submitted</h4>
+            <p className="text-sm text-slate-500 mt-1">Submitted on Oct 28, 2023 at 09:30 AM</p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-[-32px] top-1 w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-[0_0_0_4px_white]">
+              <CheckCircle2 size={16} />
+            </div>
+            <h4 className="font-bold text-slate-800">Class Substitution Accepted</h4>
+            <p className="text-sm text-slate-500 mt-1">Accepted by Dr. Smith for CS401 on Oct 28, 2023</p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-[-32px] top-1 w-8 h-8 rounded-full bg-white border-2 border-orange-500 text-orange-500 flex items-center justify-center shadow-[0_0_0_4px_white]">
+              <Clock size={16} />
+            </div>
+            <h4 className="font-bold text-orange-600">HOD Approval Pending</h4>
+            <p className="text-sm text-slate-500 mt-1">Awaiting final approval from Head of Department</p>
+          </div>
+
+          <div className="relative opacity-50">
+            <div className="absolute left-[-32px] top-1 w-8 h-8 rounded-full bg-slate-200 border-2 border-slate-300 flex items-center justify-center shadow-[0_0_0_4px_white]">
+              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+            </div>
+            <h4 className="font-bold text-slate-500">Leave Granted</h4>
+            <p className="text-sm text-slate-400 mt-1">Final confirmation will appear here</p>
+          </div>
+
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+          <button className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors">
+            Withdraw Application
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (title: string, icon: React.ElementType) => {
     const Icon = icon;
     return (
@@ -167,7 +234,7 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
     case 'leave-history':
       return renderLeaveHistory();
     case 'leave-status':
-      return renderPlaceholder('Leave Status', CheckCircle2);
+      return renderLeaveStatus();
     default:
       return renderPlaceholder('Leave Management', PlaneTakeoff);
   }
