@@ -14,6 +14,8 @@ import FacultyLeave from './FacultyLeave';
 import FacultyMeetings from './FacultyMeetings';
 import FacultyReports from './FacultyReports';
 import FacultyNotifications from './FacultyNotifications';
+import FacultyProfile from './FacultyProfile';
+import FacultySettings from './FacultySettings';
 
 export default function FacultyDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -88,6 +90,10 @@ export default function FacultyDashboard() {
         return <FacultyReports activeTab={activeTab} />;
       case 'notifications':
         return <FacultyNotifications />;
+      case 'profile':
+        return <FacultyProfile />;
+      case 'settings':
+        return <FacultySettings />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
