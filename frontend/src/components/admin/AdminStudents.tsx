@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Download, UserPlus, GraduationCap, Edit, Trash2, Eye } from 'lucide-react';
+import { Search, Filter, Download, UserPlus, Edit, Trash2, Eye } from 'lucide-react';
 
 export default function AdminStudents({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -211,14 +211,88 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
   );
 
   const renderAcademicRecords = () => (
-    <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
-      <div className="w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-6">
-        <GraduationCap size={40} className="text-purple-600 dark:text-purple-400" />
+    <div className="space-y-6 animate-fade-in-up pb-10">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Academic Records</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage and view past semester records and transcripts.</p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+          <Download size={18} /> Export All
+        </button>
       </div>
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Academic Records</h2>
-      <p className="text-slate-500 dark:text-slate-400 max-w-md">
-        View and manage past semesters, transcripts, and degree progress for all students.
-      </p>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        {/* Toolbar */}
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/20">
+          <div className="flex gap-4 w-full md:w-auto">
+            <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option>Batch 2024</option>
+              <option>Batch 2023</option>
+              <option>Batch 2022</option>
+            </select>
+            <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option>Semester 6</option>
+              <option>Semester 5</option>
+              <option>Semester 4</option>
+            </select>
+          </div>
+          <div className="relative max-w-sm w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search by student name or ID..." 
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                <th className="p-4 pl-6">Student ID</th>
+                <th className="p-4">Student Name</th>
+                <th className="p-4">Course</th>
+                <th className="p-4">SGPA</th>
+                <th className="p-4">CGPA</th>
+                <th className="p-4">Grade</th>
+                <th className="p-4 pr-6 text-right">Transcript</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {students.map((student) => {
+                const sgpa = (Math.random() * (9.8 - 6.5) + 6.5).toFixed(2);
+                const cgpa = (Math.random() * (9.5 - 6.8) + 6.8).toFixed(2);
+                return (
+                  <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                    <td className="p-4 pl-6 font-medium text-slate-500 dark:text-slate-400">{student.id}</td>
+                    <td className="p-4 font-bold text-slate-800 dark:text-slate-200">{student.name}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400">{student.course}</td>
+                    <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{sgpa}</td>
+                    <td className="p-4 font-semibold text-indigo-600 dark:text-indigo-400">{cgpa}</td>
+                    <td className="p-4">
+                      <span className={`px-2 py-1 text-xs font-bold rounded-md ${
+                        parseFloat(cgpa) >= 8.5 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' :
+                        parseFloat(cgpa) >= 7.5 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30' :
+                        'bg-orange-100 text-orange-700 dark:bg-orange-900/30'
+                      }`}>
+                        {parseFloat(cgpa) >= 8.5 ? 'A+' : parseFloat(cgpa) >= 7.5 ? 'A' : 'B'}
+                      </span>
+                    </td>
+                    <td className="p-4 pr-6 text-right">
+                      <button className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors flex items-center justify-end gap-1 w-full">
+                        View <Eye size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 
