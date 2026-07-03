@@ -3,7 +3,6 @@ import {
   Upload, 
   Search,
   CheckCircle2,
-  FileCheck,
   AlertCircle,
   Download,
   Award
@@ -137,6 +136,113 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
     </div>
   );
 
+  const renderInternalAssessment = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Internal Assessment Management</h2>
+        <div className="flex gap-3">
+          <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+            <option>CS401: Data Structures</option>
+          </select>
+          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+            Calculate Internals
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div className="relative w-64">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text"
+              placeholder="Search by Roll No..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+            />
+          </div>
+          <button className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"><Download size={16}/> Export Internals</button>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-white text-slate-500 font-medium border-b border-slate-100">
+              <tr>
+                <th className="px-6 py-4">Roll No</th>
+                <th className="px-6 py-4">Student Name</th>
+                <th className="px-6 py-4">Mid-Term 1 (30)</th>
+                <th className="px-6 py-4">Mid-Term 2 (30)</th>
+                <th className="px-6 py-4">Assignments (20)</th>
+                <th className="px-6 py-4">Attendance (20)</th>
+                <th className="px-6 py-4">Total Internal (100)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {[
+                { roll: 'CS24-001', name: 'Alice Smith', mt1: 24, mt2: 26, assign: 18, att: 20, total: 88 },
+                { roll: 'CS24-002', name: 'Bob Johnson', mt1: 20, mt2: 22, assign: 16, att: 18, total: 76 },
+                { roll: 'CS24-003', name: 'Charlie Davis', mt1: 15, mt2: 18, assign: 12, att: 10, total: 55 },
+              ].map((student, i) => (
+                <tr key={i} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-700">{student.roll}</td>
+                  <td className="px-6 py-4 font-semibold text-slate-900">{student.name}</td>
+                  <td className="px-6 py-4">{student.mt1}</td>
+                  <td className="px-6 py-4">{student.mt2}</td>
+                  <td className="px-6 py-4">{student.assign}</td>
+                  <td className="px-6 py-4">{student.att}</td>
+                  <td className="px-6 py-4 font-bold text-emerald-600">{student.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderFinalAssessment = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Final Assessment Processing</h2>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 text-center max-w-2xl mx-auto mt-12">
+        <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Award size={40} className="text-blue-600"/>
+        </div>
+        <h3 className="text-2xl font-bold text-slate-800 mb-2">Generate Final Grades</h3>
+        <p className="text-slate-500 mb-8">Process final grades by combining Internal Assessment (50%) and End Semester Examination marks (50%) for <strong>CS401: Data Structures</strong>.</p>
+        
+        <div className="bg-slate-50 border border-slate-100 rounded-xl p-6 mb-8 text-left space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={20} className="text-emerald-500" />
+              <span className="font-medium text-slate-700">Internal Marks Locked</span>
+            </div>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded">COMPLETED</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={20} className="text-emerald-500" />
+              <span className="font-medium text-slate-700">End Semester Marks Uploaded</span>
+            </div>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded">COMPLETED</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full border-2 border-slate-300"></div>
+              <span className="font-medium text-slate-700">Final Grade Calculation</span>
+            </div>
+            <span className="text-xs font-bold text-slate-500 bg-slate-200 px-2 py-1 rounded">PENDING</span>
+          </div>
+        </div>
+
+        <button className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl w-full text-lg">
+          Calculate & Publish Final Grades
+        </button>
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (title: string, icon: React.ElementType) => {
     const Icon = icon;
     return (
@@ -158,9 +264,9 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
     case 'exams-marks':
       return renderEnterMarks();
     case 'exams-internal':
-      return renderPlaceholder('Internal Assessment', FileCheck);
+      return renderInternalAssessment();
     case 'exams-final':
-      return renderPlaceholder('Final Assessment', Award);
+      return renderFinalAssessment();
     default:
       return renderPlaceholder('Examinations Management', FileText);
   }
