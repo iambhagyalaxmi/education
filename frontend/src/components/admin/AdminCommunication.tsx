@@ -1,8 +1,60 @@
-import { useState } from 'react';
-import { Search, Plus, Send, MessageSquare, Mail, Bell, Smartphone, Edit } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Send, MessageSquare, Mail, Bell, Smartphone, Edit, X, CheckCircle } from 'lucide-react';
 
 export default function AdminCommunication({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Announcements State
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [showAnnModal, setShowAnnModal] = useState(false);
+  const [annForm, setAnnForm] = useState({ title: '', audience: 'All Students & Staff', status: 'Published', content: '' });
+  
+  // Messages State
+  const [messages, setMessages] = useState<any[]>([]);
+  const [msgForm, setMsgForm] = useState({ type: 'Email', audience: 'All Students', subject: '', body: '' });
+
+  const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const fetchAnnouncements = () => {
+    fetch('/api/announcements').then(res => res.json()).then(data => setAnnouncements(Array.isArray(data) ? data : [])).catch(console.error);
+  };
+
+  const fetchMessages = () => {
+    fetch('/api/messages').then(res => res.json()).then(data => setMessages(Array.isArray(data) ? data : [])).catch(console.error);
+  };
+
+  useEffect(() => {
+    fetchAnnouncements();
+    fetchMessages();
+  }, []);
+
+  const saveAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(annForm) });
+    setSaving(false);
+    setShowAnnModal(false);
+    setAnnForm({ title: '', audience: 'All Students & Staff', status: 'Published', content: '' });
+    setSuccessMsg('Announcement published successfully!');
+    setTimeout(() => setSuccessMsg(''), 3000);
+    fetchAnnouncements();
+  };
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    await fetch('/api/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(msgForm) });
+    setSaving(false);
+    setMsgForm({ type: 'Email', audience: 'All Students', subject: '', body: '' });
+    setSuccessMsg('Message sent successfully!');
+    setTimeout(() => setSuccessMsg(''), 3000);
+    fetchMessages();
+  };
+
+  const filteredAnnouncements = announcements.filter(a => a.title?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const emailLogs = messages.filter(m => m.type === 'Email');
+  const smsLogs = messages.filter(m => m.type === 'SMS');
 
   const renderAnnouncements = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -11,10 +63,55 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Announcements</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage and broadcast institutional notices.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => setShowAnnModal(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> New Announcement
         </button>
       </div>
+
+      {successMsg && (
+        <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-400 font-semibold text-sm">
+          <CheckCircle size={18} /> {successMsg}
+        </div>
+      )}
+
+      {/* Add Announcement Modal */}
+      {showAnnModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg animate-fade-in-up">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">New Announcement</h3>
+              <button onClick={() => setShowAnnModal(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"><X size={20} /></button>
+            </div>
+            <form onSubmit={saveAnnouncement} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Title *</label>
+                <input type="text" required value={annForm.title} onChange={e => setAnnForm({...annForm, title: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Audience</label>
+                <select value={annForm.audience} onChange={e => setAnnForm({...annForm, audience: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm">
+                  <option>All Students & Staff</option>
+                  <option>Students Only</option>
+                  <option>Faculty & Staff Only</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
+                <select value={annForm.status} onChange={e => setAnnForm({...annForm, status: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm">
+                  <option>Published</option>
+                  <option>Draft</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" onClick={() => setShowAnnModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-60">
+                  {saving ? 'Publishing...' : 'Publish'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -29,7 +126,6 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
             />
           </div>
         </div>
-
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -42,10 +138,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { title: 'Diwali Holidays Declaration', aud: 'All Students & Staff', date: 'Oct 20, 2024', status: 'Published' },
-                { title: 'Mid-Term Exam Schedule Revised', aud: 'B.Tech CS Students', date: 'Oct 22, 2024', status: 'Draft' },
-              ].map((ann, i) => (
+              {filteredAnnouncements.map((ann, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -55,8 +148,8 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
                       <p className="font-bold text-slate-800 dark:text-slate-200">{ann.title}</p>
                     </div>
                   </td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400 font-medium">{ann.aud}</td>
-                  <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{ann.date}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400 font-medium">{ann.audience}</td>
+                  <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{new Date(ann.createdAt).toLocaleDateString()}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 text-xs font-bold rounded-md ${
                       ann.status === 'Published' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 
@@ -72,6 +165,11 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
                   </td>
                 </tr>
               ))}
+              {filteredAnnouncements.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-500">No announcements found.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -88,12 +186,18 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
         </div>
       </div>
 
+      {successMsg && (
+        <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-400 font-semibold text-sm">
+          <CheckCircle size={18} /> {successMsg}
+        </div>
+      )}
+
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-6" onSubmit={sendMessage}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Message Type</label>
-              <select className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
+              <select value={msgForm.type} onChange={e => setMsgForm({...msgForm, type: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                 <option>Email</option>
                 <option>SMS</option>
                 <option>Push Notification</option>
@@ -101,7 +205,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Target Audience</label>
-              <select className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
+              <select value={msgForm.audience} onChange={e => setMsgForm({...msgForm, audience: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                 <option>All Students</option>
                 <option>All Faculty</option>
                 <option>Specific Department</option>
@@ -110,17 +214,17 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Subject (for Email/App)</label>
-              <input type="text" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Enter subject..." />
+              <input type="text" value={msgForm.subject} onChange={e => setMsgForm({...msgForm, subject: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Enter subject..." />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Message Body</label>
-              <textarea rows={6} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Type your message here..."></textarea>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Message Body *</label>
+              <textarea required rows={6} value={msgForm.body} onChange={e => setMsgForm({...msgForm, body: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Type your message here..."></textarea>
             </div>
           </div>
           
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <button type="submit" className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm">
-              <Send size={18} /> Send Message
+            <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-60">
+              <Send size={18} /> {saving ? 'Sending...' : 'Send Message'}
             </button>
           </div>
         </form>
@@ -170,25 +274,24 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {[
-              { subject: 'Semester Registration Open', rec: '2,450 Students', date: 'Oct 21, 2024', rate: '99.8%', status: 'Completed' },
-              { subject: 'Fee Payment Reminder', rec: '450 Defaulters', date: 'Oct 22, 2024', rate: '98.5%', status: 'Completed' },
-              { subject: 'Faculty Meeting Agenda', rec: '120 Staff', date: 'Oct 23, 2024', rate: '100%', status: 'Scheduled' },
-            ].map((log, i) => (
+            {emailLogs.map((log, i) => (
               <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                <td className="p-4 pl-6 font-bold text-slate-800 dark:text-slate-200">{log.subject}</td>
-                <td className="p-4 text-slate-600 dark:text-slate-400">{log.rec}</td>
-                <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{log.date}</td>
-                <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{log.rate}</td>
+                <td className="p-4 pl-6 font-bold text-slate-800 dark:text-slate-200">{log.subject || 'No Subject'}</td>
+                <td className="p-4 text-slate-600 dark:text-slate-400">{log.audience}</td>
+                <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{new Date(log.createdAt).toLocaleDateString()}</td>
+                <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">100%</td>
                 <td className="p-4 pr-6 text-right">
-                  <span className={`px-2.5 py-1 text-xs font-bold rounded-md ${
-                    log.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30'
-                  }`}>
-                    {log.status}
+                  <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30">
+                    Delivered
                   </span>
                 </td>
               </tr>
             ))}
+            {emailLogs.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-slate-500">No email logs found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -213,7 +316,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Sent This Month</p>
-          <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">5,420</p>
+          <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{smsLogs.length}</p>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Delivery Success</p>
@@ -231,21 +334,23 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {[
-              { msg: 'Important: Tomorrow is a declared holiday...', rec: '3,500', date: 'Oct 20, 2024', status: 'Delivered' },
-              { msg: 'Library book overdue alert: Introduction...', rec: '45', date: 'Oct 22, 2024', status: 'Delivered' },
-            ].map((log, i) => (
+            {smsLogs.map((log, i) => (
               <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200 truncate max-w-xs">{log.msg}</td>
-                <td className="p-4 text-slate-600 dark:text-slate-400">{log.rec}</td>
-                <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{log.date}</td>
+                <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200 truncate max-w-xs">{log.body}</td>
+                <td className="p-4 text-slate-600 dark:text-slate-400">{log.audience}</td>
+                <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{new Date(log.createdAt).toLocaleDateString()}</td>
                 <td className="p-4 pr-6 text-right">
                   <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30">
-                    {log.status}
+                    Delivered
                   </span>
                 </td>
               </tr>
             ))}
+            {smsLogs.length === 0 && (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-slate-500">No SMS logs found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

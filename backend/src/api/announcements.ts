@@ -12,48 +12,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      const { role } = req.query;
-      const staff = await prisma.user.findMany({
-        where: {
-          role: role ? String(role) : { in: ['faculty', 'staff'] }
-        },
+      const announcements = await prisma.announcement.findMany({
         orderBy: { createdAt: 'desc' }
       });
-      return res.status(200).json(staff);
+      return res.status(200).json(announcements);
     }
 
     if (req.method === 'POST') {
-      const { name, email, phone, role, department } = req.body;
-      const newStaff = await prisma.user.create({
-        data: {
-          name,
-          email,
-          phone,
-          role: role || 'faculty',
-          department
-        }
+      const { title, audience, status, content } = req.body;
+      const ann = await prisma.announcement.create({
+        data: { title, audience, status: status || 'Published', content }
       });
-      return res.status(201).json(newStaff);
+      return res.status(201).json(ann);
     }
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const updatedStaff = await prisma.user.update({
+      const updated = await prisma.announcement.update({
         where: { id: String(id) },
         data: req.body
       });
-      return res.status(200).json(updatedStaff);
+      return res.status(200).json(updated);
     }
 
     if (req.method === 'DELETE') {
       const { id } = req.query;
-      await prisma.user.delete({
+      await prisma.announcement.delete({
         where: { id: String(id) }
       });
       return res.status(204).end();
     }
   } catch (error: any) {
-    console.error('Staff API Error:', error);
+    console.error('Announcements API Error:', error);
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 

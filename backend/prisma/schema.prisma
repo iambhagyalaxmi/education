@@ -460,3 +460,21 @@ model TimetableEntry {
   updatedAt DateTime @updatedAt
 }
 
+
+model Announcement {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  content   String?
+  audience  String
+  status    String   @default("Published")
+  createdAt DateTime @default(now())
+}
+
+model AppMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  type      String   // Email, SMS, Push Notification
+  audience  String
+  subject   String?
+  body      String
+  createdAt DateTime @default(now())
+}
