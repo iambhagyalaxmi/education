@@ -144,14 +144,111 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
     </div>
   );
 
+  const renderStudentProfiles = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Student Profiles</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {students.map(student => (
+          <div key={student.id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+            <div className="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-2xl mb-4">
+              {student.name.charAt(0)}
+            </div>
+            <h3 className="font-bold text-slate-800 dark:text-white text-lg">{student.name}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{student.course} • {student.year}</p>
+            <div className="w-full grid grid-cols-2 gap-4 mb-6 border-t border-b border-slate-100 dark:border-slate-800 py-4">
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Attendance</p>
+                <p className="font-bold text-slate-800 dark:text-slate-200">{student.attendance}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Current Grade</p>
+                <p className="font-bold text-slate-800 dark:text-slate-200">{student.grade}</p>
+              </div>
+            </div>
+            <button className="w-full py-2 bg-slate-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+              View Full Profile
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderStudentAttendance = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Attendance Management</h2>
+        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors">
+          <Edit size={18} /> Edit Attendance
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4">
+          <select className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option>All Courses</option>
+            <option>B.Tech CS</option>
+            <option>B.Tech IT</option>
+            <option>BBA</option>
+          </select>
+          <select className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option>Today</option>
+            <option>This Week</option>
+            <option>This Month</option>
+          </select>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                <th className="p-4 pl-6">Student</th>
+                <th className="p-4">Total Classes</th>
+                <th className="p-4">Attended</th>
+                <th className="p-4">Overall %</th>
+                <th className="p-4 pr-6 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {students.map((student) => (
+                <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{student.name}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">120</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{Math.floor(120 * (parseInt(student.attendance) / 100))}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{student.attendance}</span>
+                    </div>
+                  </td>
+                  <td className="p-4 pr-6 text-right">
+                    <span className={`px-2 py-1 text-xs font-bold rounded text-white ${
+                      parseInt(student.attendance) >= 75 ? 'bg-emerald-500' : 'bg-rose-500'
+                    }`}>
+                      {parseInt(student.attendance) >= 75 ? 'Regular' : 'Defaulter'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
   switch (activeTab) {
     case 'students-list':
       return renderStudentList();
     case 'students-add':
       return renderAddStudent();
+    case 'students-profiles':
+      return renderStudentProfiles();
+    case 'students-attendance':
+      return renderStudentAttendance();
     case 'students-academic':
       return renderAcademicRecords();
     default:
-      return renderStudentList(); // fallback for profiles, attendance placeholders
+      return renderStudentList();
   }
 }
