@@ -10,6 +10,7 @@ import LandingPage from './components/LandingPage';
 import DocumentDashboard from './components/DocumentDashboard';
 import GalleryDashboard from './components/GalleryDashboard';
 import FacultyDashboard from './components/faculty/FacultyDashboard';
+import AdminDashboard from './components/admin/AdminDashboard';
 import { Moon, Sun, ArrowLeft } from 'lucide-react';
 
 export default function App() {
@@ -66,8 +67,18 @@ export default function App() {
                   {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
               </div>
-              <AuthLogin onLogin={(role) => navigate(role === 'faculty' ? '/faculty/dashboard' : '/dashboard')} />
+              <AuthLogin onLogin={(role) => {
+                if (role === 'faculty') navigate('/faculty/dashboard');
+                else if (role === 'admin') navigate('/admin/dashboard');
+                else navigate('/dashboard');
+              }} />
             </div>
+          </div>
+        } />
+
+        <Route path="/admin/dashboard" element={
+          <div className={darkMode ? 'dark' : ''}>
+            <AdminDashboard />
           </div>
         } />
 
