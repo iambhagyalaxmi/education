@@ -4,6 +4,7 @@ import FacultyTopbar from './FacultyTopbar';
 import FacultyOverview from './FacultyOverview';
 import FacultyCourses from './FacultyCourses';
 import FacultyStudents from './FacultyStudents';
+import FacultyAttendance from './FacultyAttendance';
 
 export default function FacultyDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,6 +36,10 @@ export default function FacultyDashboard() {
       case 'students-progress':
       case 'students-marks':
         return <FacultyStudents activeTab={activeTab} />;
+      case 'attendance-take':
+      case 'attendance-edit':
+      case 'attendance-reports':
+        return <FacultyAttendance activeTab={activeTab} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
