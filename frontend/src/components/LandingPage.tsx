@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
+import PortalLoginMenu from './PortalLoginMenu';
 
-interface LandingPageProps {
-  onLoginClick: () => void;
-}
+// Props removed
 
 interface GalleryImage {
   id: string;
@@ -55,7 +54,7 @@ const FALLBACK_IMAGES = {
   ]
 };
 
-export default function LandingPage({ onLoginClick }: LandingPageProps) {
+export default function LandingPage() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [heroIndex, setHeroIndex] = useState(0);
   const [sliderIndex, setSliderIndex] = useState(0);
@@ -119,16 +118,11 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
           </span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-white/90 font-medium drop-shadow-sm">
-          <a href="#courses" className="hover:text-emerald-300 transition-colors">Programs</a>
-          <a href="#campus" className="hover:text-emerald-300 transition-colors">Campus</a>
-          <a href="#featured" className="hover:text-emerald-300 transition-colors">Life @ EduBot</a>
+          <button onClick={() => document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-emerald-300 transition-colors">Programs</button>
+          <button onClick={() => document.getElementById('campus')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-emerald-300 transition-colors">Campus</button>
+          <button onClick={() => document.getElementById('featured')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-emerald-300 transition-colors">Life @ EduBot</button>
         </div>
-        <button 
-          onClick={onLoginClick}
-          className="px-6 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg"
-        >
-          Portal Login
-        </button>
+        <PortalLoginMenu />
       </nav>
 
       {/* 1. Hero Header */}
@@ -164,12 +158,12 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
             Master highly demanded skills through our intensive degree programs. Build your portfolio, land top-tier jobs, and connect with a global alumni network in a world-class environment.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="#inquiry" className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all duration-300 hover:-translate-y-1 flex items-center gap-2">
+            <button onClick={() => document.getElementById('inquiry')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all duration-300 hover:-translate-y-1 flex items-center gap-2">
               Apply Now <ArrowRight size={20} />
-            </a>
-            <a href="#courses" className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold rounded-xl transition-all duration-300 hover:-translate-y-1">
+            </button>
+            <button onClick={() => document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold rounded-xl transition-all duration-300 hover:-translate-y-1">
               Explore Courses
-            </a>
+            </button>
           </div>
         </div>
       </section>

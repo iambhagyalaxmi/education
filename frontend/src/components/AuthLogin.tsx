@@ -1,8 +1,13 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 export default function AuthLogin({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState('');
+  const { role } = useParams<{ role: string }>();
   
+  // Capitalize the role for display
+  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if(email) {
@@ -14,10 +19,10 @@ export default function AuthLogin({ onLogin }: { onLogin: () => void }) {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your account
+          {displayRole} Portal Login
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Education Customer Support Portal
+          Sign in to your account
         </p>
       </div>
 
