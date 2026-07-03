@@ -9,6 +9,8 @@ import FacultyAssignments from './FacultyAssignments';
 import FacultyExaminations from './FacultyExaminations';
 import FacultyTimetable from './FacultyTimetable';
 import FacultyMaterials from './FacultyMaterials';
+import FacultyCommunication from './FacultyCommunication';
+import FacultyLeave from './FacultyLeave';
 
 export default function FacultyDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -63,6 +65,15 @@ export default function FacultyDashboard() {
       case 'materials-video':
       case 'materials-notes':
         return <FacultyMaterials activeTab={activeTab} />;
+      case 'comm-students':
+      case 'comm-admin':
+      case 'comm-announcements':
+      case 'comm-email':
+        return <FacultyCommunication activeTab={activeTab} />;
+      case 'leave-apply':
+      case 'leave-history':
+      case 'leave-status':
+        return <FacultyLeave activeTab={activeTab} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
