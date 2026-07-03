@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import FacultySidebar from './FacultySidebar';
 import FacultyTopbar from './FacultyTopbar';
 import FacultyOverview from './FacultyOverview';
+import FacultyCourses from './FacultyCourses';
+import FacultyStudents from './FacultyStudents';
 
 export default function FacultyDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,7 +23,18 @@ export default function FacultyDashboard() {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
+      case 'statistics':
         return <FacultyOverview />;
+      case 'courses-assigned':
+      case 'courses-materials':
+      case 'courses-syllabus':
+      case 'courses-plans':
+        return <FacultyCourses activeTab={activeTab} />;
+      case 'students-list':
+      case 'students-profiles':
+      case 'students-progress':
+      case 'students-marks':
+        return <FacultyStudents activeTab={activeTab} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
