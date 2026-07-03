@@ -5,6 +5,7 @@ import AdminSidebar from './AdminSidebar';
 import AdminOverview from './AdminOverview';
 import AdminAdmissions from './AdminAdmissions';
 import AdminStudents from './AdminStudents';
+import AdminAnalytics from './AdminAnalytics';
 
 // Placeholders
 const Placeholder = ({ title }: { title: string }) => (
@@ -26,6 +27,9 @@ export default function AdminDashboard() {
   const renderContent = () => {
     if (activeTab === 'overview') {
       return <AdminOverview />;
+    }
+    if (activeTab === 'analytics') {
+      return <AdminAnalytics />;
     }
     if (activeTab.startsWith('admissions-')) {
       return <AdminAdmissions activeTab={activeTab} />;
