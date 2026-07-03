@@ -192,6 +192,57 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     </div>
   );
 
+  const renderExamSchedule = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Exam Schedule / Invigilation Duties</h2>
+        <div className="flex gap-3">
+          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
+            Export as PDF
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <h3 className="font-bold text-slate-800 mb-6 text-lg">Upcoming Invigilation Duties</h3>
+        
+        <div className="space-y-4">
+          {[
+            { date: 'Mon, Nov 12', time: '09:00 AM - 12:00 PM', exam: 'Mid-Term 2: Data Structures', room: 'Main Hall A', role: 'Chief Invigilator', active: false },
+            { date: 'Wed, Nov 14', time: '02:00 PM - 05:00 PM', exam: 'Mid-Term 2: Operating Systems', room: 'Room 304', role: 'Invigilator', active: false },
+            { date: 'Fri, Nov 16', time: '10:00 AM - 01:00 PM', exam: 'Mid-Term 2: Computer Networks', room: 'Room 201', role: 'Reliever', active: false },
+          ].map((duty, i) => (
+            <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors gap-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-50 text-blue-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-bold shrink-0">
+                  <span className="text-xs uppercase">{duty.date.split(',')[0]}</span>
+                  <span className="text-lg leading-tight">{duty.date.split(' ')[2]}</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800">{duty.exam}</h4>
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-600 font-medium">
+                      <Clock size={16} className="text-slate-400" /> {duty.time}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-sm text-slate-600 font-medium">
+                      <MapPin size={16} className="text-slate-400" /> {duty.room}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 md:flex-col md:items-end">
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
+                  {duty.role}
+                </span>
+                <button className="text-sm font-bold text-emerald-600 hover:text-emerald-700">View Details</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (title: string, icon: React.ElementType) => {
     const Icon = icon;
     return (
@@ -213,7 +264,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     case 'timetable-today':
       return renderTodaysClasses();
     case 'timetable-exam':
-      return renderPlaceholder('Exam Schedule', CalendarDays);
+      return renderExamSchedule();
     default:
       return renderPlaceholder('Timetable Management', CalendarDays);
   }
