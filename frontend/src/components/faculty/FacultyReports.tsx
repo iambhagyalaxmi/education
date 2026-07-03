@@ -64,6 +64,24 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
     ]
   };
   
+  const marksData = {
+    stats: [
+      { label: 'Highest Score', value: '98', icon: Award, colorClass: 'bg-emerald-100 text-emerald-600' },
+      { label: 'Lowest Score', value: '35', icon: TrendingUp, colorClass: 'bg-red-100 text-red-600' },
+      { label: 'Avg Class Score', value: '76', icon: BarChart3, colorClass: 'bg-blue-100 text-blue-600' },
+      { label: 'Distinctions', value: '18', icon: Users, colorClass: 'bg-purple-100 text-purple-600' },
+    ]
+  };
+
+  const completionData = {
+    stats: [
+      { label: 'Syllabus Covered', value: '85%', icon: BookOpen, colorClass: 'bg-emerald-100 text-emerald-600' },
+      { label: 'Modules Left', value: '2', icon: BarChart3, colorClass: 'bg-orange-100 text-orange-600' },
+      { label: 'Classes Left', value: '12', icon: Users, colorClass: 'bg-blue-100 text-blue-600' },
+      { label: 'On Track', value: 'Yes', icon: CheckCircle, colorClass: 'bg-purple-100 text-purple-600' },
+    ]
+  };
+  
   // Dummy icon components for missing lucide imports used in objects
   function CheckCircle(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>; }
   function AlertTriangle(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>; }
@@ -90,9 +108,9 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
     case 'reports-attendance':
       return renderDashboardReport('Attendance Analytics', attendanceData);
     case 'reports-marks':
-      return renderPlaceholder('Marks Reports', BarChart3);
+      return renderDashboardReport('Marks Distribution Report', marksData);
     case 'reports-completion':
-      return renderPlaceholder('Course Completion Reports', BarChart3);
+      return renderDashboardReport('Course Completion Status', completionData);
     default:
       return renderPlaceholder('Reports & Analytics', BarChart3);
   }
