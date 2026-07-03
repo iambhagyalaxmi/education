@@ -11,6 +11,9 @@ import FacultyTimetable from './FacultyTimetable';
 import FacultyMaterials from './FacultyMaterials';
 import FacultyCommunication from './FacultyCommunication';
 import FacultyLeave from './FacultyLeave';
+import FacultyMeetings from './FacultyMeetings';
+import FacultyReports from './FacultyReports';
+import FacultyNotifications from './FacultyNotifications';
 
 export default function FacultyDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -74,6 +77,17 @@ export default function FacultyDashboard() {
       case 'leave-history':
       case 'leave-status':
         return <FacultyLeave activeTab={activeTab} />;
+      case 'meetings-schedule':
+      case 'meetings-google':
+      case 'meetings-zoom':
+        return <FacultyMeetings activeTab={activeTab} />;
+      case 'reports-performance':
+      case 'reports-attendance':
+      case 'reports-marks':
+      case 'reports-completion':
+        return <FacultyReports activeTab={activeTab} />;
+      case 'notifications':
+        return <FacultyNotifications />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
