@@ -146,17 +146,94 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
   );
 
   const renderSyllabus = () => (
-    <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
-      <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
-        <BookOpen size={40} className="text-blue-600 dark:text-blue-400" />
+    <div className="space-y-6 animate-fade-in-up pb-10">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Syllabus Repository</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage and distribute course curriculum documents.</p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+          <BookOpen size={18} /> Upload Syllabus
+        </button>
       </div>
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Syllabus Repository</h2>
-      <p className="text-slate-500 dark:text-slate-400 max-w-md">
-        Upload, manage, and distribute course syllabus documents to students and faculty.
-      </p>
-      <button className="mt-6 px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors">
-        Upload Syllabus PDF
-      </button>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        {/* Toolbar */}
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative max-w-md w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search by course, subject or topic..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
+              <Filter size={16} /> Filter
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                <th className="p-4 pl-6">Document Name</th>
+                <th className="p-4">Program</th>
+                <th className="p-4">Semester</th>
+                <th className="p-4">Last Updated</th>
+                <th className="p-4 pr-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {[
+                { doc: 'B.Tech CS - Complete Syllabus 2024', program: 'B.Tech Computer Science', sem: 'All', date: 'Jan 10, 2024' },
+                { doc: 'Data Structures Module Breakdown', program: 'B.Tech CS & IT', sem: 'Semester 3', date: 'Dec 15, 2023' },
+                { doc: 'Engineering Mathematics II', program: 'Common', sem: 'Semester 2', date: 'Feb 20, 2024' },
+                { doc: 'Business Ethics & Comm', program: 'BBA', sem: 'Semester 1', date: 'Aug 05, 2023' },
+              ].map((item, i) => (
+                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="p-4 pl-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                        <span className="text-xs font-bold">PDF</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-slate-200">{item.doc}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">PDF Document • 2.4 MB</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{item.program}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">
+                    <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                      {item.sem}
+                    </span>
+                  </td>
+                  <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{item.date}</td>
+                  <td className="p-4 pr-6 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors" title="Download">
+                        <Download size={18} />
+                      </button>
+                      <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                        <Edit size={18} />
+                      </button>
+                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 
