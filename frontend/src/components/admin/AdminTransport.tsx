@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Map, Truck, UserCircle, Edit, Trash2 } from 'lucide-react';
 
 export default function AdminTransport({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [routes, setRoutes] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/transport/routes').then(res => res.json()).then(data => setRoutes(data)).catch(console.error);
+    fetch('/api/transport/vehicles').then(res => res.json()).then(data => setVehicles(data)).catch(console.error);
+  }, []);
 
   const renderRoutes = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -47,11 +54,7 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { no: 'R-01', name: 'Downtown Express', path: 'City Center ↔ Campus', vehicle: 'BUS-1042', stops: 12 },
-                { no: 'R-02', name: 'North Suburbs', path: 'North Hills ↔ Campus', vehicle: 'BUS-2055', stops: 15 },
-                { no: 'R-03', name: 'East Side Shuttle', path: 'East Station ↔ Campus', vehicle: 'BUS-3108', stops: 8 },
-              ].map((route, i) => (
+              {routes.map((route, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -99,11 +102,7 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          { id: 'BUS-1042', type: '50-Seater Bus', plate: 'CA-12-8899', condition: 'Excellent', status: 'Active' },
-          { id: 'BUS-2055', type: '50-Seater Bus', plate: 'CA-12-3344', condition: 'Good', status: 'Active' },
-          { id: 'VAN-4011', type: '15-Seater Van', plate: 'CA-05-1122', condition: 'Needs Service', status: 'Maintenance' },
-        ].map((vehicle, i) => (
+        {vehicles.map((vehicle, i) => (
           <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400">

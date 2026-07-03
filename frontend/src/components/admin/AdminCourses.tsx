@@ -1,16 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Download, Plus, Book, BookOpen, Layers, Edit, Trash2, Calendar } from 'lucide-react';
 
 export default function AdminCourses({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [courses, setCourses] = useState<any[]>([]);
 
-  // Mock data
-  const courses = [
-    { id: 'CS101', name: 'B.Tech Computer Science', dept: 'Computer Science', duration: '4 Years', credits: 160, status: 'Active' },
-    { id: 'IT102', name: 'B.Tech Information Tech', dept: 'Information Tech', duration: '4 Years', credits: 160, status: 'Active' },
-    { id: 'BBA201', name: 'Bachelor of Business Admin', dept: 'Business Admin', duration: '3 Years', credits: 120, status: 'Active' },
-    { id: 'ME301', name: 'B.Tech Mechanical', dept: 'Mechanical', duration: '4 Years', credits: 164, status: 'Active' },
-  ];
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch('/api/courses');
+      if (res.ok) {
+        const data = await res.json();
+        setCourses(data);
+      } else {
+        throw new Error('Failed to fetch');
+      }
+    } catch (err) {
+      console.error(err);
+      // Fallback data if backend is down
+      setCourses([
+        { id: 'CS101', name: 'B.Tech Computer Science', code: 'CS', durationYears: 4, credits: 160, status: 'Active' },
+        { id: 'IT102', name: 'B.Tech Information Tech', code: 'IT', durationYears: 4, credits: 160, status: 'Active' },
+      ]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, [activeTab]);
 
   const renderCourseList = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -70,16 +86,16 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
                       </div>
                       <div>
                         <p className="font-bold text-slate-800 dark:text-slate-200">{course.name}</p>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{course.id}</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{course.code || course.id.substring(0,8)}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{course.dept}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{course.duration}</td>
-                  <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{course.credits}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">Engineering</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{course.durationYears} Years</td>
+                  <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{course.credits || 160}</td>
                   <td className="p-4">
                     <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                      {course.status}
+                      {course.status || 'Active'}
                     </span>
                   </td>
                   <td className="p-4 pr-6">

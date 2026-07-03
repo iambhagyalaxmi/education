@@ -1,17 +1,64 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Download, Plus, Shield, Edit, Trash2, ShieldAlert, Key } from 'lucide-react';
 
 export default function AdminStaff({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [staffList, setStaffList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
-  // Mock data for staff
-  const staffList = [
-    { id: 'STF001', name: 'John Smith', role: 'System Admin', department: 'IT Support', email: 'john.s@institute.edu', status: 'Active' },
-    { id: 'STF002', name: 'Mary Johnson', role: 'Librarian', department: 'Library', email: 'mary.j@institute.edu', status: 'Active' },
-    { id: 'STF003', name: 'Robert Davis', role: 'Accountant', department: 'Finance', email: 'robert.d@institute.edu', status: 'Active' },
-    { id: 'STF004', name: 'Linda Wilson', role: 'HR Manager', department: 'Human Resources', email: 'linda.w@institute.edu', status: 'On Leave' },
-    { id: 'STF005', name: 'James Taylor', role: 'Maintenance Supervisor', department: 'Facilities', email: 'james.t@institute.edu', status: 'Active' },
-  ];
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
+    department: ''
+  });
+
+  const fetchStaff = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/staff');
+      if (res.ok) {
+        const data = await res.json();
+        setStaffList(data);
+      } else {
+        throw new Error('Failed to fetch');
+      }
+    } catch (err) {
+      console.error(err);
+      // Fallback data if backend is down
+      setStaffList([
+        { id: 'STF001', name: 'John Smith', role: 'System Admin', department: 'IT Support', email: 'john.s@institute.edu', status: 'Active' },
+      ]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchStaff();
+  }, [activeTab]);
+
+  const handleRegister = async (e: any) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    try {
+      const res = await fetch('/api/staff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) throw new Error('Registration failed');
+      setSuccessMsg('Staff member registered successfully!');
+      setFormData({ name: '', email: '', phone: '', role: '', department: '' });
+      fetchStaff();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
   const renderStaffList = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -120,21 +167,24 @@ export default function AdminStaff({ activeTab }: { activeTab: string }) {
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 md:p-8">
-        <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+        {error && <div className="p-4 mb-6 bg-rose-50 text-rose-700 rounded-lg">{error}</div>}
+        {successMsg && <div className="p-4 mb-6 bg-emerald-50 text-emerald-700 rounded-lg">{successMsg}</div>}
+        
+        <form className="space-y-8" onSubmit={handleRegister}>
           <div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Full Name *</label>
-                <input type="text" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Jane Doe" />
+                <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Jane Doe" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Email Address *</label>
-                <input type="email" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="jane.doe@institute.edu" />
+                <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="jane.doe@institute.edu" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Phone Number *</label>
-                <input type="tel" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="+91 9876543210" />
+                <input type="tel" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="+91 9876543210" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Date of Birth *</label>
@@ -148,28 +198,28 @@ export default function AdminStaff({ activeTab }: { activeTab: string }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Department *</label>
-                <select className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
+                <select required value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                   <option value="">Select Department</option>
-                  <option value="it">IT Support</option>
-                  <option value="hr">Human Resources</option>
-                  <option value="finance">Finance</option>
-                  <option value="library">Library</option>
-                  <option value="facilities">Facilities & Maintenance</option>
+                  <option value="IT Support">IT Support</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Library">Library</option>
+                  <option value="Facilities">Facilities & Maintenance</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Role/Designation *</label>
-                <input type="text" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. System Admin" />
+                <input type="text" required value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. System Admin" />
               </div>
             </div>
           </div>
 
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <button type="button" className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              Cancel
+            <button type="button" onClick={() => {setError(''); setSuccessMsg(''); setFormData({name: '', email: '', phone: '', role: '', department: ''})}} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              Clear
             </button>
-            <button type="submit" className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm">
-              Register Staff
+            <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">
+              {loading ? 'Registering...' : 'Register Staff'}
             </button>
           </div>
         </form>

@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Download, Plus, Users, DollarSign, Calendar, Edit } from 'lucide-react';
 
 export default function AdminHR({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [payroll, setPayroll] = useState<any[]>([]);
+  const [leaves, setLeaves] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/hr/payroll').then(res => res.json()).then(data => setPayroll(data)).catch(console.error);
+    fetch('/api/hr/leave').then(res => res.json()).then(data => setLeaves(data)).catch(console.error);
+  }, []);
 
   const renderSalary = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -48,11 +55,7 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { name: 'Dr. Sarah Johnson', role: 'HOD Computer Science', dept: 'CS', base: '$8,000', allow: '$1,200', net: '$9,200' },
-                { name: 'Michael Chen', role: 'Senior Lecturer', dept: 'IT', base: '$6,500', allow: '$800', net: '$7,300' },
-                { name: 'Emma Wilson', role: 'Librarian', dept: 'Administration', base: '$4,000', allow: '$400', net: '$4,400' },
-              ].map((emp, i) => (
+              {payroll.map((emp, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -146,10 +149,7 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { name: 'Michael Chen', type: 'Sick Leave', duration: 'Oct 20 - Oct 21 (2 Days)', reason: 'Fever and cold' },
-                { name: 'Emma Wilson', type: 'Annual Leave', duration: 'Nov 01 - Nov 05 (5 Days)', reason: 'Family vacation' },
-              ].map((req, i) => (
+              {leaves.map((req, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6 font-bold text-slate-800 dark:text-slate-200">
                     {req.name}
@@ -166,14 +166,20 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
                   </td>
                   <td className="p-4 text-slate-500 dark:text-slate-400 text-sm truncate max-w-[200px]">{req.reason}</td>
                   <td className="p-4 pr-6 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button className="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 rounded transition-colors">
-                        Approve
-                      </button>
-                      <button className="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-400 rounded transition-colors">
-                        Reject
-                      </button>
-                    </div>
+                    {req.status === 'Pending' ? (
+                      <div className="flex justify-end gap-2">
+                        <button className="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 rounded transition-colors">
+                          Approve
+                        </button>
+                        <button className="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-400 rounded transition-colors">
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`px-2 py-1 text-xs font-bold rounded ${req.status === 'Approved' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}`}>
+                        {req.status}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

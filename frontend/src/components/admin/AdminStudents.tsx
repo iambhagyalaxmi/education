@@ -1,17 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Download, UserPlus, Edit, Trash2, Eye } from 'lucide-react';
 
 export default function AdminStudents({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
-  // Mock data for students
-  const students = [
-    { id: 'STU001', name: 'Arjun Das', course: 'B.Tech CS', year: '3rd Year', attendance: '92%', grade: 'A', status: 'Active' },
-    { id: 'STU002', name: 'Neha Gupta', course: 'B.Tech IT', year: '2nd Year', attendance: '85%', grade: 'B+', status: 'Active' },
-    { id: 'STU003', name: 'Rohan Mehra', course: 'B.Com', year: '1st Year', attendance: '74%', grade: 'C', status: 'Warning' },
-    { id: 'STU004', name: 'Kavya Singh', course: 'B.Sc Physics', year: '3rd Year', attendance: '98%', grade: 'A+', status: 'Active' },
-    { id: 'STU005', name: 'Siddharth Jain', course: 'BBA', year: '2nd Year', attendance: '65%', grade: 'D', status: 'Critical' },
-  ];
+  // Form State
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    courseId: '',
+    batchId: ''
+  });
+
+  const fetchStudents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/students');
+      if (res.ok) {
+        const data = await res.json();
+        setStudents(data);
+      } else {
+        throw new Error('Failed to fetch');
+      }
+    } catch (err) {
+      console.error(err);
+      // Fallback data if backend is down
+      setStudents([
+        { id: 'STU001', firstName: 'Arjun', lastName: 'Das', course: { name: 'B.Tech CS' }, batch: { academicYear: '2024-2027' }, attendance: '92%', grade: 'A', status: 'active' },
+        { id: 'STU002', firstName: 'Neha', lastName: 'Gupta', course: { name: 'B.Tech IT' }, batch: { academicYear: '2023-2026' }, attendance: '85%', grade: 'B+', status: 'active' },
+      ]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, [activeTab]);
+
+  const handleRegister = async (e: any) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    try {
+      const res = await fetch('/api/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) throw new Error('Registration failed');
+      setSuccessMsg('Student registered successfully!');
+      setFormData({ firstName: '', lastName: '', email: '', phone: '', courseId: '', batchId: '' });
+      fetchStudents();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
   const renderStudentList = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -62,18 +111,18 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
                 <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm">
-                        {student.name.charAt(0)}
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm uppercase">
+                        {student.firstName?.charAt(0) || 'S'}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">{student.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{student.id}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">{student.firstName} {student.lastName}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{student.id.substring(0,8)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">
-                    <p className="font-medium text-slate-700 dark:text-slate-300">{student.course}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{student.year}</p>
+                    <p className="font-medium text-slate-700 dark:text-slate-300">{student.course?.name || 'Unassigned'}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{student.batch?.academicYear || 'N/A'}</p>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
@@ -130,7 +179,10 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 md:p-8">
-        <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+        {error && <div className="p-4 mb-6 bg-rose-50 text-rose-700 rounded-lg">{error}</div>}
+        {successMsg && <div className="p-4 mb-6 bg-emerald-50 text-emerald-700 rounded-lg">{successMsg}</div>}
+        
+        <form className="space-y-8" onSubmit={handleRegister}>
           
           {/* Personal Details */}
           <div>
@@ -138,19 +190,19 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">First Name *</label>
-                <input type="text" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. Rahul" />
+                <input type="text" required value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. Rahul" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Last Name *</label>
-                <input type="text" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. Sharma" />
+                <input type="text" required value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. Sharma" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Email Address *</label>
-                <input type="email" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="rahul@example.com" />
+                <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="rahul@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Phone Number *</label>
-                <input type="tel" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="+91 9876543210" />
+                <input type="tel" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="+91 9876543210" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Date of Birth *</label>
@@ -173,22 +225,12 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Academic Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Course/Program *</label>
-                <select className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
-                  <option value="">Select Course</option>
-                  <option value="cs">B.Tech Computer Science</option>
-                  <option value="it">B.Tech Information Technology</option>
-                  <option value="me">B.Tech Mechanical</option>
-                  <option value="bba">Bachelor of Business Admin</option>
-                </select>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Course ID *</label>
+                <input type="text" required value={formData.courseId} onChange={e => setFormData({...formData, courseId: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Enter valid Course UUID" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Admission Year *</label>
-                <select className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                </select>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Batch ID *</label>
+                <input type="text" required value={formData.batchId} onChange={e => setFormData({...formData, batchId: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Enter valid Batch UUID" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Previous Qualifications</label>
@@ -198,11 +240,11 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
           </div>
 
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <button type="button" className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              Cancel
+            <button type="button" onClick={() => {setError(''); setSuccessMsg(''); setFormData({firstName: '', lastName: '', email: '', phone: '', courseId: '', batchId: ''})}} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              Clear
             </button>
-            <button type="submit" className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm">
-              Register Student
+            <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">
+              {loading ? 'Registering...' : 'Register Student'}
             </button>
           </div>
         </form>

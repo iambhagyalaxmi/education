@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Download, Plus, Home, UserCheck, Edit, Trash2 } from 'lucide-react';
 
 export default function AdminHostel({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [rooms, setRooms] = useState<any[]>([]);
+  const [allocations, setAllocations] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/hostel/rooms').then(res => res.json()).then(data => setRooms(data)).catch(console.error);
+    fetch('/api/hostel/allocations').then(res => res.json()).then(data => setAllocations(data)).catch(console.error);
+  }, []);
 
   const renderRooms = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -48,12 +55,7 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { room: 'A-101', block: 'Boys Hostel A', type: '2-Seater (AC)', total: 2, occ: 2, status: 'Full' },
-                { room: 'A-102', block: 'Boys Hostel A', type: '2-Seater (AC)', total: 2, occ: 1, status: 'Partially Available' },
-                { room: 'B-205', block: 'Girls Hostel B', type: '3-Seater (Non-AC)', total: 3, occ: 0, status: 'Available' },
-                { room: 'C-110', block: 'International Block', type: 'Single Room', total: 1, occ: 1, status: 'Full' },
-              ].map((item, i) => (
+              {rooms.map((item, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -67,7 +69,7 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
                   <td className="p-4 text-slate-600 dark:text-slate-400">{item.type}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-700 dark:text-slate-300">{item.total - item.occ}</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{item.total - (item.occ || 0)}</span>
                       <span className="text-xs text-slate-500">/ {item.total} free</span>
                     </div>
                   </td>
@@ -112,11 +114,7 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          { student: 'James Wilson', id: 'STD-24-089', room: 'A-101', block: 'Boys Hostel A', status: 'Allocated' },
-          { student: 'Sophia Davis', id: 'STD-23-112', room: 'B-302', block: 'Girls Hostel B', status: 'Allocated' },
-          { student: 'Michael Brown', id: 'STD-24-205', room: '-', block: '-', status: 'Pending Request' },
-        ].map((alloc, i) => (
+        {allocations.map((alloc, i) => (
           <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
               <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
@@ -130,7 +128,7 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
               </button>
             </div>
             <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-1">{alloc.student}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{alloc.id}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{alloc.studentId}</p>
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Assigned Room</p>
               {alloc.status === 'Allocated' ? (

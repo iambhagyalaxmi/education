@@ -404,7 +404,6 @@ async function generateResponse(message: string, sessionId: string): Promise<{ t
       messages.push({
         tool_call_id: toolCall.id,
         role: 'tool',
-        name: toolCall.function.name,
         content: toolResult,
       });
     }

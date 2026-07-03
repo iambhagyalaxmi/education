@@ -82,6 +82,7 @@ model Student {
 
   course    Course   @relation(fields: [courseId], references: [id])
   batch     Batch    @relation(fields: [batchId], references: [id])
+  hostelAllocations HostelAllocation[]
 }
 
 model Application {
@@ -119,6 +120,8 @@ model User {
   auditLogs         AuditLog[]
   uploadedDocs      Document[]
   documentDownloads DocumentDownload[]
+  payrollRecords    PayrollRecord[]
+  leaveRequests     LeaveRequest[]
 }
 
 model Conversation {
@@ -294,4 +297,88 @@ model GalleryImage {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ─── Hostel Management ────────────────────────────────────────────────────────
+
+model HostelRoom {
+  id          String   @id @default(uuid()) @db.Uuid
+  roomNumber  String
+  block       String
+  roomType    String
+  totalBeds   Int
+  status      String   @default("Available")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  allocations HostelAllocation[]
+}
+
+model HostelAllocation {
+  id          String   @id @default(uuid()) @db.Uuid
+  studentId   String   @db.Uuid
+  roomId      String   @db.Uuid
+  status      String   @default("Allocated")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student     Student    @relation(fields: [studentId], references: [id])
+  room        HostelRoom @relation(fields: [roomId], references: [id])
+}
+
+// ─── Transport Management ─────────────────────────────────────────────────────
+
+model TransportVehicle {
+  id          String   @id @default(uuid()) @db.Uuid
+  vehicleId   String   @unique
+  type        String
+  plateNumber String
+  condition   String
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  routes      TransportRoute[]
+}
+
+model TransportRoute {
+  id          String   @id @default(uuid()) @db.Uuid
+  routeNo     String   @unique
+  name        String
+  path        String
+  vehicleId   String?  @db.Uuid
+  stops       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vehicle     TransportVehicle? @relation(fields: [vehicleId], references: [id])
+}
+
+// ─── HR & Payroll Management ──────────────────────────────────────────────────
+
+model PayrollRecord {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  month       String
+  baseSalary  String
+  allowances  String
+  netPayable  String
+  status      String   @default("Pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model LeaveRequest {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  type        String
+  duration    String
+  reason      String
+  status      String   @default("Pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
 }
