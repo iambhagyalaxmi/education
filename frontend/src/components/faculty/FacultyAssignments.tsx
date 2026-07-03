@@ -157,6 +157,107 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
     </div>
   );
 
+  const renderGradeAssignments = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Grade Assignments</h2>
+        <div className="flex gap-3">
+          <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+            <option>CS401: Data Structures</option>
+          </select>
+          <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+            <option>Assignment 1: Trees</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col items-center">
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1 border-r border-slate-100 pr-6">
+            <h3 className="font-bold text-slate-800 mb-4">Pending Grading (42)</h3>
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+              {[
+                { name: 'Bob Johnson', roll: 'CS24-002', time: '2 hours ago', active: true },
+                { name: 'Eve Carter', roll: 'CS24-008', time: '5 hours ago', active: false },
+                { name: 'Frank Castle', roll: 'CS24-011', time: '1 day ago', active: false }
+              ].map((student, i) => (
+                <div key={i} className={`p-3 rounded-xl border cursor-pointer transition-colors ${student.active ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
+                  <p className={`font-semibold ${student.active ? 'text-emerald-800' : 'text-slate-800'}`}>{student.name}</p>
+                  <p className={`text-xs ${student.active ? 'text-emerald-600' : 'text-slate-500'}`}>{student.roll} • Submitted {student.time}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="md:col-span-2">
+            <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="font-bold text-xl text-slate-800">Bob Johnson</h3>
+                <p className="text-sm text-slate-500">CS24-002 • Assignment 1: Trees</p>
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">
+                <Download size={16}/> Download Submission
+              </button>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-6 text-center h-48 flex flex-col items-center justify-center">
+              <FileEdit size={32} className="text-slate-400 mb-2"/>
+              <p className="text-slate-600 font-medium">Bob_Johnson_Trees_Assign1.pdf</p>
+              <p className="text-sm text-slate-400">PDF Document • 1.2 MB</p>
+              <button className="mt-4 text-emerald-600 font-semibold text-sm hover:text-emerald-700">Preview Document</button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Marks Awarded (Out of 100)</label>
+                <input type="number" placeholder="Enter marks..." className="w-32 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-lg font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Feedback Comments</label>
+                <textarea rows={3} placeholder="Provide constructive feedback..." className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+              </div>
+              <div className="flex gap-3 justify-end mt-4">
+                <button className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors">Skip</button>
+                <button className="px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">Save & Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPublishResults = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Publish Results</h2>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 text-center max-w-2xl mx-auto mt-12">
+        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 size={40} className="text-emerald-600"/>
+        </div>
+        <h3 className="text-2xl font-bold text-slate-800 mb-2">Ready to Publish</h3>
+        <p className="text-slate-500 mb-8">All 120 submissions for <strong>Assignment 1: Trees (CS401)</strong> have been successfully graded. Once published, students will receive an email notification and can view their scores.</p>
+        
+        <div className="bg-slate-50 border border-slate-100 rounded-xl p-6 flex justify-around mb-8 text-left">
+          <div>
+            <p className="text-sm font-medium text-slate-500 mb-1">Highest Score</p>
+            <p className="text-2xl font-bold text-emerald-600">98 / 100</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-500 mb-1">Average Score</p>
+            <p className="text-2xl font-bold text-blue-600">82.4 / 100</p>
+          </div>
+        </div>
+
+        <button className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl w-full text-lg">
+          Publish Results to Students
+        </button>
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (title: string, icon: React.ElementType) => {
     const Icon = icon;
     return (
@@ -178,9 +279,9 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
     case 'assignments-review':
       return renderReviewSubmissions();
     case 'assignments-grade':
-      return renderPlaceholder('Grade Assignments', FileEdit);
+      return renderGradeAssignments();
     case 'assignments-publish':
-      return renderPlaceholder('Publish Results', Download);
+      return renderPublishResults();
     default:
       return renderPlaceholder('Assignment Management', FileEdit);
   }
