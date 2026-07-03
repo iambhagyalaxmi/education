@@ -40,7 +40,7 @@ export default function AdminDashboard() {
 
   const renderContent = () => {
     if (activeTab === 'overview') {
-      return <AdminOverview />;
+      return <AdminOverview setActiveTab={setActiveTab} />;
     }
     if (activeTab === 'analytics') {
       return <AdminAnalytics />;
