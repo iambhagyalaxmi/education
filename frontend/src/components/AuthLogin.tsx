@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 
 export default function AuthLogin({ onLogin }: { onLogin: (role: string) => void }) {
   const [email, setEmail] = useState('');
+  const [id, setId] = useState('');
+  const [password, setPassword] = useState('');
   const { role } = useParams<{ role: string }>();
   
   // Capitalize the role for display
@@ -10,27 +12,27 @@ export default function AuthLogin({ onLogin }: { onLogin: (role: string) => void
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if(email) {
+    if(email && id && password) {
       onLogin(role || '');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 dark:bg-slate-900 transition-colors duration-300">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
           {displayRole} Portal Login
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-slate-400">
           Sign in to your account
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
+        <div className="bg-white dark:bg-slate-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100 dark:border-slate-700 transition-colors duration-300">
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Email address
               </label>
               <div className="mt-1">
@@ -42,7 +44,42 @@ export default function AuthLogin({ onLogin }: { onLogin: (role: string) => void
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-slate-700 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="id" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                {displayRole} ID
+              </label>
+              <div className="mt-1">
+                <input
+                  id="id"
+                  name="id"
+                  type="text"
+                  required
+                  value={id}
+                  onChange={(e) => setId(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-slate-700 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-slate-700 dark:text-white"
                 />
               </div>
             </div>
