@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, FileText, CheckCircle, Edit, Calendar } from 'lucide-react';
 
 export default function AdminExaminations({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [exams, setExams] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/examinations').then(res => res.json()).then(data => setExams(Array.isArray(data) ? data : [])).catch(console.error);
+  }, []);
 
   const renderSchedule = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -42,11 +47,7 @@ export default function AdminExaminations({ activeTab }: { activeTab: string }) 
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { name: 'Mid-Term Exam', course: 'B.Tech CS - Sem 3', date: 'Oct 15, 2024 • 10:00 AM', duration: '2 Hours', status: 'Upcoming' },
-                { name: 'Final Semester Exam', course: 'BBA - Sem 1', date: 'Dec 10, 2024 • 09:00 AM', duration: '3 Hours', status: 'Scheduled' },
-                { name: 'Practical Assessment', course: 'B.Tech IT - Sem 5', date: 'Nov 05, 2024 • 01:00 PM', duration: '4 Hours', status: 'Upcoming' },
-              ].map((exam, i) => (
+              {exams.map((exam, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -57,10 +58,14 @@ export default function AdminExaminations({ activeTab }: { activeTab: string }) 
                     </div>
                   </td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">{exam.course}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{exam.date}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{exam.duration}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{exam.date} • {exam.time}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{exam.room}</td>
                   <td className="p-4">
-                    <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                    <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                      exam.status === 'Upcoming' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                      exam.status === 'Ongoing' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                      'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }`}>
                       {exam.status}
                     </span>
                   </td>

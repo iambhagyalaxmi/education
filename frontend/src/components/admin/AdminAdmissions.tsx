@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Download, UserPlus, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [applications, setApplications] = useState<any[]>([]);
 
-  // Mock data for applications
-  const applications = [
-    { id: 'APP-2024-001', name: 'Rahul Sharma', course: 'B.Tech Computer Science', date: '2023-10-15', status: 'Pending', score: '88%' },
-    { id: 'APP-2024-002', name: 'Priya Patel', course: 'B.Sc Mathematics', date: '2023-10-14', status: 'Approved', score: '92%' },
-    { id: 'APP-2024-003', name: 'Amit Kumar', course: 'B.Com General', date: '2023-10-14', status: 'Rejected', score: '55%' },
-    { id: 'APP-2024-004', name: 'Sneha Reddy', course: 'B.Tech Information Tech', date: '2023-10-13', status: 'Pending', score: '78%' },
-    { id: 'APP-2024-005', name: 'Vikram Singh', course: 'BBA', date: '2023-10-12', status: 'Approved', score: '85%' },
-  ];
+  const fetchApplications = () => {
+    fetch('/api/admissions').then(res => res.json()).then(data => setApplications(Array.isArray(data) ? data : [])).catch(console.error);
+  };
+
+  useEffect(() => { fetchApplications(); }, []);
+
+  const updateStatus = async (id: string, status: string) => {
+    await fetch(`/api/admissions?id=${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+    fetchApplications();
+  };
 
   const renderNewApplications = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -37,6 +40,10 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
               className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 text-sm"
             />
           </div>
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            {applications.filter(a => a.status === 'Pending').length} pending applications
+          </h3>
           <div className="flex items-center gap-2">
             <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
               <Filter size={16} /> Filter
@@ -45,6 +52,7 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
               <Download size={16} /> Export
             </button>
           </div>
+        </div>
         </div>
 
         {/* Table */}
@@ -63,7 +71,7 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {applications.filter(app => app.status === 'Pending').map((app) => (
                 <tr key={app.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group">
-                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{app.id}</td>
+                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{app.appId}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs">
@@ -77,10 +85,10 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
                   <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{app.score}</td>
                   <td className="p-4 pr-6">
                     <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-colors" title="Approve">
+                      <button onClick={() => updateStatus(app.id, 'Approved')} className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-colors" title="Approve">
                         <CheckCircle size={18} />
                       </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Reject">
+                      <button onClick={() => updateStatus(app.id, 'Rejected')} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Reject">
                         <XCircle size={18} />
                       </button>
                     </div>
@@ -105,21 +113,21 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
           <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center"><Clock size={24} /></div>
           <div>
             <h3 className="text-slate-500 dark:text-slate-400 text-sm font-medium">Pending Review</h3>
-            <p className="text-2xl font-bold text-slate-800 dark:text-white">45</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-white">{applications.filter(a => a.status === 'Pending').length}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center"><CheckCircle size={24} /></div>
           <div>
             <h3 className="text-slate-500 dark:text-slate-400 text-sm font-medium">Approved</h3>
-            <p className="text-2xl font-bold text-slate-800 dark:text-white">128</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-white">{applications.filter(a => a.status === 'Approved').length}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl flex items-center justify-center"><XCircle size={24} /></div>
           <div>
             <h3 className="text-slate-500 dark:text-slate-400 text-sm font-medium">Rejected</h3>
-            <p className="text-2xl font-bold text-slate-800 dark:text-white">12</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-white">{applications.filter(a => a.status === 'Rejected').length}</p>
           </div>
         </div>
       </div>
@@ -139,7 +147,7 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {applications.map((app) => (
                 <tr key={app.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{app.id}</td>
+                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{app.appId}</td>
                   <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{app.name}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">{app.course}</td>
                   <td className="p-4">
@@ -187,27 +195,18 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {applications.filter(app => app.status === 'Approved').map((app, index) => (
+              {applications.filter(app => app.status === 'Approved').map((app) => (
                 <tr key={app.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{app.id}</td>
+                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{app.appId}</td>
                   <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{app.name}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">{app.course}</td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 text-xs font-bold rounded-md ${
-                      index === 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                    }`}>
-                      {index === 0 ? 'Paid' : 'Pending'}
+                    <span className="px-2 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      Approved
                     </span>
                   </td>
                   <td className="p-4 pr-6 text-right">
-                    <button 
-                      className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors ${
-                        index === 0 
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
-                        : 'bg-slate-100 text-slate-400 dark:bg-slate-800 cursor-not-allowed'
-                      }`}
-                      disabled={index !== 0}
-                    >
+                    <button className="px-3 py-1.5 text-sm font-bold rounded-lg transition-colors bg-indigo-600 text-white hover:bg-indigo-700">
                       Enroll Student
                     </button>
                   </td>

@@ -26,6 +26,9 @@ import staffHandler from './api/staff';
 import hostelHandler from './api/hostel';
 import transportHandler from './api/transport';
 import hrHandler from './api/hr';
+import admissionsHandler from './api/admissions';
+import feesHandler from './api/fees';
+import examinationsHandler from './api/examinations';
 
 app.use('/api/auth', authRoutes); // Keep legacy auth
 
@@ -42,6 +45,9 @@ app.all('/api/staff', staffHandler as any);
 app.all('/api/hostel', hostelHandler as any);
 app.all('/api/transport', transportHandler as any);
 app.all('/api/hr', hrHandler as any);
+app.all('/api/admissions', admissionsHandler as any);
+app.all('/api/fees', feesHandler as any);
+app.all('/api/examinations', examinationsHandler as any);
 
 // For local development or non-Vercel deployments, serve the frontend
 import path from 'path';

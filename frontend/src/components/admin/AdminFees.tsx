@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Download, Plus, DollarSign, CreditCard, AlertCircle, Award, Edit } from 'lucide-react';
 
 export default function AdminFees({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [feeRecords, setFeeRecords] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/fees').then(res => res.json()).then(data => setFeeRecords(Array.isArray(data) ? data : [])).catch(console.error);
+  }, []);
 
   const renderStructure = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -105,24 +110,20 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { name: 'Alex Carter', id: 'STD-24-001', receipt: 'RCPT-8921', amount: '$2,500.00', method: 'Bank Transfer', date: 'Oct 12, 2024' },
-                { name: 'Mia Wong', id: 'STD-24-045', receipt: 'RCPT-8922', amount: '$5,150.00', method: 'Credit Card', date: 'Oct 14, 2024' },
-                { name: 'Ethan Hunt', id: 'STD-23-112', receipt: 'RCPT-8923', amount: '$1,200.00', method: 'Cash', date: 'Oct 15, 2024' },
-              ].map((record, i) => (
+              {feeRecords.filter(r => r.status === 'Paid').map((record, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
-                    <p className="font-bold text-slate-800 dark:text-slate-200">{record.name}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{record.id}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-200">{record.student}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{record.course}</p>
                   </td>
-                  <td className="p-4 font-mono text-sm text-slate-600 dark:text-slate-400">{record.receipt}</td>
+                  <td className="p-4 font-mono text-sm text-slate-600 dark:text-slate-400">{record.invoiceNo}</td>
                   <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{record.amount}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">
                     <div className="flex items-center gap-1.5">
-                      <CreditCard size={14} className="text-slate-400" /> {record.method}
+                      <CreditCard size={14} className="text-slate-400" /> Bank Transfer
                     </div>
                   </td>
-                  <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{record.date}</td>
+                  <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{record.dueDate}</td>
                   <td className="p-4 pr-6 text-right">
                     <button className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors" title="Download Receipt">
                       <Download size={18} />
@@ -162,18 +163,19 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { name: 'Oliver Twist', id: 'STD-22-098', program: 'B.Tech Mechanical', due: '$2,100.00', date: 'Sep 30, 2024 (Overdue)' },
-                { name: 'Sophia Lee', id: 'STD-24-105', program: 'BBA', due: '$4,000.00', date: 'Oct 31, 2024' },
-              ].map((record, i) => (
+              {feeRecords.filter(r => r.status === 'Pending' || r.status === 'Overdue').map((record, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
-                    <p className="font-bold text-slate-800 dark:text-slate-200">{record.name}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{record.id}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-200">{record.student}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{record.invoiceNo}</p>
                   </td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{record.program}</td>
-                  <td className="p-4 font-bold text-orange-600 dark:text-orange-400">{record.due}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400 font-medium">{record.date}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{record.course}</td>
+                  <td className="p-4 font-bold text-orange-600 dark:text-orange-400">{record.amount}</td>
+                  <td className="p-4">
+                    <span className={`px-2 py-1 text-xs font-bold rounded-md ${
+                      record.status === 'Overdue' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                    }`}>{record.dueDate}</span>
+                  </td>
                   <td className="p-4 pr-6 text-right">
                     <button className="px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-lg transition-colors">
                       Send Reminder

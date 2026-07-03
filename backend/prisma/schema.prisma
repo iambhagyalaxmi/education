@@ -382,3 +382,42 @@ model LeaveRequest {
 
   user        User     @relation(fields: [userId], references: [id])
 }
+
+// --- Admissions, Fees & Examinations (Phase 4) ------------------------------
+
+model AdmissionApplication {
+  id        String   @id @default(uuid()) @db.Uuid
+  appId     String   @unique
+  name      String
+  course    String
+  date      String
+  status    String   @default("Pending") // Pending, Approved, Rejected
+  score     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FeeRecord {
+  id        String   @id @default(uuid()) @db.Uuid
+  student   String
+  course    String
+  amount    String
+  dueDate   String
+  status    String   @default("Pending") // Paid, Pending, Overdue
+  invoiceNo String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Examination {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  course    String
+  date      String
+  time      String
+  room      String
+  status    String   @default("Upcoming") // Upcoming, Ongoing, Completed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
