@@ -1,0 +1,252 @@
+import { useState } from 'react';
+import { Search, Filter, Download, Plus, DollarSign, CreditCard, AlertCircle, Award, Edit } from 'lucide-react';
+
+export default function AdminFees({ activeTab }: { activeTab: string }) {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const renderStructure = () => (
+    <div className="space-y-6 animate-fade-in-up pb-10">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Fee Structure</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Configure tuition, hostel, and miscellaneous fee structures.</p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+          <Plus size={18} /> New Fee Category
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { program: 'B.Tech CS / IT', tuition: '$4,500', lab: '$500', library: '$150', total: '$5,150' },
+          { program: 'B.Tech Mechanical', tuition: '$4,200', lab: '$800', library: '$150', total: '$5,150' },
+          { program: 'BBA', tuition: '$3,800', lab: '$0', library: '$200', total: '$4,000' },
+        ].map((fee, i) => (
+          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-4">
+              <span className="px-2.5 py-1 text-xs font-bold rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/30 dark:border-indigo-800">
+                Annual Fee
+              </span>
+              <button className="text-slate-400 hover:text-indigo-600 transition-colors">
+                <Edit size={16} />
+              </button>
+            </div>
+            <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-4">{fee.program}</h3>
+            
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500 dark:text-slate-400">Tuition Fee</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{fee.tuition}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500 dark:text-slate-400">Lab & Equipment</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{fee.lab}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500 dark:text-slate-400">Library & Resources</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{fee.library}</span>
+              </div>
+            </div>
+            
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">Total</span>
+              <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{fee.total}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderCollection = () => (
+    <div className="space-y-6 animate-fade-in-up pb-10">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Fee Collection Records</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track and manage student fee payments and receipts.</p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+          <DollarSign size={18} /> Record Payment
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative max-w-md w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search by student name, ID, or receipt..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
+              <Filter size={16} /> Filter
+            </button>
+            <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
+              <Download size={16} /> Export
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                <th className="p-4 pl-6">Student Info</th>
+                <th className="p-4">Receipt No.</th>
+                <th className="p-4">Amount Paid</th>
+                <th className="p-4">Payment Method</th>
+                <th className="p-4">Date</th>
+                <th className="p-4 pr-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {[
+                { name: 'Alex Carter', id: 'STD-24-001', receipt: 'RCPT-8921', amount: '$2,500.00', method: 'Bank Transfer', date: 'Oct 12, 2024' },
+                { name: 'Mia Wong', id: 'STD-24-045', receipt: 'RCPT-8922', amount: '$5,150.00', method: 'Credit Card', date: 'Oct 14, 2024' },
+                { name: 'Ethan Hunt', id: 'STD-23-112', receipt: 'RCPT-8923', amount: '$1,200.00', method: 'Cash', date: 'Oct 15, 2024' },
+              ].map((record, i) => (
+                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="p-4 pl-6">
+                    <p className="font-bold text-slate-800 dark:text-slate-200">{record.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{record.id}</p>
+                  </td>
+                  <td className="p-4 font-mono text-sm text-slate-600 dark:text-slate-400">{record.receipt}</td>
+                  <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{record.amount}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">
+                    <div className="flex items-center gap-1.5">
+                      <CreditCard size={14} className="text-slate-400" /> {record.method}
+                    </div>
+                  </td>
+                  <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{record.date}</td>
+                  <td className="p-4 pr-6 text-right">
+                    <button className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors" title="Download Receipt">
+                      <Download size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPending = () => (
+    <div className="space-y-6 animate-fade-in-up pb-10">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Pending Fees & Defaulters</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track outstanding balances and send reminders.</p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+          <AlertCircle size={18} /> Send Mass Reminder
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                <th className="p-4 pl-6">Student Info</th>
+                <th className="p-4">Program</th>
+                <th className="p-4">Total Due</th>
+                <th className="p-4">Due Date</th>
+                <th className="p-4 pr-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {[
+                { name: 'Oliver Twist', id: 'STD-22-098', program: 'B.Tech Mechanical', due: '$2,100.00', date: 'Sep 30, 2024 (Overdue)' },
+                { name: 'Sophia Lee', id: 'STD-24-105', program: 'BBA', due: '$4,000.00', date: 'Oct 31, 2024' },
+              ].map((record, i) => (
+                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="p-4 pl-6">
+                    <p className="font-bold text-slate-800 dark:text-slate-200">{record.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{record.id}</p>
+                  </td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{record.program}</td>
+                  <td className="p-4 font-bold text-orange-600 dark:text-orange-400">{record.due}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400 font-medium">{record.date}</td>
+                  <td className="p-4 pr-6 text-right">
+                    <button className="px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-lg transition-colors">
+                      Send Reminder
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderScholarships = () => (
+    <div className="space-y-6 animate-fade-in-up pb-10">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Scholarships & Grants</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage financial aid allocations and student waivers.</p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+          <Award size={18} /> New Grant
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { name: 'Merit Scholarship', type: 'Academic', coverage: '50% Tuition Waiver', students: 45, status: 'Active' },
+          { name: 'Sports Quota Grant', type: 'Athletics', coverage: '$2,000 Flat', students: 12, status: 'Active' },
+          { name: 'Need-based Aid 2024', type: 'Financial Aid', coverage: '100% Tuition Waiver', students: 8, status: 'Reviewing' },
+        ].map((grant, i) => (
+          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-4">
+              <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
+                grant.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800' : 
+                'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:border-blue-800'
+              }`}>
+                {grant.status}
+              </span>
+              <button className="text-slate-400 hover:text-indigo-600 transition-colors">
+                <Edit size={16} />
+              </button>
+            </div>
+            <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-1">{grant.name}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{grant.type}</p>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500 dark:text-slate-400">Coverage</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{grant.coverage}</span>
+              </div>
+            </div>
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Awarded Students</span>
+              <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg text-sm">{grant.students}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+
+  switch (activeTab) {
+    case 'fees-structure':
+      return renderStructure();
+    case 'fees-collection':
+      return renderCollection();
+    case 'fees-pending':
+      return renderPending();
+    case 'fees-scholarships':
+      return renderScholarships();
+    default:
+      return renderStructure();
+  }
+}
