@@ -128,13 +128,12 @@ export default function AdminOverview() {
               <option>This Year</option>
             </select>
           </div>
-          <div className="h-64 flex items-end justify-between gap-2 px-2">
+          <div className="h-64 flex justify-between gap-2 px-2 mt-4">
             {[40, 70, 45, 90, 65, 100].map((height, i) => (
-              <div key={i} className="w-1/6 flex flex-col items-center gap-2 group">
-                <div className="w-full relative flex justify-center h-full items-end">
+              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div className="w-full flex justify-center flex-1 items-end group">
                   <div 
-                    className="w-full max-w-[3rem] bg-indigo-100 dark:bg-indigo-900/30 rounded-t-lg relative"
-                    style={{ height: '100%' }}
+                    className="w-full max-w-[3rem] bg-indigo-100 dark:bg-indigo-900/30 rounded-t-lg relative h-full"
                   >
                     <div 
                       className="absolute bottom-0 w-full bg-indigo-500 rounded-t-lg transition-all duration-1000 group-hover:bg-indigo-400"

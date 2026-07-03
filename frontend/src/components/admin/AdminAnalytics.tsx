@@ -34,10 +34,10 @@ export default function AdminAnalytics() {
               <TrendingUp size={14} /> +12%
             </span>
           </div>
-          <div className="h-64 flex items-end justify-between gap-4">
+          <div className="h-64 flex justify-between gap-4 mt-4">
             {enrollmentData.map((val, i) => (
-              <div key={i} className="w-1/6 flex flex-col items-center gap-2 group h-full">
-                <div className="w-full relative flex justify-center h-full items-end">
+              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div className="w-full flex justify-center flex-1 items-end">
                   <div className="w-full max-w-[3rem] bg-blue-50 dark:bg-blue-900/20 rounded-t-xl relative h-full">
                     <div 
                       className="absolute bottom-0 w-full bg-blue-500 dark:bg-blue-600 rounded-t-xl transition-all duration-1000 group-hover:bg-blue-400"
@@ -98,10 +98,10 @@ export default function AdminAnalytics() {
               <h3 className="text-lg font-bold text-slate-800 dark:text-white">Fee Collection</h3>
             </div>
           </div>
-          <div className="h-64 flex items-end justify-between gap-2">
+          <div className="h-64 flex justify-between gap-2 mt-4">
             {feeData.map((val, i) => (
-              <div key={i} className="w-1/6 flex flex-col items-center gap-2 group h-full">
-                <div className="w-full relative flex justify-center h-full items-end">
+              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div className="w-full flex justify-center flex-1 items-end">
                   <div className="w-full max-w-[2.5rem] bg-emerald-50 dark:bg-emerald-900/20 rounded-t-lg relative h-full">
                     <div 
                       className="absolute bottom-0 w-full bg-emerald-500 dark:bg-emerald-600 rounded-t-lg transition-all duration-1000 group-hover:bg-emerald-400"
@@ -182,10 +182,10 @@ export default function AdminAnalytics() {
               <h3 className="text-lg font-bold text-slate-800 dark:text-white">Department Performance</h3>
             </div>
           </div>
-          <div className="h-64 flex items-end justify-between gap-4 px-2">
+          <div className="h-64 flex justify-between gap-4 px-2 mt-4">
             {[88, 75, 92, 85, 95].map((val, i) => (
-              <div key={i} className="flex flex-col items-center gap-3 flex-1 h-full">
-                <div className="w-full relative flex justify-center h-48 items-end group">
+              <div key={i} className="flex-1 flex flex-col items-center gap-3">
+                <div className="w-full flex justify-center flex-1 items-end group">
                   <div className="w-full max-w-[2rem] bg-indigo-50 dark:bg-indigo-900/20 rounded-t flex items-end h-full">
                     <div 
                       className="w-full bg-indigo-500 dark:bg-indigo-600 rounded-t transition-all group-hover:bg-indigo-400"
