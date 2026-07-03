@@ -7,6 +7,7 @@ import AdminAdmissions from './AdminAdmissions';
 import AdminStudents from './AdminStudents';
 import AdminAnalytics from './AdminAnalytics';
 import AdminFaculty from './AdminFaculty';
+import AdminCourses from './AdminCourses';
 
 // Placeholders
 const Placeholder = ({ title }: { title: string }) => (
@@ -40,6 +41,9 @@ export default function AdminDashboard() {
     }
     if (activeTab.startsWith('faculty-')) {
       return <AdminFaculty activeTab={activeTab} />;
+    }
+    if (activeTab.startsWith('courses-')) {
+      return <AdminCourses activeTab={activeTab} />;
     }
     
     // Convert activeTab ID to a readable title for placeholders
