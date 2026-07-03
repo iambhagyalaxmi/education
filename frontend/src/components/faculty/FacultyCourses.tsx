@@ -198,6 +198,71 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
     </div>
   );
 
+  const renderLessonPlans = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Lesson Plans</h2>
+        <div className="flex gap-3">
+          <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+            <option>CS401: Data Structures</option>
+            <option>CS402: Operating Systems</option>
+          </select>
+          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+            + Create Plan
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+          <div>
+            <h3 className="font-bold text-slate-800 text-lg">CS401: Data Structures</h3>
+            <p className="text-sm text-slate-500 mt-1">Week 4: October 18 - October 24</p>
+          </div>
+          <div className="flex gap-2">
+            <button className="px-3 py-1 bg-white border border-slate-200 rounded text-sm text-slate-600 hover:bg-slate-50 transition-colors">Previous Week</button>
+            <button className="px-3 py-1 bg-white border border-slate-200 rounded text-sm text-slate-600 hover:bg-slate-50 transition-colors">Next Week</button>
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-white text-slate-500 font-medium border-b border-slate-100">
+              <tr>
+                <th className="px-6 py-4">Day/Date</th>
+                <th className="px-6 py-4">Topic</th>
+                <th className="px-6 py-4">Pedagogical Tool</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {[
+                { date: 'Mon, Oct 18', topic: 'Binary Search Trees (BST) Introduction', tool: 'Chalk & Board, Slides', status: 'Completed', color: 'emerald' },
+                { date: 'Wed, Oct 20', topic: 'BST Operations: Insertion, Deletion', tool: 'Live Coding, Projector', status: 'In Progress', color: 'blue' },
+                { date: 'Fri, Oct 22', topic: 'AVL Trees Overview and Rotations', tool: 'Interactive Animation, Slides', status: 'Pending', color: 'slate' }
+              ].map((lesson, i) => (
+                <tr key={i} className="hover:bg-slate-50 transition-colors group">
+                  <td className="px-6 py-4 font-semibold text-slate-900">{lesson.date}</td>
+                  <td className="px-6 py-4">{lesson.topic}</td>
+                  <td className="px-6 py-4 text-slate-500">{lesson.tool}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-${lesson.color}-100 text-${lesson.color}-700`}>
+                      {lesson.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (title: string) => (
     <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
       <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
@@ -218,7 +283,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
     case 'courses-syllabus':
       return renderSyllabus();
     case 'courses-plans':
-      return renderPlaceholder('Lesson Plans');
+      return renderLessonPlans();
     default:
       return renderPlaceholder('Course Information');
   }
