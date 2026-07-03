@@ -7,6 +7,8 @@ import FacultyStudents from './FacultyStudents';
 import FacultyAttendance from './FacultyAttendance';
 import FacultyAssignments from './FacultyAssignments';
 import FacultyExaminations from './FacultyExaminations';
+import FacultyTimetable from './FacultyTimetable';
+import FacultyMaterials from './FacultyMaterials';
 
 export default function FacultyDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,6 +54,15 @@ export default function FacultyDashboard() {
       case 'exams-internal':
       case 'exams-final':
         return <FacultyExaminations activeTab={activeTab} />;
+      case 'timetable-weekly':
+      case 'timetable-today':
+      case 'timetable-exam':
+        return <FacultyTimetable activeTab={activeTab} />;
+      case 'materials-pdf':
+      case 'materials-ppt':
+      case 'materials-video':
+      case 'materials-notes':
+        return <FacultyMaterials activeTab={activeTab} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
