@@ -4,6 +4,7 @@ import ChatWidget from './components/ChatWidget';
 import TicketDashboard from './components/TicketDashboard';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import AuthLogin from './components/AuthLogin';
+import FacultyLogin from './components/faculty/FacultyLogin';
 import AuditDashboard from './components/AuditDashboard';
 import LandingPage from './components/LandingPage';
 import DocumentDashboard from './components/DocumentDashboard';
@@ -28,6 +29,27 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         
+        <Route path="/faculty/login" element={
+          <div className={darkMode ? 'dark' : ''}>
+            <div className="dark:bg-slate-900 min-h-screen transition-colors duration-300 relative">
+              <div className="absolute top-4 left-4 z-10">
+                <button 
+                  onClick={() => navigate('/')} 
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-md hover:bg-slate-50 transition-colors"
+                >
+                  <ArrowLeft size={18} /> Back to Site
+                </button>
+              </div>
+              <div className="absolute top-4 right-4 z-10">
+                <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+              </div>
+              <FacultyLogin onLogin={() => navigate('/faculty/dashboard')} />
+            </div>
+          </div>
+        } />
+
         <Route path="/:role/login" element={
           <div className={darkMode ? 'dark' : ''}>
             <div className="dark:bg-slate-900 min-h-screen transition-colors duration-300 relative">
