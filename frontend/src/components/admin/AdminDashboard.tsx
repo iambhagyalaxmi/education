@@ -14,6 +14,8 @@ import AdminTimetable from './AdminTimetable';
 import AdminExaminations from './AdminExaminations';
 import AdminFees from './AdminFees';
 import AdminLibrary from './AdminLibrary';
+import AdminHostel from './AdminHostel';
+import AdminTransport from './AdminTransport';
 
 // Placeholders
 const Placeholder = ({ title }: { title: string }) => (
@@ -68,6 +70,12 @@ export default function AdminDashboard() {
     }
     if (activeTab.startsWith('library-')) {
       return <AdminLibrary activeTab={activeTab} />;
+    }
+    if (activeTab.startsWith('hostel-')) {
+      return <AdminHostel activeTab={activeTab} />;
+    }
+    if (activeTab.startsWith('transport-')) {
+      return <AdminTransport activeTab={activeTab} />;
     }
     
     // Convert activeTab ID to a readable title for placeholders
