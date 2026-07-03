@@ -3,6 +3,8 @@ import { Menu } from 'lucide-react';
 import AdminTopbar from './AdminTopbar';
 import AdminSidebar from './AdminSidebar';
 import AdminOverview from './AdminOverview';
+import AdminAdmissions from './AdminAdmissions';
+import AdminStudents from './AdminStudents';
 
 // Placeholders
 const Placeholder = ({ title }: { title: string }) => (
@@ -25,18 +27,16 @@ export default function AdminDashboard() {
     if (activeTab === 'overview') {
       return <AdminOverview />;
     }
+    if (activeTab.startsWith('admissions-')) {
+      return <AdminAdmissions activeTab={activeTab} />;
+    }
+    if (activeTab.startsWith('students-')) {
+      return <AdminStudents activeTab={activeTab} />;
+    }
     
     // Convert activeTab ID to a readable title for placeholders
     const titles: Record<string, string> = {
       'analytics': 'Analytics',
-      'admissions-new': 'New Applications',
-      'admissions-status': 'Admission Status',
-      'admissions-enrollment': 'Enrollment',
-      'students-list': 'Student List',
-      'students-add': 'Add Student',
-      'students-profiles': 'Student Profiles',
-      'students-attendance': 'Student Attendance',
-      'students-academic': 'Academic Records',
       'faculty-list': 'Faculty List',
       'faculty-add': 'Add Faculty',
       'faculty-departments': 'Faculty Departments',
