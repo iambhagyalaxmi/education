@@ -162,6 +162,13 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
                   </td>
                 </tr>
               ))}
+              {students.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                    No students found. Register a new student to see them here.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -331,6 +338,13 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
                   </tr>
                 );
               })}
+              {students.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                    No academic records found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -366,6 +380,11 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
             </button>
           </div>
         ))}
+        {students.length === 0 && (
+          <div className="col-span-full p-8 text-center text-slate-500 dark:text-slate-400">
+            No student profiles found.
+          </div>
+        )}
       </div>
     </div>
   );
@@ -424,6 +443,13 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
                   </td>
                 </tr>
               ))}
+              {students.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                    No attendance records found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
