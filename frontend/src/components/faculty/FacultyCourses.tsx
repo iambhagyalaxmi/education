@@ -10,7 +10,8 @@ import {
   FolderOpen,
   X,
   CheckCircle,
-  File
+  File,
+  Upload
 } from 'lucide-react';
 
 interface FacultyCoursesProps {
@@ -138,7 +139,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Course Materials</h2>
         <button onClick={() => setShowUploadModal(true)} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
-          <Download size={18} /> Upload Material
+          <Upload size={18} /> Upload Material
         </button>
       </div>
 
