@@ -22,6 +22,7 @@ import galleryHandler from './api/gallery';
 import ticketsHandler from './api/tickets';
 import studentsHandler from './api/students';
 import coursesHandler from './api/courses';
+import batchesHandler from './api/batches';
 import staffHandler from './api/staff';
 import hostelHandler from './api/hostel';
 import transportHandler from './api/transport';
