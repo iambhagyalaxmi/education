@@ -22,6 +22,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
   const [materials, setMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
   const [uploadForm, setUploadForm] = useState({ title: '', description: '', fileType: 'PDF', fileSize: '2048' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -57,6 +58,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
       if (!res.ok) throw new Error('Failed to upload material');
       setSuccess('Material uploaded successfully!');
       setUploadForm({ title: '', description: '', fileType: 'PDF', fileSize: '2048' });
+      setSelectedFileName('');
       setShowUploadModal(false);
       fetchMaterials();
       setTimeout(() => setSuccess(''), 3000);
@@ -196,11 +198,38 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
               {error && <div className="p-3 bg-rose-50 text-rose-700 rounded-lg text-sm">{error}</div>}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">File</label>
-                <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-emerald-300 transition-colors cursor-pointer">
-                  <File size={32} className="mb-2 text-emerald-500" />
-                  <p className="text-sm font-medium">Click to select or drag and drop</p>
-                  <p className="text-xs mt-1">PDF, PPTX, or MP4 (Max 50MB)</p>
-                </div>
+                <label className="border-2 border-dashed border-slate-200 rounded-lg p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-emerald-300 transition-colors cursor-pointer relative">
+                  <input 
+                    type="file" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setSelectedFileName(file.name);
+                        const kbSize = Math.round(file.size / 1024).toString();
+                        let type = 'PDF';
+                        if (file.type.includes('presentation') || file.name.endsWith('.ppt') || file.name.endsWith('.pptx')) type = 'PPT';
+                        if (file.type.includes('video')) type = 'VIDEO';
+                        
+                        setUploadForm({
+                          ...uploadForm,
+                          title: uploadForm.title || file.name.split('.')[0],
+                          fileSize: kbSize,
+                          fileType: type
+                        });
+                      }
+                    }}
+                  />
+                  <File size={32} className={`mb-2 ${selectedFileName ? 'text-blue-500' : 'text-emerald-500'}`} />
+                  <p className="text-sm font-medium text-center">
+                    {selectedFileName ? (
+                      <span className="text-slate-800 font-bold">{selectedFileName}</span>
+                    ) : (
+                      'Click to select or drag and drop'
+                    )}
+                  </p>
+                  {!selectedFileName && <p className="text-xs mt-1">PDF, PPTX, or MP4 (Max 50MB)</p>}
+                </label>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Title</label>

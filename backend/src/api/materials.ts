@@ -46,6 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           fileSize: parseInt(fileSize) || 1024,
           fileUrl: mockFileUrl,
           categoryId: category.id,
+          keywords: [],
           status: 'active'
         }
       });
