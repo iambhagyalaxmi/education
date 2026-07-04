@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   Users, 
   Search, 
@@ -15,6 +16,29 @@ interface FacultyStudentsProps {
 }
 
 export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const MOCK_STUDENTS = [
+    { name: 'Alice Smith', email: 'alice.smith@student.edu', roll: 'CS24-001', batch: 'Sem 4 - B1', attendance: 92, status: 'Active' },
+    { name: 'Bob Johnson', email: 'bob.j@student.edu', roll: 'CS24-002', batch: 'Sem 4 - B1', attendance: 85, status: 'Active' },
+    { name: 'Charlie Davis', email: 'charlie.d@student.edu', roll: 'CS24-003', batch: 'Sem 4 - B2', attendance: 65, status: 'Warning' },
+    { name: 'Diana Prince', email: 'diana.p@student.edu', roll: 'CS24-004', batch: 'Sem 6 - A', attendance: 98, status: 'Active' },
+    { name: 'Evan Wright', email: 'evan.w@student.edu', roll: 'CS24-005', batch: 'Sem 4 - B1', attendance: 45, status: 'Critical' },
+    { name: 'Fiona Gallagher', email: 'fiona.g@student.edu', roll: 'CS24-006', batch: 'Sem 4 - B1', attendance: 78, status: 'Active' },
+    { name: 'George Harrison', email: 'george.h@student.edu', roll: 'CS24-007', batch: 'Sem 4 - B2', attendance: 88, status: 'Active' },
+    { name: 'Hannah Abbott', email: 'hannah.a@student.edu', roll: 'CS24-008', batch: 'Sem 6 - A', attendance: 95, status: 'Active' },
+    { name: 'Ian Malcolm', email: 'ian.m@student.edu', roll: 'CS24-009', batch: 'Sem 4 - B1', attendance: 55, status: 'Critical' },
+    { name: 'Julia Roberts', email: 'julia.r@student.edu', roll: 'CS24-010', batch: 'Sem 4 - B2', attendance: 72, status: 'Warning' },
+    { name: 'Kevin Hart', email: 'kevin.h@student.edu', roll: 'CS24-011', batch: 'Sem 6 - A', attendance: 91, status: 'Active' },
+    { name: 'Laura Dern', email: 'laura.d@student.edu', roll: 'CS24-012', batch: 'Sem 4 - B1', attendance: 89, status: 'Active' },
+    { name: 'Mike Ross', email: 'mike.r@student.edu', roll: 'CS24-013', batch: 'Sem 4 - B2', attendance: 82, status: 'Active' },
+    { name: 'Nina Dobrev', email: 'nina.d@student.edu', roll: 'CS24-014', batch: 'Sem 6 - A', attendance: 97, status: 'Active' },
+    { name: 'Oliver Twist', email: 'oliver.t@student.edu', roll: 'CS24-015', batch: 'Sem 4 - B1', attendance: 68, status: 'Warning' },
+  ];
+
+  const totalPages = Math.ceil(MOCK_STUDENTS.length / itemsPerPage);
+  const paginatedStudents = MOCK_STUDENTS.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const renderStudentList = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -65,13 +89,7 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {[
-                { name: 'Alice Smith', email: 'alice.smith@student.edu', roll: 'CS24-001', batch: 'Sem 4 - B1', attendance: 92, status: 'Active' },
-                { name: 'Bob Johnson', email: 'bob.j@student.edu', roll: 'CS24-002', batch: 'Sem 4 - B1', attendance: 85, status: 'Active' },
-                { name: 'Charlie Davis', email: 'charlie.d@student.edu', roll: 'CS24-003', batch: 'Sem 4 - B2', attendance: 65, status: 'Warning' },
-                { name: 'Diana Prince', email: 'diana.p@student.edu', roll: 'CS24-004', batch: 'Sem 6 - A', attendance: 98, status: 'Active' },
-                { name: 'Evan Wright', email: 'evan.w@student.edu', roll: 'CS24-005', batch: 'Sem 4 - B1', attendance: 45, status: 'Critical' },
-              ].map((student, i) => (
+              {paginatedStudents.map((student, i) => (
                 <tr key={i} className="hover:bg-slate-50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -128,14 +146,34 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
             </tbody>
           </table>
         </div>
-        <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-          <div>Showing 1 to 5 of 248 students</div>
-          <div className="flex gap-1">
-            <button className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50">Prev</button>
-            <button className="px-3 py-1 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors">1</button>
-            <button className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors">2</button>
-            <button className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors">3</button>
-            <button className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors">Next</button>
+        <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-sm text-slate-500 gap-4">
+          <div>Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, MOCK_STUDENTS.length)} of {MOCK_STUDENTS.length} students</div>
+          <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto justify-center">
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50"
+            >
+              Prev
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button 
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1 rounded transition-colors ${currentPage === page ? 'bg-emerald-600 text-white' : 'border border-slate-200 hover:bg-slate-50'}`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button 
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
