@@ -8,7 +8,9 @@ import {
   Mail, 
   Eye,
   TrendingUp,
-  Award
+  Award,
+  X,
+  Save
 } from 'lucide-react';
 
 interface FacultyStudentsProps {
@@ -18,6 +20,14 @@ interface FacultyStudentsProps {
 export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: 'Alice Smith',
+    email: 'alice.smith@student.edu',
+    phone: '+1 (555) 123-4567',
+    dob: 'May 14, 2004'
+  });
 
   const MOCK_STUDENTS = [
     { name: 'Alice Smith', email: 'alice.smith@student.edu', roll: 'CS24-001', batch: 'Sem 4 - B1', attendance: 92, status: 'Active' },
@@ -198,27 +208,27 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center text-center">
             <div className="w-24 h-24 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl font-bold mb-4">
-              AS
+              {editForm.name.split(' ').map(n => n[0]).join('')}
             </div>
-            <h3 className="text-xl font-bold text-slate-800">Alice Smith</h3>
+            <h3 className="text-xl font-bold text-slate-800">{editForm.name}</h3>
             <p className="text-sm text-slate-500 mb-4">CS24-001 • B.Tech Computer Science</p>
             <div className="flex gap-2 w-full">
-              <button className="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">Message</button>
-              <button className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">Edit</button>
+              <button onClick={() => window.location.href = `mailto:${editForm.email}`} className="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">Message</button>
+              <button onClick={() => setShowEditModal(true)} className="flex-1 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">Edit</button>
             </div>
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mt-6 space-y-4">
             <div>
               <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Email</p>
-              <p className="text-sm text-slate-700 font-medium">alice.smith@student.edu</p>
+              <p className="text-sm text-slate-700 font-medium">{editForm.email}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Phone</p>
-              <p className="text-sm text-slate-700 font-medium">+1 (555) 123-4567</p>
+              <p className="text-sm text-slate-700 font-medium">{editForm.phone}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Date of Birth</p>
-              <p className="text-sm text-slate-700 font-medium">May 14, 2004</p>
+              <p className="text-sm text-slate-700 font-medium">{editForm.dob}</p>
             </div>
           </div>
         </div>
@@ -403,6 +413,44 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-800">Edit Student Profile</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); setShowEditModal(false); }} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+                <input required type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
+                <input required type="email" value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Phone Number</label>
+                <input required type="text" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Date of Birth</label>
+                <input required type="text" value={editForm.dob} onChange={e => setEditForm({...editForm, dob: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" className="px-4 py-2 font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
+                  <Save size={18} /> Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
