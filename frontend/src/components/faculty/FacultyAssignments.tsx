@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { 
   FileEdit, 
   Upload, 
@@ -6,7 +7,9 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  Download
+  Download,
+  FileText,
+  X
 } from 'lucide-react';
 
 interface FacultyAssignmentsProps {
@@ -14,6 +17,33 @@ interface FacultyAssignmentsProps {
 }
 
 export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setSelectedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleRemoveFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const renderCreateAssignment = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -54,12 +84,42 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
 
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-2">Attach Files (Optional)</label>
-          <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors cursor-pointer group">
-            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Upload size={24} />
-            </div>
-            <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
-            <p className="text-xs text-slate-400 mt-1">PDF, DOCX, ZIP up to 10MB</p>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+            accept=".pdf,.docx,.zip"
+          />
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors cursor-pointer group relative"
+          >
+            {selectedFile ? (
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-3">
+                  <FileText size={32} />
+                </div>
+                <p className="text-sm font-medium text-slate-800">{selectedFile.name}</p>
+                <p className="text-xs text-slate-500 mt-1">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <button 
+                  onClick={handleRemoveFile}
+                  className="mt-4 px-4 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                >
+                  <X size={16} /> Remove File
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Upload size={24} />
+                </div>
+                <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
+                <p className="text-xs text-slate-400 mt-1">PDF, DOCX, ZIP up to 10MB</p>
+              </>
+            )}
           </div>
         </div>
       </div>
