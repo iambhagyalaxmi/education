@@ -35,16 +35,42 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
     setStudents(newStudents);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    }, 1000);
+  };
+
   const renderTakeAttendance = () => (
     <div className="space-y-6 animate-fade-in-up">
+      {showSuccess && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center gap-3 animate-fade-in-up">
+          <CheckCircle2 size={20} className="text-emerald-600" />
+          <p className="font-medium">Attendance successfully submitted for CS401 (Batch A)</p>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-slate-800">Take Attendance</h2>
         <div className="flex items-center gap-3">
           <div className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl font-medium flex items-center gap-2">
             <Calendar size={18} /> Today: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-            Submit Attendance
+          <button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+            className={`px-4 py-2 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isSubmitting ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'} text-white`}
+          >
+            {isSubmitting ? (
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            ) : null}
+            {isSubmitting ? 'Submitting...' : 'Submit Attendance'}
           </button>
         </div>
       </div>
