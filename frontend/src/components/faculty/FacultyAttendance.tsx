@@ -196,11 +196,29 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
     </div>
   );
 
+  const exportToCSV = () => {
+    const csvContent = [
+      ['Roll No', 'Student Name', 'Course', 'Attendance %'],
+      ['CS24-003', 'Charlie Davis', 'Data Structures', '65'],
+      ['CS24-005', 'Evan Wright', 'Data Structures', '45'],
+      ['CS24-012', 'Fiona Gallagher', 'Operating Systems', '72']
+    ].map(e => e.join(",")).join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "attendance_defaulters_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const renderAttendanceReports = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Attendance Reports</h2>
-        <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+        <button onClick={exportToCSV} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
           <Download size={18} /> Export Report
         </button>
       </div>
