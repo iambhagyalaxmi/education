@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Download, Plus, Book, BookOpen, Layers, Edit, Trash2, Calendar } from 'lucide-react';
+import { Plus, Book, Edit, Trash2, X, CheckCircle } from 'lucide-react';
 
 export default function AdminCourses({ activeTab }: { activeTab: string }) {
-  const [searchTerm, setSearchTerm] = useState('');
   const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  // Modal states
+  const [showAddCourse, setShowAddCourse] = useState(false);
+  const [showAddBatch, setShowAddBatch] = useState(false);
+  
+  // Forms
+  const [courseForm, setCourseForm] = useState({ code: '', name: '', durationYears: '4', description: '' });
+  const [batchForm, setBatchForm] = useState({ courseId: '', academicYear: '', startYear: '', endYear: '' });
+  
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const fetchCourses = async () => {
     try {
@@ -11,16 +22,9 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       if (res.ok) {
         const data = await res.json();
         setCourses(data);
-      } else {
-        throw new Error('Failed to fetch');
       }
     } catch (err) {
       console.error(err);
-      // Fallback data if backend is down
-      setCourses([
-        { id: 'CS101', name: 'B.Tech Computer Science', code: 'CS', durationYears: 4, credits: 160, status: 'Active' },
-        { id: 'IT102', name: 'B.Tech Information Tech', code: 'IT', durationYears: 4, credits: 160, status: 'Active' },
-      ]);
     }
   };
 
@@ -28,52 +32,85 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     fetchCourses();
   }, [activeTab]);
 
+  const handleAddCourse = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(courseForm)
+      });
+      if (!res.ok) throw new Error('Failed to add course');
+      setSuccess('Course added successfully!');
+      setCourseForm({ code: '', name: '', durationYears: '4', description: '' });
+      setShowAddCourse(false);
+      fetchCourses();
+    } catch (err: any) {
+      setError(err.message);
+    }
+    setLoading(false);
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
+  const handleAddBatch = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/batches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(batchForm)
+      });
+      if (!res.ok) throw new Error('Failed to add batch');
+      setSuccess('Batch added successfully!');
+      setBatchForm({ courseId: '', academicYear: '', startYear: '', endYear: '' });
+      setShowAddBatch(false);
+      fetchCourses();
+    } catch (err: any) {
+      setError(err.message);
+    }
+    setLoading(false);
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
   const renderCourseList = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
+      
+      {success && (
+        <div className="flex items-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-lg">
+          <CheckCircle size={20} />
+          <span className="font-medium">{success}</span>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Courses Directory</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage academic programs and degree courses.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-          <Plus size={18} /> Add Course
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowAddBatch(true)} className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">
+            <Plus size={18} /> Add Batch
+          </button>
+          <button onClick={() => setShowAddCourse(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+            <Plus size={18} /> Add Course
+          </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search courses..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 text-sm"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-              <Filter size={16} /> Filter
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-              <Download size={16} /> Export
-            </button>
-          </div>
-        </div>
-
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
                 <th className="p-4 pl-6">Course Details</th>
-                <th className="p-4">Department</th>
                 <th className="p-4">Duration</th>
-                <th className="p-4">Credits</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
+                <th className="p-4">Batches</th>
+                <th className="p-4">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -86,20 +123,16 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
                       </div>
                       <div>
                         <p className="font-bold text-slate-800 dark:text-slate-200">{course.name}</p>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{course.code || course.id.substring(0,8)}</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{course.code}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">Engineering</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">{course.durationYears} Years</td>
-                  <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{course.credits || 160}</td>
-                  <td className="p-4">
-                    <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                      {course.status || 'Active'}
-                    </span>
+                  <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">
+                    {course.batches?.length || 0} batches
                   </td>
                   <td className="p-4 pr-6">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex gap-2">
                       <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
@@ -110,220 +143,106 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
                   </td>
                 </tr>
               ))}
+              {courses.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-slate-500">
+                    No courses found. Add a course to get started.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-    </div>
-  );
 
-  const renderSubjects = () => (
-    <div className="space-y-6 animate-fade-in-up pb-10">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Subject Master</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage individual subjects and their mappings.</p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-          <Plus size={18} /> Add Subject
-        </button>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          { code: 'CS301', name: 'Data Structures & Algorithms', credits: 4, type: 'Core', course: 'B.Tech CS' },
-          { code: 'CS302', name: 'Database Management Systems', credits: 3, type: 'Core', course: 'B.Tech CS' },
-          { code: 'IT405', name: 'Cloud Computing', credits: 3, type: 'Elective', course: 'B.Tech IT' },
-          { code: 'MATH201', name: 'Engineering Mathematics', credits: 4, type: 'Core', course: 'Common' },
-          { code: 'MGT101', name: 'Principles of Management', credits: 3, type: 'Core', course: 'BBA' },
-        ].map((subject, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-xs font-bold rounded-lg border border-indigo-100 dark:border-indigo-800">
-                {subject.code}
-              </span>
-              <button className="text-slate-400 hover:text-indigo-600 transition-colors">
-                <Edit size={16} />
+      {/* Add Course Modal */}
+      {showAddCourse && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Add New Course</h3>
+              <button onClick={() => setShowAddCourse(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                <X size={24} />
               </button>
             </div>
-            <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-2">{subject.name}</h3>
-            <div className="space-y-2 text-sm text-slate-500 dark:text-slate-400 mb-4">
-              <p>Program: <span className="font-semibold text-slate-700 dark:text-slate-300">{subject.course}</span></p>
-              <p>Credits: <span className="font-semibold text-slate-700 dark:text-slate-300">{subject.credits}</span></p>
+            <form onSubmit={handleAddCourse} className="p-6 space-y-4">
+              {error && <div className="p-3 bg-rose-50 text-rose-700 rounded-lg text-sm">{error}</div>}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Course Code</label>
+                <input required type="text" value={courseForm.code} onChange={e => setCourseForm({...courseForm, code: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. CS101" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Course Name</label>
+                <input required type="text" value={courseForm.name} onChange={e => setCourseForm({...courseForm, name: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. B.Tech Computer Science" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Duration (Years)</label>
+                <input required type="number" value={courseForm.durationYears} onChange={e => setCourseForm({...courseForm, durationYears: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
+                <textarea value={courseForm.description} onChange={e => setCourseForm({...courseForm, description: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" rows={3}></textarea>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowAddCourse(false)} className="px-4 py-2 font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Adding...' : 'Save Course'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Batch Modal */}
+      {showAddBatch && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Add New Batch</h3>
+              <button onClick={() => setShowAddBatch(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                <X size={24} />
+              </button>
             </div>
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-              <span className={`text-xs font-bold uppercase tracking-wider ${
-                subject.type === 'Core' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'
-              }`}>{subject.type} SUBJECT</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderSyllabus = () => (
-    <div className="space-y-6 animate-fade-in-up pb-10">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Syllabus Repository</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage and distribute course curriculum documents.</p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-          <BookOpen size={18} /> Upload Syllabus
-        </button>
-      </div>
-
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search by course, subject or topic..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 text-sm"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-              <Filter size={16} /> Filter
-            </button>
+            <form onSubmit={handleAddBatch} className="p-6 space-y-4">
+              {error && <div className="p-3 bg-rose-50 text-rose-700 rounded-lg text-sm">{error}</div>}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Course</label>
+                <select required value={batchForm.courseId} onChange={e => setBatchForm({...batchForm, courseId: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
+                  <option value="">Select a course...</option>
+                  {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Academic Year</label>
+                <input required type="text" value={batchForm.academicYear} onChange={e => setBatchForm({...batchForm, academicYear: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. 2024-2028" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Start Year</label>
+                  <input required type="number" value={batchForm.startYear} onChange={e => setBatchForm({...batchForm, startYear: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="2024" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">End Year</label>
+                  <input required type="number" value={batchForm.endYear} onChange={e => setBatchForm({...batchForm, endYear: e.target.value})} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="2028" />
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowAddBatch(false)} className="px-4 py-2 font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Adding...' : 'Save Batch'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-4 pl-6">Document Name</th>
-                <th className="p-4">Program</th>
-                <th className="p-4">Semester</th>
-                <th className="p-4">Last Updated</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { doc: 'B.Tech CS - Complete Syllabus 2024', program: 'B.Tech Computer Science', sem: 'All', date: 'Jan 10, 2024' },
-                { doc: 'Data Structures Module Breakdown', program: 'B.Tech CS & IT', sem: 'Semester 3', date: 'Dec 15, 2023' },
-                { doc: 'Engineering Mathematics II', program: 'Common', sem: 'Semester 2', date: 'Feb 20, 2024' },
-                { doc: 'Business Ethics & Comm', program: 'BBA', sem: 'Semester 1', date: 'Aug 05, 2023' },
-              ].map((item, i) => (
-                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                  <td className="p-4 pl-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
-                        <span className="text-xs font-bold">PDF</span>
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-800 dark:text-slate-200">{item.doc}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">PDF Document • 2.4 MB</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{item.program}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">
-                    <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                      {item.sem}
-                    </span>
-                  </td>
-                  <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{item.date}</td>
-                  <td className="p-4 pr-6 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors" title="Download">
-                        <Download size={18} />
-                      </button>
-                      <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
-                        <Edit size={18} />
-                      </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderSemester = () => (
-    <div className="space-y-6 animate-fade-in-up pb-10">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Semester Management</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Configure academic terms, dates, and active status.</p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-          <Calendar size={18} /> New Semester
-        </button>
-      </div>
-
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-4 pl-6">Academic Term</th>
-                <th className="p-4">Start Date</th>
-                <th className="p-4">End Date</th>
-                <th className="p-4">Working Days</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { term: 'Spring 2024 (Even)', start: 'Jan 15, 2024', end: 'May 30, 2024', days: 95, status: 'Active' },
-                { term: 'Fall 2023 (Odd)', start: 'Aug 10, 2023', end: 'Dec 20, 2023', days: 92, status: 'Completed' },
-                { term: 'Spring 2023 (Even)', start: 'Jan 12, 2023', end: 'May 25, 2023', days: 90, status: 'Completed' },
-              ].map((sem, i) => (
-                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                  <td className="p-4 pl-6 font-bold text-slate-800 dark:text-slate-200">
-                    <div className="flex items-center gap-2">
-                      <Layers size={16} className="text-indigo-500" />
-                      {sem.term}
-                    </div>
-                  </td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{sem.start}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{sem.end}</td>
-                  <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{sem.days}</td>
-                  <td className="p-4">
-                    <span className={`px-2.5 py-1 text-xs font-bold rounded-md ${
-                      sem.status === 'Active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    }`}>
-                      {sem.status}
-                    </span>
-                  </td>
-                  <td className="p-4 pr-6 text-right">
-                    <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
-                      <Edit size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 
   switch (activeTab) {
     case 'courses-list':
       return renderCourseList();
-    case 'courses-subjects':
-      return renderSubjects();
-    case 'courses-syllabus':
-      return renderSyllabus();
-    case 'courses-semester':
-      return renderSemester();
     default:
       return renderCourseList();
   }
