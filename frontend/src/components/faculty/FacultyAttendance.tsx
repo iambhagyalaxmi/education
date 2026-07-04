@@ -44,6 +44,18 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
   ]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [showEditSuccess, setShowEditSuccess] = useState(false);
+  const [showAllDefaulters, setShowAllDefaulters] = useState(false);
+
+  const allDefaulters = [
+    { roll: 'CS24-003', name: 'Charlie Davis', course: 'Data Structures', percent: 65 },
+    { roll: 'CS24-005', name: 'Evan Wright', course: 'Data Structures', percent: 45 },
+    { roll: 'CS24-012', name: 'Fiona Gallagher', course: 'Operating Systems', percent: 72 },
+    { roll: 'CS24-028', name: 'George Harrison', course: 'Computer Networks', percent: 55 },
+    { roll: 'CS24-042', name: 'Ian Malcolm', course: 'Database Systems', percent: 68 },
+    { roll: 'CS24-055', name: 'Jane Doe', course: 'Data Structures', percent: 70 },
+  ];
+  
+  const displayedDefaulters = showAllDefaulters ? allDefaulters : allDefaulters.slice(0, 3);
 
   const handleUpdate = () => {
     setIsUpdating(true);
@@ -250,7 +262,12 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
           <h3 className="font-bold text-slate-800 text-lg">Defaulters List (Below 75%)</h3>
-          <button className="text-sm font-medium text-emerald-600 hover:text-emerald-700">View All</button>
+          <button 
+            onClick={() => setShowAllDefaulters(!showAllDefaulters)} 
+            className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
+          >
+            {showAllDefaulters ? 'View Less' : 'View All'}
+          </button>
         </div>
         <div className="p-0">
           <table className="w-full text-left text-sm whitespace-nowrap">
@@ -264,11 +281,7 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {[
-                { roll: 'CS24-003', name: 'Charlie Davis', course: 'Data Structures', percent: 65 },
-                { roll: 'CS24-005', name: 'Evan Wright', course: 'Data Structures', percent: 45 },
-                { roll: 'CS24-012', name: 'Fiona Gallagher', course: 'Operating Systems', percent: 72 },
-              ].map((student, i) => (
+              {displayedDefaulters.map((student, i) => (
                 <tr key={i} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 font-medium text-slate-700">{student.roll}</td>
                   <td className="px-6 py-4 font-semibold text-slate-900">{student.name}</td>
