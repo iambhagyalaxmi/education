@@ -152,6 +152,13 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
                   </td>
                 </tr>
               ))}
+              {applications.filter(app => app.status === 'Pending').length === 0 && (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                    No pending applications found. Click "New Application" to add one.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
