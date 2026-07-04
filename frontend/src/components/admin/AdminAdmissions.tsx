@@ -228,6 +228,13 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
                   </td>
                 </tr>
               ))}
+              {applications.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                    No applications found in the system.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -276,6 +283,13 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
                   </td>
                 </tr>
               ))}
+              {applications.filter(app => app.status === 'Approved').length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                    No approved applications waiting for enrollment.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
