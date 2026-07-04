@@ -7,6 +7,7 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [courses, setCourses] = useState<any[]>([]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -41,6 +42,7 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
 
   useEffect(() => {
     fetchStudents();
+    fetch('/api/courses').then(r => r.json()).then(setCourses).catch(console.error);
   }, [activeTab]);
 
   const handleRegister = async (e: any) => {
@@ -232,12 +234,20 @@ export default function AdminStudents({ activeTab }: { activeTab: string }) {
             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Academic Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Course ID *</label>
-                <input type="text" required value={formData.courseId} onChange={e => setFormData({...formData, courseId: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Enter valid Course UUID" />
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Course *</label>
+                <select required value={formData.courseId} onChange={e => setFormData({...formData, courseId: e.target.value, batchId: ''})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm">
+                  <option value="">Select Course...</option>
+                  {courses.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+                </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Batch ID *</label>
-                <input type="text" required value={formData.batchId} onChange={e => setFormData({...formData, batchId: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="Enter valid Batch UUID" />
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Batch *</label>
+                <select required value={formData.batchId} onChange={e => setFormData({...formData, batchId: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm" disabled={!formData.courseId}>
+                  <option value="">Select Batch...</option>
+                  {formData.courseId && courses.find(c => c.id === formData.courseId)?.batches?.map((b: any) => (
+                    <option key={b.id} value={b.id}>{b.academicYear}</option>
+                  ))}
+                </select>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Previous Qualifications</label>
