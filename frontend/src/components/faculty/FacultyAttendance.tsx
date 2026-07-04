@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   CheckSquare, 
   Search, 
@@ -13,6 +14,26 @@ interface FacultyAttendanceProps {
 }
 
 export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps) {
+  const [students, setStudents] = useState([
+    { roll: 'CS24-001', name: 'Alice Smith', percent: 92, status: 'present' },
+    { roll: 'CS24-002', name: 'Bob Johnson', percent: 85, status: 'present' },
+    { roll: 'CS24-003', name: 'Charlie Davis', percent: 65, status: 'absent' },
+    { roll: 'CS24-004', name: 'Diana Prince', percent: 98, status: 'present' },
+    { roll: 'CS24-005', name: 'Evan Wright', percent: 45, status: 'late' },
+  ]);
+
+  const presentCount = students.filter(s => s.status === 'present').length;
+  const absentCount = students.filter(s => s.status === 'absent').length;
+
+  const markAll = (status: string) => {
+    setStudents(students.map(s => ({ ...s, status })));
+  };
+
+  const updateStatus = (index: number, status: string) => {
+    const newStudents = [...students];
+    newStudents[index].status = status;
+    setStudents(newStudents);
+  };
 
   const renderTakeAttendance = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -58,9 +79,14 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
             />
           </div>
-          <div className="flex gap-2 text-sm font-medium">
-            <button className="px-3 py-1.5 text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors">Mark All Present</button>
-            <button className="px-3 py-1.5 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Mark All Absent</button>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="text-sm font-semibold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+              Present: <span className="text-emerald-600">{presentCount}</span> | Absent: <span className="text-red-600">{absentCount}</span>
+            </div>
+            <div className="flex gap-2 text-sm font-medium">
+              <button onClick={() => markAll('present')} className="px-3 py-1.5 text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors">Mark All Present</button>
+              <button onClick={() => markAll('absent')} className="px-3 py-1.5 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Mark All Absent</button>
+            </div>
           </div>
         </div>
         
@@ -75,13 +101,7 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {[
-                { roll: 'CS24-001', name: 'Alice Smith', percent: 92, status: 'present' },
-                { roll: 'CS24-002', name: 'Bob Johnson', percent: 85, status: 'present' },
-                { roll: 'CS24-003', name: 'Charlie Davis', percent: 65, status: 'absent' },
-                { roll: 'CS24-004', name: 'Diana Prince', percent: 98, status: 'present' },
-                { roll: 'CS24-005', name: 'Evan Wright', percent: 45, status: 'late' },
-              ].map((student, i) => (
+              {students.map((student, i) => (
                 <tr key={i} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 font-medium text-slate-700">{student.roll}</td>
                   <td className="px-6 py-4">
@@ -99,17 +119,17 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
-                      <button className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
+                      <button onClick={() => updateStatus(i, 'present')} className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
                         ${student.status === 'present' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}
                       `}>
                         <CheckCircle2 size={16} className={student.status === 'present' ? 'text-emerald-500' : ''} /> Present
                       </button>
-                      <button className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
+                      <button onClick={() => updateStatus(i, 'absent')} className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
                         ${student.status === 'absent' ? 'bg-red-50 border-red-200 text-red-700 shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}
                       `}>
                         <XCircle size={16} className={student.status === 'absent' ? 'text-red-500' : ''} /> Absent
                       </button>
-                      <button className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
+                      <button onClick={() => updateStatus(i, 'late')} className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
                         ${student.status === 'late' ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}
                       `}>
                         <AlertCircle size={16} className={student.status === 'late' ? 'text-orange-500' : ''} /> Late
