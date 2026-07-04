@@ -35,6 +35,31 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
     setStudents(newStudents);
   };
 
+  const [editStudents, setEditStudents] = useState([
+    { roll: 'CS24-001', name: 'Alice Smith', percent: 92, status: 'present' },
+    { roll: 'CS24-002', name: 'Bob Johnson', percent: 85, status: 'absent' },
+    { roll: 'CS24-003', name: 'Charlie Davis', percent: 65, status: 'late' },
+    { roll: 'CS24-004', name: 'Diana Prince', percent: 98, status: 'present' },
+    { roll: 'CS24-005', name: 'Evan Wright', percent: 45, status: 'absent' },
+  ]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showEditSuccess, setShowEditSuccess] = useState(false);
+
+  const handleUpdate = () => {
+    setIsUpdating(true);
+    setTimeout(() => {
+      setIsUpdating(false);
+      setShowEditSuccess(true);
+      setTimeout(() => setShowEditSuccess(false), 3000);
+    }, 1000);
+  };
+
+  const updateEditStatus = (index: number, status: string) => {
+    const newStudents = [...editStudents];
+    newStudents[index].status = status;
+    setEditStudents(newStudents);
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -249,6 +274,125 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
     </div>
   );
 
+  const renderEditAttendance = () => (
+    <div className="space-y-6 animate-fade-in-up">
+      {showEditSuccess && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-xl flex items-center gap-3 animate-fade-in-up">
+          <CheckCircle2 size={20} className="text-blue-600" />
+          <p className="font-medium">Attendance successfully updated for selected date</p>
+        </div>
+      )}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl font-bold text-slate-800">Edit Attendance</h2>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleUpdate} 
+            disabled={isUpdating}
+            className={`px-6 py-2.5 font-semibold rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isUpdating ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+          >
+            {isUpdating ? (
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            ) : null}
+            {isUpdating ? 'Updating...' : 'Save Updates'}
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col md:flex-row gap-4 items-end">
+        <div className="flex-1 w-full">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Select Date</label>
+          <input type="date" defaultValue="2026-07-01" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div className="flex-1 w-full">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Select Course</label>
+          <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option>CS401: Data Structures - Batch A</option>
+            <option>CS402: Operating Systems - Batch B</option>
+          </select>
+        </div>
+        <div className="flex-1 w-full">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Time Slot</label>
+          <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option>09:00 AM - 10:00 AM</option>
+            <option>10:00 AM - 11:00 AM</option>
+          </select>
+        </div>
+        <button className="w-full md:w-auto px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors">
+          Load Records
+        </button>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div className="relative max-w-sm w-full">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text"
+              placeholder="Search student to edit..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-white text-slate-500 font-medium border-b border-slate-100">
+              <tr>
+                <th className="px-6 py-4">Roll No</th>
+                <th className="px-6 py-4">Student Name</th>
+                <th className="px-6 py-4">Current Status</th>
+                <th className="px-6 py-4">Update Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {editStudents.map((student, i) => (
+                <tr key={i} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-700">{student.roll}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">
+                        {student.name.charAt(0)}
+                      </div>
+                      <span className="font-semibold text-slate-900">{student.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold
+                      ${student.status === 'present' ? 'bg-emerald-100 text-emerald-700' : 
+                        student.status === 'absent' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}
+                    `}>
+                      {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <button onClick={() => updateEditStatus(i, 'present')} className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
+                        ${student.status === 'present' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}
+                      `}>
+                        <CheckCircle2 size={16} className={student.status === 'present' ? 'text-emerald-500' : ''} /> Present
+                      </button>
+                      <button onClick={() => updateEditStatus(i, 'absent')} className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
+                        ${student.status === 'absent' ? 'bg-red-50 border-red-200 text-red-700 shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}
+                      `}>
+                        <XCircle size={16} className={student.status === 'absent' ? 'text-red-500' : ''} /> Absent
+                      </button>
+                      <button onClick={() => updateEditStatus(i, 'late')} className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all
+                        ${student.status === 'late' ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}
+                      `}>
+                        <AlertCircle size={16} className={student.status === 'late' ? 'text-orange-500' : ''} /> Late
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (title: string, icon: React.ElementType) => {
     const Icon = icon;
     return (
@@ -268,7 +412,7 @@ export default function FacultyAttendance({ activeTab }: FacultyAttendanceProps)
     case 'attendance-take':
       return renderTakeAttendance();
     case 'attendance-edit':
-      return renderPlaceholder('Edit Attendance', CheckSquare);
+      return renderEditAttendance();
     case 'attendance-reports':
       return renderAttendanceReports();
     default:
