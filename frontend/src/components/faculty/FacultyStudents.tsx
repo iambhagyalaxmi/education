@@ -413,10 +413,46 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
           </div>
         </div>
       </div>
+    </div>
+  );
+
+  const renderPlaceholder = (title: string, icon: React.ElementType) => {
+    const Icon = icon;
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
+        <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+          <Icon className="text-slate-400 w-10 h-10" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">{title}</h2>
+        <p className="text-slate-500 max-w-md">
+          The {title.toLowerCase()} module is ready for integration. Connect your grading and assessment API to display this data.
+        </p>
+      </div>
+    );
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'students-list':
+        return renderStudentList();
+      case 'students-profiles':
+        return renderStudentProfiles();
+      case 'students-progress':
+        return renderAcademicProgress();
+      case 'students-marks':
+        return renderInternalMarks();
+      default:
+        return renderPlaceholder('Student Management', Users);
+    }
+  };
+
+  return (
+    <>
+      {renderContent()}
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
               <h3 className="text-xl font-bold text-slate-800">Edit Student Profile</h3>
@@ -451,34 +487,6 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
-
-  const renderPlaceholder = (title: string, icon: React.ElementType) => {
-    const Icon = icon;
-    return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in-up">
-        <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-          <Icon className="text-slate-400 w-10 h-10" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">{title}</h2>
-        <p className="text-slate-500 max-w-md">
-          The {title.toLowerCase()} module is ready for integration. Connect your grading and assessment API to display this data.
-        </p>
-      </div>
-    );
-  };
-
-  switch (activeTab) {
-    case 'students-list':
-      return renderStudentList();
-    case 'students-profiles':
-      return renderStudentProfiles();
-    case 'students-progress':
-      return renderAcademicProgress();
-    case 'students-marks':
-      return renderInternalMarks();
-    default:
-      return renderPlaceholder('Student Management', Users);
-  }
 }
