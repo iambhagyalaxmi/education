@@ -32,6 +32,7 @@ import examinationsHandler from './api/examinations';
 import libraryHandler from './api/library';
 import departmentsHandler from './api/departments';
 import timetableHandler from './api/timetable';
+import materialsHandler from './api/materials';
 
 app.use('/api/auth', authRoutes); // Keep legacy auth
 
@@ -44,6 +45,7 @@ app.all('/api/gallery', galleryHandler as any);
 app.all('/api/tickets', ticketsHandler as any);
 app.all('/api/students', studentsHandler as any);
 app.all('/api/courses', coursesHandler as any);
+app.all('/api/batches', batchesHandler as any);
 app.all('/api/staff', staffHandler as any);
 app.all('/api/hostel', hostelHandler as any);
 app.all('/api/transport', transportHandler as any);
@@ -54,6 +56,7 @@ app.all('/api/examinations', examinationsHandler as any);
 app.all('/api/library', libraryHandler as any);
 app.all('/api/departments', departmentsHandler as any);
 app.all('/api/timetable', timetableHandler as any);
+app.all('/api/materials', materialsHandler as any);
 
 // For local development or non-Vercel deployments, serve the frontend
 import path from 'path';

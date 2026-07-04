@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
   BookOpen, 
   Users, 
@@ -6,7 +7,10 @@ import {
   Video, 
   Download, 
   MoreVertical,
-  FolderOpen
+  FolderOpen,
+  X,
+  CheckCircle,
+  File
 } from 'lucide-react';
 
 interface FacultyCoursesProps {
@@ -14,6 +18,52 @@ interface FacultyCoursesProps {
 }
 
 export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
+  const [materials, setMaterials] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadForm, setUploadForm] = useState({ title: '', description: '', fileType: 'PDF', fileSize: '2048' });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const fetchMaterials = async () => {
+    try {
+      const res = await fetch('/api/materials');
+      if (res.ok) {
+        const data = await res.json();
+        setMaterials(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'courses-materials') {
+      fetchMaterials();
+    }
+  }, [activeTab]);
+
+  const handleUpload = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/materials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(uploadForm)
+      });
+      if (!res.ok) throw new Error('Failed to upload material');
+      setSuccess('Material uploaded successfully!');
+      setUploadForm({ title: '', description: '', fileType: 'PDF', fileSize: '2048' });
+      setShowUploadModal(false);
+      fetchMaterials();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
 
   const renderAssignedCourses = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -79,9 +129,15 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
 
   const renderCourseMaterials = () => (
     <div className="space-y-6 animate-fade-in-up">
+      {success && (
+        <div className="flex items-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-lg">
+          <CheckCircle size={20} />
+          <span className="font-medium">{success}</span>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Course Materials</h2>
-        <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+        <button onClick={() => setShowUploadModal(true)} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
           <Download size={18} /> Upload Material
         </button>
       </div>
@@ -93,37 +149,86 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
           </div>
           <div>
             <h3 className="font-bold text-slate-800 text-lg">CS401: Data Structures</h3>
-            <p className="text-sm text-slate-500">24 files • Last updated 2 days ago</p>
+            <p className="text-sm text-slate-500">{materials.length} files available</p>
           </div>
         </div>
 
         <div className="space-y-3">
-          {[
-            { name: 'Unit 1: Trees and Graphs.pdf', type: 'pdf', size: '2.4 MB', date: 'Oct 12' },
-            { name: 'Lecture 4 - Red Black Trees.pptx', type: 'ppt', size: '5.1 MB', date: 'Oct 10' },
-            { name: 'Sorting Algorithms Visualization.mp4', type: 'video', size: '42 MB', date: 'Oct 05' },
-          ].map((file, i) => (
-            <div key={i} className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group cursor-pointer">
+          {materials.map((file, i) => (
+            <div key={file.id || i} className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group cursor-pointer">
               <div className="flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center
-                  ${file.type === 'pdf' ? 'bg-red-50 text-red-500' : 
-                    file.type === 'ppt' ? 'bg-orange-50 text-orange-500' : 
+                  ${file.fileType === 'PDF' ? 'bg-red-50 text-red-500' : 
+                    file.fileType === 'PPT' ? 'bg-orange-50 text-orange-500' : 
                     'bg-purple-50 text-purple-500'}`
                 }>
-                  {file.type === 'video' ? <Video size={20} /> : <FileText size={20} />}
+                  {file.fileType === 'VIDEO' ? <Video size={20} /> : <FileText size={20} />}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-slate-700 group-hover:text-emerald-600 transition-colors">{file.name}</h4>
-                  <p className="text-xs text-slate-400 font-medium">{file.size} • Uploaded {file.date}</p>
+                  <h4 className="font-semibold text-slate-700 group-hover:text-emerald-600 transition-colors">{file.title}</h4>
+                  <p className="text-xs text-slate-400 font-medium">{Math.round(file.fileSize / 1024)} MB • Uploaded {new Date(file.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
-              <button className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+              <a href={file.fileUrl || '#'} download className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
                 <Download size={18} />
-              </button>
+              </a>
             </div>
           ))}
+          {materials.length === 0 && (
+            <div className="p-8 text-center text-slate-500">
+              No materials found. Upload a material to get started.
+            </div>
+          )}
         </div>
       </div>
+
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-800">Upload Material</h3>
+              <button onClick={() => setShowUploadModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleUpload} className="p-6 space-y-4">
+              {error && <div className="p-3 bg-rose-50 text-rose-700 rounded-lg text-sm">{error}</div>}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">File</label>
+                <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-emerald-300 transition-colors cursor-pointer">
+                  <File size={32} className="mb-2 text-emerald-500" />
+                  <p className="text-sm font-medium">Click to select or drag and drop</p>
+                  <p className="text-xs mt-1">PDF, PPTX, or MP4 (Max 50MB)</p>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Title</label>
+                <input required type="text" value={uploadForm.title} onChange={e => setUploadForm({...uploadForm, title: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="e.g. Unit 1: Introduction" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">File Type</label>
+                  <select value={uploadForm.fileType} onChange={e => setUploadForm({...uploadForm, fileType: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="PDF">PDF</option>
+                    <option value="PPT">PowerPoint</option>
+                    <option value="VIDEO">Video</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Size (KB)</label>
+                  <input required type="number" value={uploadForm.fileSize} onChange={e => setUploadForm({...uploadForm, fileSize: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowUploadModal(false)} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Uploading...' : 'Upload File'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 

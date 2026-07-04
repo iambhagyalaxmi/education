@@ -42,7 +42,14 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(courseForm)
       });
-      if (!res.ok) throw new Error('Failed to add course');
+      if (!res.ok) {
+        let errMsg = 'Failed to add course';
+        try {
+          const errData = await res.json();
+          if (errData.error) errMsg = errData.error;
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
       setSuccess('Course added successfully!');
       setCourseForm({ code: '', name: '', durationYears: '4', description: '' });
       setShowAddCourse(false);
@@ -64,7 +71,14 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(batchForm)
       });
-      if (!res.ok) throw new Error('Failed to add batch');
+      if (!res.ok) {
+        let errMsg = 'Failed to add batch';
+        try {
+          const errData = await res.json();
+          if (errData.error) errMsg = errData.error;
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
       setSuccess('Batch added successfully!');
       setBatchForm({ courseId: '', academicYear: '', startYear: '', endYear: '' });
       setShowAddBatch(false);
