@@ -46,6 +46,26 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
     }
   };
 
+  const [isLockingMarks, setIsLockingMarks] = useState(false);
+  const [isMarksLocked, setIsMarksLocked] = useState(false);
+  const [isImportingCSV, setIsImportingCSV] = useState(false);
+
+  const handleLockMarks = () => {
+    setIsLockingMarks(true);
+    setTimeout(() => {
+      setIsLockingMarks(false);
+      setIsMarksLocked(true);
+      setTimeout(() => setIsMarksLocked(false), 3000);
+    }, 1500);
+  };
+
+  const handleImportCSV = () => {
+    setIsImportingCSV(true);
+    setTimeout(() => {
+      setIsImportingCSV(false);
+    }, 1500);
+  };
+
   const handleSubmitExam = () => {
     setIsSubmittingExam(true);
     setTimeout(() => {
@@ -162,8 +182,27 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
           <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
             <option>Mid-Term 1 (Theory)</option>
           </select>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-            Lock Marks
+          <button 
+            onClick={handleLockMarks}
+            disabled={isLockingMarks || isMarksLocked}
+            className={`px-4 py-2 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isMarksLocked ? 'bg-emerald-100 text-emerald-700 cursor-default' : 
+                isLockingMarks ? 'bg-emerald-400 text-white cursor-not-allowed' : 
+                'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+          >
+            {isLockingMarks ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Locking...
+              </>
+            ) : isMarksLocked ? (
+              <>
+                <CheckCircle2 size={18} />
+                Marks Locked
+              </>
+            ) : (
+              'Lock Marks'
+            )}
           </button>
         </div>
       </div>
@@ -178,7 +217,23 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
             />
           </div>
-          <button className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"><Download size={16}/> Import CSV</button>
+          <button 
+            onClick={handleImportCSV}
+            disabled={isImportingCSV}
+            className={`text-sm font-semibold flex items-center gap-1 transition-colors
+              ${isImportingCSV ? 'text-emerald-400 cursor-wait' : 'text-emerald-600 hover:text-emerald-700'}`}
+          >
+            {isImportingCSV ? (
+              <>
+                <span className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+                Importing...
+              </>
+            ) : (
+              <>
+                <Download size={16}/> Import CSV
+              </>
+            )}
+          </button>
         </div>
         
         <div className="overflow-x-auto">
