@@ -14,6 +14,7 @@ interface FacultyCommunicationProps {
 }
 
 export default function FacultyCommunication({ activeTab }: FacultyCommunicationProps) {
+  const [selectedChatIndex, setSelectedChatIndex] = useState(0);
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -61,7 +62,17 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
     }
   };
 
-  const renderChat = (type: 'students' | 'admin') => (
+  const getChats = (type: 'students' | 'admin') => [
+    { name: type === 'students' ? 'Alice Smith' : 'IT Helpdesk', role: type === 'students' ? 'CS24-001' : 'Support', time: '10:42 AM', preview: 'Can you help me with...' },
+    { name: type === 'students' ? 'Batch B Group' : 'Exam Branch', role: type === 'students' ? '60 Students' : 'Admin', time: 'Yesterday', preview: 'The assignment is due on...' },
+    { name: type === 'students' ? 'Charlie Davis' : 'HOD Computer Science', role: type === 'students' ? 'CS24-003' : 'Management', time: 'Monday', preview: 'Approved the syllabus.' },
+  ];
+
+  const renderChat = (type: 'students' | 'admin') => {
+    const chats = getChats(type);
+    const activeChat = chats[selectedChatIndex] || chats[0];
+
+    return (
     <div className="h-[calc(100vh-12rem)] flex bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in-up">
       {/* Sidebar */}
       <div className="w-1/3 border-r border-slate-100 flex flex-col bg-slate-50/50">
@@ -77,19 +88,27 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {[
-            { name: type === 'students' ? 'Alice Smith' : 'IT Helpdesk', role: type === 'students' ? 'CS24-001' : 'Support', time: '10:42 AM', preview: 'Can you help me with...', active: true },
-            { name: type === 'students' ? 'Batch B Group' : 'Exam Branch', role: type === 'students' ? '60 Students' : 'Admin', time: 'Yesterday', preview: 'The assignment is due on...', active: false },
-            { name: type === 'students' ? 'Charlie Davis' : 'HOD Computer Science', role: type === 'students' ? 'CS24-003' : 'Management', time: 'Monday', preview: 'Approved the syllabus.', active: false },
-          ].map((chat, i) => (
-            <div key={i} className={`p-4 border-b border-slate-100 cursor-pointer transition-colors flex gap-3
-              ${chat.active ? 'bg-white border-l-4 border-l-emerald-500' : 'hover:bg-slate-100/50'}`}>
+          {chats.map((chat, i) => (
+            <div 
+              key={i} 
+              onClick={() => {
+                setSelectedChatIndex(i);
+                setMessages([{
+                  id: Date.now(),
+                  sender: chat.name,
+                  isMe: false,
+                  text: `Hi, this is ${chat.name}. How can I help you?`,
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }]);
+              }}
+              className={`p-4 border-b border-slate-100 cursor-pointer transition-colors flex gap-3
+              ${selectedChatIndex === i ? 'bg-white border-l-4 border-l-emerald-500' : 'hover:bg-slate-100/50'}`}>
               <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold">
                 {chat.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start mb-1">
-                  <h4 className={`font-semibold truncate ${chat.active ? 'text-slate-900' : 'text-slate-700'}`}>{chat.name}</h4>
+                  <h4 className={`font-semibold truncate ${selectedChatIndex === i ? 'text-slate-900' : 'text-slate-700'}`}>{chat.name}</h4>
                   <span className="text-xs text-slate-400 whitespace-nowrap ml-2">{chat.time}</span>
                 </div>
                 <p className="text-xs text-slate-500 truncate">{chat.preview}</p>
@@ -104,11 +123,11 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white shadow-sm z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-              {type === 'students' ? 'A' : 'I'}
+              {activeChat.name.charAt(0)}
             </div>
             <div>
-              <h3 className="font-bold text-slate-800">{type === 'students' ? 'Alice Smith' : 'IT Helpdesk'}</h3>
-              <p className="text-xs text-slate-500">{type === 'students' ? 'Roll: CS24-001 • Online' : 'Active now'}</p>
+              <h3 className="font-bold text-slate-800">{activeChat.name}</h3>
+              <p className="text-xs text-slate-500">{activeChat.role} • Online</p>
             </div>
           </div>
         </div>
@@ -152,7 +171,8 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   const renderAnnouncements = () => (
     <div className="space-y-6 animate-fade-in-up">
