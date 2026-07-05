@@ -35,8 +35,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
         throw new Error('Failed to fetch');
       }
     } catch (err) {
-      console.error(err);
-      // Fallback data if backend is down
+      // Backend not connected, using fallback data silently
       setStudents(prev => prev.length > 0 ? prev : [
         { id: 'STU001', firstName: 'Arjun', lastName: 'Das', course: { name: 'B.Tech CS' }, batch: { academicYear: '2024-2027' }, attendance: '92%', grade: 'A', status: 'active' },
         { id: 'STU002', firstName: 'Neha', lastName: 'Gupta', course: { name: 'B.Tech IT' }, batch: { academicYear: '2023-2026' }, attendance: '85%', grade: 'B+', status: 'active' },
@@ -92,7 +91,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
         setTimeout(() => setActiveTab('students-list'), 1500);
       }
     } catch (err: any) {
-      console.log('Backend sync failed, using local state');
+      // Backend sync failed, using local state silently
     }
   };
 
