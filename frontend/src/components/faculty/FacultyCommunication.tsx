@@ -367,6 +367,7 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
   };
 
   switch (activeTab) {
+    case 'communication':
     case 'comm-students':
       return renderChat('students');
     case 'comm-admin':
