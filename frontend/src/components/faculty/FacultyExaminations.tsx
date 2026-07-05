@@ -86,6 +86,17 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
     }, 1500);
   };
 
+  const [isPublishingGrades, setIsPublishingGrades] = useState(false);
+  const [isGradesPublished, setIsGradesPublished] = useState(false);
+
+  const handlePublishGrades = () => {
+    setIsPublishingGrades(true);
+    setTimeout(() => {
+      setIsPublishingGrades(false);
+      setIsGradesPublished(true);
+    }, 2000);
+  };
+
   const handleSubmitExam = () => {
     setIsSubmittingExam(true);
     setTimeout(() => {
@@ -429,15 +440,42 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full border-2 border-slate-300"></div>
+              {isGradesPublished ? (
+                <CheckCircle2 size={20} className="text-emerald-500" />
+              ) : (
+                <div className="w-5 h-5 rounded-full border-2 border-slate-300"></div>
+              )}
               <span className="font-medium text-slate-700">Final Grade Calculation</span>
             </div>
-            <span className="text-xs font-bold text-slate-500 bg-slate-200 px-2 py-1 rounded">PENDING</span>
+            {isGradesPublished ? (
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded">COMPLETED</span>
+            ) : (
+              <span className="text-xs font-bold text-slate-500 bg-slate-200 px-2 py-1 rounded">PENDING</span>
+            )}
           </div>
         </div>
 
-        <button className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl w-full text-lg">
-          Calculate & Publish Final Grades
+        <button 
+          onClick={handlePublishGrades}
+          disabled={isPublishingGrades || isGradesPublished}
+          className={`px-8 py-3 font-bold rounded-xl transition-colors shadow-lg w-full text-lg flex items-center justify-center gap-2
+            ${isGradesPublished ? 'bg-blue-100 text-blue-700 cursor-default shadow-none' : 
+              isPublishingGrades ? 'bg-blue-400 text-white cursor-not-allowed' : 
+              'bg-blue-600 hover:bg-blue-700 hover:shadow-xl text-white'}`}
+        >
+          {isPublishingGrades ? (
+            <>
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Calculating...
+            </>
+          ) : isGradesPublished ? (
+            <>
+              <CheckCircle2 size={24} />
+              Grades Published Successfully
+            </>
+          ) : (
+            'Calculate & Publish Final Grades'
+          )}
         </button>
       </div>
     </div>
