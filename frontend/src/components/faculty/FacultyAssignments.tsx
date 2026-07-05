@@ -126,6 +126,17 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
     </div>
   );
 
+  const downloadSubmission = () => {
+    const blob = new Blob(["This is a mockup submission file for Bob Johnson."], { type: 'application/pdf' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "Bob_Johnson_Trees_Assign1.pdf");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const renderReviewSubmissions = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
@@ -255,7 +266,7 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
                 <h3 className="font-bold text-xl text-slate-800">Bob Johnson</h3>
                 <p className="text-sm text-slate-500">CS24-002 • Assignment 1: Trees</p>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">
+              <button onClick={downloadSubmission} className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">
                 <Download size={16}/> Download Submission
               </button>
             </div>
