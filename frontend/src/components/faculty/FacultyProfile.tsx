@@ -32,7 +32,10 @@ export default function FacultyProfile() {
               </div>
             </div>
             <div className="pb-2">
-              <button className="w-full sm:w-auto px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2">
+              <button 
+                onClick={() => alert("Profile editing mode activated. (This will open a settings modal in the future)")}
+                className="w-full sm:w-auto px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2"
+              >
                 <Edit size={16} /> Edit Profile
               </button>
             </div>
