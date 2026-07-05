@@ -44,11 +44,18 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
   };
 
   const [attendanceTaken, setAttendanceTaken] = useState<number[]>([]);
+  const [selectedDate, setSelectedDate] = useState('2026-10-19');
 
   const handleTakeAttendance = (index: number) => {
     if (!attendanceTaken.includes(index)) {
       setAttendanceTaken(prev => [...prev, index]);
     }
+  };
+
+  const formatDisplayDate = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   };
 
   const renderWeeklySchedule = () => (
@@ -205,8 +212,14 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Today's Schedule</h2>
-        <div className="px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-xl flex items-center gap-2">
-          <Calendar size={18} /> Tuesday, Oct 19
+        <div className="relative px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-xl flex items-center gap-2 overflow-hidden hover:bg-emerald-200 transition-colors cursor-pointer">
+          <Calendar size={18} /> {formatDisplayDate(selectedDate)}
+          <input 
+            type="date" 
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          />
         </div>
       </div>
 
