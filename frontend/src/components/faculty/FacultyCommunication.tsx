@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { 
   MessageSquare, 
   Search,
@@ -13,6 +14,52 @@ interface FacultyCommunicationProps {
 }
 
 export default function FacultyCommunication({ activeTab }: FacultyCommunicationProps) {
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      sender: 'Alice Johnson',
+      isMe: false,
+      text: 'Hello Professor, I had a question regarding the recent AVL Trees assignment. Could you explain the balancing factor calculation again?',
+      time: '10:42 AM'
+    },
+    {
+      id: 2,
+      sender: 'Me',
+      isMe: true,
+      text: 'Sure Alice, the balance factor is calculated as the height of the left subtree minus the height of the right subtree. Let me share a diagram.',
+      time: '10:45 AM'
+    }
+  ]);
+  const [inputText, setInputText] = useState('');
+  
+  const docInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSendMessage = () => {
+    if (inputText.trim()) {
+      setMessages([...messages, {
+        id: Date.now(),
+        sender: 'Me',
+        isMe: true,
+        text: inputText,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+      setInputText('');
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setMessages([...messages, {
+        id: Date.now(),
+        sender: 'Me',
+        isMe: true,
+        text: `📎 Sent a file: ${e.target.files[0].name}`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+      e.target.value = '';
+    }
+  };
 
   const renderChat = (type: 'students' | 'admin') => (
     <div className="h-[calc(100vh-12rem)] flex bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in-up">
@@ -66,35 +113,39 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
-          <div className="flex justify-start">
-            <div className="bg-white border border-slate-200 text-slate-700 p-3 rounded-2xl rounded-tl-sm max-w-[75%] shadow-sm">
-              <p className="text-sm">Hello Professor, I had a question regarding the recent AVL Trees assignment. Could you explain the balancing factor calculation again?</p>
-              <span className="text-[10px] text-slate-400 mt-1 block">10:42 AM</span>
+        <div className="flex-1 p-4 overflow-y-auto space-y-4">
+          <div className="text-center text-xs text-slate-400 my-4">Today</div>
+          
+          {messages.map(msg => (
+            <div key={msg.id} className={`flex ${msg.isMe ? 'justify-end' : 'justify-start'}`}>
+              <div className={`${msg.isMe ? 'bg-emerald-600 text-white rounded-tr-sm' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm'} p-3 rounded-2xl max-w-[75%] shadow-sm`}>
+                <p className="text-sm">{msg.text}</p>
+                <span className={`text-[10px] mt-1 block ${msg.isMe ? 'text-emerald-200 text-right' : 'text-slate-400'}`}>{msg.time}</span>
+              </div>
             </div>
-          </div>
-          <div className="flex justify-end">
-            <div className="bg-emerald-600 text-white p-3 rounded-2xl rounded-tr-sm max-w-[75%] shadow-sm">
-              <p className="text-sm">Sure Alice, the balance factor is calculated as the height of the left subtree minus the height of the right subtree. Let me share a diagram.</p>
-              <span className="text-[10px] text-emerald-200 mt-1 block text-right">10:45 AM</span>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="p-4 bg-white border-t border-slate-100">
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1">
-            <button className="p-2 text-slate-400 hover:text-emerald-600 transition-colors rounded-lg hover:bg-emerald-50">
+            <input type="file" ref={docInputRef} className="hidden" onChange={handleFileUpload} />
+            <input type="file" ref={imageInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+            
+            <button onClick={() => docInputRef.current?.click()} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors rounded-lg hover:bg-emerald-50">
               <Paperclip size={20} />
             </button>
-            <button className="p-2 text-slate-400 hover:text-emerald-600 transition-colors rounded-lg hover:bg-emerald-50">
+            <button onClick={() => imageInputRef.current?.click()} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors rounded-lg hover:bg-emerald-50">
               <ImageIcon size={20} />
             </button>
             <input 
               type="text" 
               placeholder="Type a message..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               className="flex-1 bg-transparent py-2 px-2 focus:outline-none text-sm"
             />
-            <button className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+            <button onClick={handleSendMessage} className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
               <Send size={18} />
             </button>
           </div>
