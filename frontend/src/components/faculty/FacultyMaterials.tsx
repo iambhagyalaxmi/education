@@ -17,6 +17,7 @@ interface FacultyMaterialsProps {
 export default function FacultyMaterials({ activeTab }: FacultyMaterialsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [newFiles, setNewFiles] = useState<any[]>([]);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -24,9 +25,17 @@ export default function FacultyMaterials({ activeTab }: FacultyMaterialsProps) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
       setIsUploading(true);
       setTimeout(() => {
         setIsUploading(false);
+        // Add the new file to the mock UI
+        setNewFiles(prev => [{
+          name: file.name.split('.').slice(0, -1).join('.'),
+          size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          course: 'Selected Course'
+        }, ...prev]);
         if (fileInputRef.current) fileInputRef.current.value = '';
       }, 1500);
     }
@@ -42,6 +51,9 @@ export default function FacultyMaterials({ activeTab }: FacultyMaterialsProps) {
       { name: 'Trees and Graphs Overview', size: '4.5 MB', date: 'Oct 20, 2023', course: 'CS401' },
       { name: 'Process Scheduling Algorithms', size: '3.2 MB', date: 'Oct 12, 2023', course: 'CS402' },
     ];
+
+    // Combine mock data with newly uploaded files
+    const displayFiles = [...newFiles, ...files];
 
     const getColors = () => {
       switch(type) {
@@ -105,7 +117,7 @@ export default function FacultyMaterials({ activeTab }: FacultyMaterialsProps) {
           
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {files.map((file, i) => (
+              {displayFiles.map((file, i) => (
                 <div key={i} className="border border-slate-200 rounded-xl p-4 hover:border-emerald-500 hover:shadow-md transition-all group relative bg-white">
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button className="p-1.5 bg-slate-100 text-slate-600 rounded hover:bg-emerald-100 hover:text-emerald-700 transition-colors" title="Download">
