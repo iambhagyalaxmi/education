@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { 
   Library, 
   Upload, 
@@ -14,6 +15,22 @@ interface FacultyMaterialsProps {
 }
 
 export default function FacultyMaterials({ activeTab }: FacultyMaterialsProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setIsUploading(true);
+      setTimeout(() => {
+        setIsUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }, 1500);
+    }
+  };
 
   const renderMaterialsView = (title: string, icon: React.ElementType, type: 'pdf' | 'ppt' | 'video' | 'notes') => {
     const Icon = icon;
@@ -43,9 +60,30 @@ export default function FacultyMaterials({ activeTab }: FacultyMaterialsProps) {
             <Icon size={24} className={getColors().split(' ')[1]} />
             {title}
           </h2>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
-            <Upload size={18} /> Upload New {type.toUpperCase()}
+          <button 
+            onClick={handleUploadClick}
+            disabled={isUploading}
+            className={`px-4 py-2 text-white font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isUploading ? 'bg-emerald-400 cursor-wait' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+          >
+            {isUploading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload size={18} /> Upload New {type.toUpperCase()}
+              </>
+            )}
           </button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange}
+            className="hidden" 
+            accept={type === 'pdf' ? '.pdf' : type === 'ppt' ? '.ppt,.pptx' : type === 'video' ? 'video/*' : '*/*'}
+          />
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
