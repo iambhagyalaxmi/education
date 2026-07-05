@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   CalendarDays, 
   Clock, 
@@ -45,6 +45,17 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
 
   const [attendanceTaken, setAttendanceTaken] = useState<number[]>([]);
   const [selectedDate, setSelectedDate] = useState('2026-10-19');
+  const dateInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDateClick = () => {
+    if (dateInputRef.current) {
+      // @ts-ignore
+      if (typeof dateInputRef.current.showPicker === 'function') {
+        // @ts-ignore
+        dateInputRef.current.showPicker();
+      }
+    }
+  };
 
   const handleTakeAttendance = (index: number) => {
     if (!attendanceTaken.includes(index)) {
@@ -212,13 +223,17 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Today's Schedule</h2>
-        <div className="relative px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-xl flex items-center gap-2 overflow-hidden hover:bg-emerald-200 transition-colors cursor-pointer">
+        <div 
+          onClick={handleDateClick}
+          className="relative px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-xl flex items-center gap-2 overflow-hidden hover:bg-emerald-200 transition-colors cursor-pointer"
+        >
           <Calendar size={18} /> {formatDisplayDate(selectedDate)}
           <input 
+            ref={dateInputRef}
             type="date" 
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+            className="absolute -top-10 -left-10 w-0 h-0 opacity-0"
           />
         </div>
       </div>
