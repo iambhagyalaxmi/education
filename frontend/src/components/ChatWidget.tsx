@@ -123,7 +123,7 @@ export default function ChatWidget() {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 font-sans">
       {isOpen && (
         <div
-          className="w-[380px] max-w-[calc(100vw-2rem)] flex flex-col rounded-3xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200/60 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 transition-colors duration-300"
+          className="w-[380px] max-w-[calc(100vw-2rem)] flex flex-col rounded-3xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200/60  bg-slate-50  transition-colors duration-300"
           style={{ height: '600px', maxHeight: 'calc(100vh - 10rem)' }}
         >
           {/* Header */}
@@ -156,14 +156,14 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-5 py-6 space-y-5 scroll-smooth bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="flex-1 overflow-y-auto px-5 py-6 space-y-5 scroll-smooth bg-slate-50/50 /50">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center px-4 animate-in fade-in duration-500">
-                <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden mb-4 shadow-lg border-4 border-blue-100 dark:border-blue-900/40 flex items-center justify-center">
+                <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden mb-4 shadow-lg border-4 border-blue-100 /40 flex items-center justify-center">
                   <img src="/child_book_avatar.png" alt="EduBot" className="w-full h-full object-cover" />
                 </div>
-                <h3 className="text-slate-800 dark:text-slate-200 font-bold text-lg mb-1">How can we help?</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                <h3 className="text-slate-800  font-bold text-lg mb-1">How can we help?</h3>
+                <p className="text-slate-500  text-sm leading-relaxed">
                   Ask me anything about admissions, courses, fees, or scholarships. I can even fetch live database statistics!
                 </p>
               </div>
@@ -173,7 +173,7 @@ export default function ChatWidget() {
               <div key={i} className="flex flex-col gap-2">
                 <div className={`flex gap-3 max-w-full ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                   {msg.sender !== 'user' && (
-                    <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-blue-200 dark:border-blue-800 shadow-sm mt-1">
+                    <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-blue-200  shadow-sm mt-1">
                       <img src="/child_book_avatar.png" alt="EduBot" className="w-full h-full object-cover" />
                     </div>
                   )}
@@ -182,7 +182,7 @@ export default function ChatWidget() {
                       className={`px-4 py-3 rounded-2xl text-[14px] leading-[1.6] whitespace-pre-wrap break-words
                         ${msg.sender === 'user'
                           ? 'text-white rounded-tr-sm shadow-md bg-gradient-to-br from-blue-500 to-blue-700'
-                          : 'text-slate-800 dark:text-slate-200 rounded-tl-sm shadow-sm border border-slate-200/60 dark:border-slate-700 bg-white dark:bg-slate-800'
+                          : 'text-slate-800  rounded-tl-sm shadow-sm border border-slate-200/60  bg-white '
                         }`}
                     >
                       {parseMessageContent(msg.content).text}
@@ -191,13 +191,13 @@ export default function ChatWidget() {
                       {parseMessageContent(msg.content).data?.documents && (
                         <div className="mt-4 flex flex-col gap-3">
                           {parseMessageContent(msg.content).data.documents.map((doc: any) => (
-                            <div key={doc.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+                            <div key={doc.id} className="bg-slate-50  border border-slate-200  rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
                               <div className="flex items-start gap-3">
-                                <div className="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-lg shrink-0">
+                                <div className="p-2 bg-blue-100 /50 text-blue-600  rounded-lg shrink-0">
                                   <FileText size={20} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="font-semibold text-slate-800 dark:text-slate-200 text-[13px] truncate">{doc.title}</h4>
+                                  <h4 className="font-semibold text-slate-800  text-[13px] truncate">{doc.title}</h4>
                                   <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{doc.description}</p>
                                   <div className="flex items-center gap-2 mt-1.5 text-[10px] text-slate-400 font-medium">
                                     <span>{doc.academicYear}</span>
@@ -206,16 +206,16 @@ export default function ChatWidget() {
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex gap-2 mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-700">
+                              <div className="flex gap-2 mt-3 pt-3 border-t border-slate-200/60 ">
                                 <button 
                                   onClick={() => handleDownload(doc.id, doc.fileUrl)}
-                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-semibold transition-colors"
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-blue-50 hover:bg-blue-100 /30 :bg-blue-900/50 text-blue-700  rounded-lg text-xs font-semibold transition-colors"
                                 >
                                   <Eye size={14} /> Preview
                                 </button>
                                 <button 
                                   onClick={() => handleDownload(doc.id, doc.fileUrl)}
-                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-semibold transition-colors"
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 /30 :bg-emerald-900/50 text-emerald-700  rounded-lg text-xs font-semibold transition-colors"
                                 >
                                   <Download size={14} /> Download
                                 </button>
@@ -229,17 +229,17 @@ export default function ChatWidget() {
                       {parseMessageContent(msg.content).data?.courses && (
                         <div className="mt-4 flex flex-col gap-4">
                           {parseMessageContent(msg.content).data.courses.map((course: any) => (
-                            <div key={course.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                            <div key={course.id} className="bg-white  border border-slate-200  rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                               
                               {/* Header */}
-                              <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                              <div className="p-4 border-b border-slate-100 ">
                                 <div className="flex justify-between items-start gap-2 mb-2">
-                                  <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-tight">{course.name}</h4>
-                                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${course.eligibility.includes('Eligible') && !course.eligibility.includes('Not') ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'}`}>
+                                  <h4 className="font-bold text-slate-800  text-[15px] leading-tight">{course.name}</h4>
+                                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${course.eligibility.includes('Eligible') && !course.eligibility.includes('Not') ? 'bg-emerald-100 text-emerald-700 /30 ' : 'bg-rose-100 text-rose-700 /30 '}`}>
                                     {course.eligibility}
                                   </span>
                                 </div>
-                                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-xs text-slate-600 dark:text-slate-400">
+                                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-xs text-slate-600 ">
                                   <div className="flex items-center gap-1.5">
                                     <GraduationCap size={14} className="text-blue-500" />
                                     {course.duration}
@@ -256,13 +256,13 @@ export default function ChatWidget() {
                               </div>
 
                               {/* Body */}
-                              <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                              <div className="p-4 bg-slate-50/50 /50 space-y-3">
                                 {course.scholarship && (
                                   <div className="flex items-start gap-2 text-xs">
                                     <span className="shrink-0 w-1.5 h-1.5 mt-1.5 rounded-full bg-emerald-500"></span>
                                     <div>
-                                      <span className="font-semibold text-slate-700 dark:text-slate-300">Scholarship: </span>
-                                      <span className="text-slate-600 dark:text-slate-400">{course.scholarship}</span>
+                                      <span className="font-semibold text-slate-700 ">Scholarship: </span>
+                                      <span className="text-slate-600 ">{course.scholarship}</span>
                                     </div>
                                   </div>
                                 )}
@@ -270,17 +270,17 @@ export default function ChatWidget() {
                                   <div className="flex items-start gap-2 text-xs">
                                     <span className="shrink-0 w-1.5 h-1.5 mt-1.5 rounded-full bg-blue-500"></span>
                                     <div>
-                                      <span className="font-semibold text-slate-700 dark:text-slate-300">Careers: </span>
-                                      <span className="text-slate-600 dark:text-slate-400">{course.careers}</span>
+                                      <span className="font-semibold text-slate-700 ">Careers: </span>
+                                      <span className="text-slate-600 ">{course.careers}</span>
                                     </div>
                                   </div>
                                 )}
                               </div>
 
                               {/* Footer Actions */}
-                              <div className="flex p-3 gap-2 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                              <div className="flex p-3 gap-2 bg-slate-50  border-t border-slate-100 ">
                                 {course.brochureUrl && (
-                                  <button onClick={() => window.open(course.brochureUrl, '_blank')} className="flex-1 flex justify-center items-center gap-1.5 py-2 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                                  <button onClick={() => window.open(course.brochureUrl, '_blank')} className="flex-1 flex justify-center items-center gap-1.5 py-2 px-3 bg-white  border border-slate-200  text-slate-700  hover:bg-slate-50 :bg-slate-700 rounded-lg text-xs font-semibold transition-colors">
                                     <Download size={14} /> Brochure
                                   </button>
                                 )}
@@ -297,7 +297,7 @@ export default function ChatWidget() {
                       )}
 
                     </div>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium px-1 uppercase tracking-wider">
+                    <span className="text-[10px] text-slate-400  font-medium px-1 uppercase tracking-wider">
                       {formatTime(msg.timestamp)}
                     </span>
                   </div>
@@ -310,7 +310,7 @@ export default function ChatWidget() {
                       <button
                         key={idx}
                         onClick={() => sendMessage(suggestion)}
-                        className="text-xs px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                        className="text-xs px-3 py-1.5 rounded-full border border-blue-200  text-blue-700  bg-blue-50 /20 hover:bg-blue-100 :bg-blue-900/40 transition-colors"
                       >
                         {suggestion}
                       </button>
@@ -322,13 +322,13 @@ export default function ChatWidget() {
 
             {isTyping && (
               <div className="flex gap-3 items-end">
-                <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-blue-200 dark:border-blue-800 shadow-sm">
+                <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-blue-200  shadow-sm">
                   <img src="/child_book_avatar.png" alt="EduBot" className="w-full h-full object-cover" />
                 </div>
-                <div className="bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
+                <div className="bg-white  border border-slate-200/60  rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
                   <div className="flex gap-1.5 items-center h-2">
                     {[0, 1, 2].map((i) => (
-                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400  animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
                     ))}
                   </div>
                 </div>
@@ -339,9 +339,9 @@ export default function ChatWidget() {
 
           {/* Quick Replies */}
           {showQuickReplies && messages.length === 0 && (
-            <div className="px-5 py-3 shrink-0 flex flex-wrap gap-2 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] relative z-10">
+            <div className="px-5 py-3 shrink-0 flex flex-wrap gap-2 bg-white  border-t border-slate-100  shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)] relative z-10">
               {QUICK_REPLIES.map((r) => (
-                <button key={r} onClick={() => sendMessage(r)} className="text-[13px] text-blue-700 dark:text-blue-400 font-medium px-3.5 py-2 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-100/50 dark:border-blue-800/50">
+                <button key={r} onClick={() => sendMessage(r)} className="text-[13px] text-blue-700  font-medium px-3.5 py-2 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 bg-blue-50 /20 hover:bg-blue-100 :bg-blue-900/40 border border-blue-100/50 /50">
                   {r}
                 </button>
               ))}
@@ -349,8 +349,8 @@ export default function ChatWidget() {
           )}
 
           {/* Input */}
-          <div className="p-4 shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] relative z-20">
-            <div className="flex items-end gap-2 bg-slate-50 dark:bg-slate-800 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-900/50 transition-all duration-200 shadow-inner">
+          <div className="p-4 shrink-0 bg-white  border-t border-slate-200  shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] relative z-20">
+            <div className="flex items-end gap-2 bg-slate-50  rounded-2xl p-1.5 border border-slate-200  focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 :ring-blue-900/50 transition-all duration-200 shadow-inner">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -362,7 +362,7 @@ export default function ChatWidget() {
                   }
                 }}
                 placeholder="Ask a question..."
-                className="flex-1 bg-transparent text-[14px] text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none resize-none px-3 py-2.5 max-h-[120px]"
+                className="flex-1 bg-transparent text-[14px] text-slate-700  placeholder-slate-400  focus:outline-none resize-none px-3 py-2.5 max-h-[120px]"
                 rows={1}
                 style={{ minHeight: '44px' }}
               />
@@ -375,7 +375,7 @@ export default function ChatWidget() {
               </button>
             </div>
             <div className="flex justify-center items-center mt-3 gap-1">
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-widest">Powered by EduBot AI</span>
+              <span className="text-[10px] text-slate-400  font-medium uppercase tracking-widest">Powered by EduBot AI</span>
             </div>
           </div>
         </div>
@@ -391,7 +391,7 @@ export default function ChatWidget() {
           }, 350);
         }}
         title="Chat with EduBot"
-        className="relative w-20 h-20 rounded-full overflow-hidden shadow-[0_8px_32px_rgba(99,102,241,0.55)] transition-all duration-300 hover:scale-110 active:scale-95 border-4 border-white dark:border-slate-700"
+        className="relative w-20 h-20 rounded-full overflow-hidden shadow-[0_8px_32px_rgba(99,102,241,0.55)] transition-all duration-300 hover:scale-110 active:scale-95 border-4 border-white "
         style={{
           background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%)'
         }}
@@ -413,7 +413,7 @@ export default function ChatWidget() {
           <span className="absolute top-1 right-1 w-4 h-4 bg-emerald-400 rounded-full border-[3px] border-white animate-pulse shadow" />
         )}
         {/* shimmer ring on hover */}
-        <span className="absolute inset-0 rounded-full ring-4 ring-indigo-300/40 dark:ring-indigo-500/30 animate-ping" style={{ animationDuration: '2.5s' }} />
+        <span className="absolute inset-0 rounded-full ring-4 ring-indigo-300/40 /30 animate-ping" style={{ animationDuration: '2.5s' }} />
       </button>
     </div>
   );
