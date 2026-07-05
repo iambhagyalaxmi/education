@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { 
   CalendarDays, 
   Clock, 
   MapPin, 
   Users,
-  Calendar
+  Calendar,
+  CheckCircle2,
+  Download
 } from 'lucide-react';
 
 interface FacultyTimetableProps {
@@ -11,17 +14,77 @@ interface FacultyTimetableProps {
 }
 
 export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [isRescheduleRequested, setIsRescheduleRequested] = useState(false);
+
+  const handleDownloadPDF = () => {
+    setIsDownloading(true);
+    setTimeout(() => {
+      setIsDownloading(false);
+      // Mock download logic
+      const blob = new Blob(["This is a mockup timetable PDF for Faculty."], { type: 'application/pdf' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "Faculty_Timetable.pdf");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 1500);
+  };
+
+  const handleRequestReschedule = () => {
+    setIsRescheduling(true);
+    setTimeout(() => {
+      setIsRescheduling(false);
+      setIsRescheduleRequested(true);
+      setTimeout(() => setIsRescheduleRequested(false), 3000);
+    }, 1500);
+  };
 
   const renderWeeklySchedule = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Weekly Schedule</h2>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
-            Download PDF
+          <button 
+            onClick={handleDownloadPDF}
+            disabled={isDownloading}
+            className={`px-4 py-2 bg-white border border-slate-200 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isDownloading ? 'text-slate-400 cursor-wait' : 'text-slate-700 hover:bg-slate-50'}`}
+          >
+            {isDownloading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                Generating...
+              </>
+            ) : (
+              <>
+                <Download size={16}/> Download PDF
+              </>
+            )}
           </button>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-            Request Reschedule
+          <button 
+            onClick={handleRequestReschedule}
+            disabled={isRescheduling || isRescheduleRequested}
+            className={`px-4 py-2 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isRescheduleRequested ? 'bg-emerald-100 text-emerald-700 cursor-default' : 
+                isRescheduling ? 'bg-emerald-400 text-white cursor-not-allowed' : 
+                'bg-emerald-600 text-white hover:bg-emerald-700'}`}
+          >
+            {isRescheduling ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Sending Request...
+              </>
+            ) : isRescheduleRequested ? (
+              <>
+                <CheckCircle2 size={16}/> Request Sent
+              </>
+            ) : (
+              'Request Reschedule'
+            )}
           </button>
         </div>
       </div>
