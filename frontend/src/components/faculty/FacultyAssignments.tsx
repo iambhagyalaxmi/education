@@ -45,6 +45,26 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
     }
   };
 
+  const mockReviewStudents = [
+    { name: 'Bob Johnson', roll: 'CS24-002', time: '2 hours ago', file: 'Bob_Johnson_Trees_Assign1.pdf' },
+    { name: 'Eve Carter', roll: 'CS24-008', time: '5 hours ago', file: 'Eve_Carter_Trees.pdf' },
+    { name: 'Frank Castle', roll: 'CS24-011', time: '1 day ago', file: 'FC_Assign1_Final.pdf' }
+  ];
+  const [activeReviewIndex, setActiveReviewIndex] = useState(0);
+  const [isSavingReview, setIsSavingReview] = useState(false);
+  
+  const handleSaveAndNext = () => {
+    setIsSavingReview(true);
+    setTimeout(() => {
+      setIsSavingReview(false);
+      setActiveReviewIndex((prev) => (prev + 1) % mockReviewStudents.length);
+    }, 800);
+  };
+  
+  const handleSkip = () => {
+    setActiveReviewIndex((prev) => (prev + 1) % mockReviewStudents.length);
+  };
+
   const renderCreateAssignment = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
@@ -247,24 +267,23 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
           <div className="md:col-span-1 border-r border-slate-100 pr-6">
             <h3 className="font-bold text-slate-800 mb-4">Pending Grading (42)</h3>
             <div className="space-y-2 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-              {[
-                { name: 'Bob Johnson', roll: 'CS24-002', time: '2 hours ago', active: true },
-                { name: 'Eve Carter', roll: 'CS24-008', time: '5 hours ago', active: false },
-                { name: 'Frank Castle', roll: 'CS24-011', time: '1 day ago', active: false }
-              ].map((student, i) => (
-                <div key={i} className={`p-3 rounded-xl border cursor-pointer transition-colors ${student.active ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
-                  <p className={`font-semibold ${student.active ? 'text-emerald-800' : 'text-slate-800'}`}>{student.name}</p>
-                  <p className={`text-xs ${student.active ? 'text-emerald-600' : 'text-slate-500'}`}>{student.roll} • Submitted {student.time}</p>
-                </div>
-              ))}
+              {mockReviewStudents.map((student, i) => {
+                const isActive = i === activeReviewIndex;
+                return (
+                  <div key={i} onClick={() => setActiveReviewIndex(i)} className={`p-3 rounded-xl border cursor-pointer transition-colors ${isActive ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
+                    <p className={`font-semibold ${isActive ? 'text-emerald-800' : 'text-slate-800'}`}>{student.name}</p>
+                    <p className={`text-xs ${isActive ? 'text-emerald-600' : 'text-slate-500'}`}>{student.roll} • Submitted {student.time}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
           
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="font-bold text-xl text-slate-800">Bob Johnson</h3>
-                <p className="text-sm text-slate-500">CS24-002 • Assignment 1: Trees</p>
+                <h3 className="font-bold text-xl text-slate-800">{mockReviewStudents[activeReviewIndex].name}</h3>
+                <p className="text-sm text-slate-500">{mockReviewStudents[activeReviewIndex].roll} • Assignment 1: Trees</p>
               </div>
               <button onClick={downloadSubmission} className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">
                 <Download size={16}/> Download Submission
@@ -273,7 +292,7 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
 
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-6 text-center h-48 flex flex-col items-center justify-center">
               <FileEdit size={32} className="text-slate-400 mb-2"/>
-              <p className="text-slate-600 font-medium">Bob_Johnson_Trees_Assign1.pdf</p>
+              <p className="text-slate-600 font-medium">{mockReviewStudents[activeReviewIndex].file}</p>
               <p className="text-sm text-slate-400">PDF Document • 1.2 MB</p>
               <button className="mt-4 text-emerald-600 font-semibold text-sm hover:text-emerald-700">Preview Document</button>
             </div>
@@ -288,8 +307,21 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
                 <textarea rows={3} placeholder="Provide constructive feedback..." className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
               </div>
               <div className="flex gap-3 justify-end mt-4">
-                <button className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors">Skip</button>
-                <button className="px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">Save & Next</button>
+                <button onClick={handleSkip} className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors">Skip</button>
+                <button 
+                  onClick={handleSaveAndNext} 
+                  disabled={isSavingReview}
+                  className={`px-6 py-2.5 font-semibold rounded-xl transition-colors shadow-sm flex items-center gap-2 ${isSavingReview ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'} text-white`}
+                >
+                  {isSavingReview ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save & Next'
+                  )}
+                </button>
               </div>
             </div>
           </div>
