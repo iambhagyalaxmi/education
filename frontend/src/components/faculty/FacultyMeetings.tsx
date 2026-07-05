@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   Video, 
   Link as LinkIcon,
@@ -10,6 +11,12 @@ interface FacultyMeetingsProps {
 }
 
 export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
+  const [platform, setPlatform] = useState('Google Meet');
+  const [course, setCourse] = useState('CS401: Data Structures - Batch A');
+  const [date, setDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [duration, setDuration] = useState('60');
+  const [agenda, setAgenda] = useState('');
 
   const renderScheduleOnlineClass = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -21,7 +28,11 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Platform</label>
-            <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <select 
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
               <option>Google Meet</option>
               <option>Zoom</option>
               <option>Microsoft Teams</option>
@@ -29,34 +40,74 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Course / Batch</label>
-            <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <select 
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
               <option>CS401: Data Structures - Batch A</option>
               <option>CS402: Operating Systems - Batch B</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Date</label>
-            <input type="date" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" />
+            <input 
+              type="date" 
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" 
+            />
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="block text-sm font-semibold text-slate-700 mb-2">Start Time</label>
-              <input type="time" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" />
+              <input 
+                type="time" 
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" 
+              />
             </div>
             <div className="flex-1">
               <label className="block text-sm font-semibold text-slate-700 mb-2">Duration (Mins)</label>
-              <input type="number" defaultValue="60" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <input 
+                type="number" 
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+              />
             </div>
           </div>
         </div>
         
         <div className="mb-6">
           <label className="block text-sm font-semibold text-slate-700 mb-2">Meeting Agenda / Topic</label>
-          <input type="text" placeholder="e.g. Doubt Clearing Session on Trees" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <input 
+            type="text" 
+            placeholder="e.g. Doubt Clearing Session on Trees" 
+            value={agenda}
+            onChange={(e) => setAgenda(e.target.value)}
+            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+          />
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-          <button className="px-8 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+          <button 
+            onClick={() => {
+              if (date && startTime && agenda) {
+                alert(`Successfully generated and scheduled ${platform} link for ${course}!`);
+                setPlatform('Google Meet');
+                setCourse('CS401: Data Structures - Batch A');
+                setDate('');
+                setStartTime('');
+                setDuration('60');
+                setAgenda('');
+              } else {
+                alert('Please fill out all required fields (Date, Time, Agenda) to schedule.');
+              }
+            }}
+            className="px-8 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2"
+          >
             <Plus size={18} /> Generate Link & Schedule
           </button>
         </div>
@@ -68,7 +119,10 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">{platform} Links</h2>
-        <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+        <button 
+          onClick={() => alert(`A new persistent ${platform} link has been generated and copied to your clipboard!`)}
+          className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+        >
           Generate Persistent Link
         </button>
       </div>
