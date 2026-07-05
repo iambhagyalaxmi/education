@@ -361,8 +361,8 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                 return (
                   <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                     <td className="p-4 pl-6 font-medium text-slate-500 dark:text-slate-400">{student.id}</td>
-                    <td className="p-4 font-bold text-slate-800 dark:text-slate-200">{student.name}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-400">{student.course}</td>
+                    <td className="p-4 font-bold text-slate-800 dark:text-slate-200">{student.firstName} {student.lastName}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400">{student.course?.name || 'Unassigned'}</td>
                     <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{sgpa}</td>
                     <td className="p-4 font-semibold text-indigo-600 dark:text-indigo-400">{cgpa}</td>
                     <td className="p-4">
@@ -404,11 +404,11 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {students.map(student => (
           <div key={student.id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-            <div className="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-2xl mb-4">
-              {student.name.charAt(0)}
+            <div className="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-2xl mb-4 uppercase">
+              {student.firstName?.charAt(0) || 'S'}
             </div>
-            <h3 className="font-bold text-slate-800 dark:text-white text-lg">{student.name}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{student.course} • {student.year}</p>
+            <h3 className="font-bold text-slate-800 dark:text-white text-lg">{student.firstName} {student.lastName}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{student.course?.name || 'Unassigned'} • {student.batch?.academicYear || 'N/A'}</p>
             <div className="w-full grid grid-cols-2 gap-4 mb-6 border-t border-b border-slate-100 dark:border-slate-800 py-4">
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Attendance</p>
@@ -470,7 +470,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {students.map((student) => (
                 <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{student.name}</td>
+                  <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{student.firstName} {student.lastName}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">120</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">{Math.floor(120 * (parseInt(student.attendance) / 100))}</td>
                   <td className="p-4">
