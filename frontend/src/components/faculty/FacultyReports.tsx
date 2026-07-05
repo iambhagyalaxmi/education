@@ -6,6 +6,18 @@ import {
   Award,
   BookOpen
 } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 interface FacultyReportsProps {
   activeTab: string;
@@ -37,13 +49,42 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <BarChart3 size={64} className="mx-auto text-slate-300 mb-4" />
-          <h3 className="text-lg font-bold text-slate-700 mb-2">Interactive Charts Ready</h3>
-          <p className="text-slate-500 max-w-sm mx-auto">
-            Connect a charting library (like Chart.js or Recharts) to visualize {title.toLowerCase()} trends over time.
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+          <h3 className="text-lg font-bold text-slate-800 mb-6">Average CGPA Trend</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                <Line type="monotone" dataKey="cgpa" name="Average CGPA" stroke="#10b981" strokeWidth={3} activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+          <h3 className="text-lg font-bold text-slate-800 mb-6">Attendance Rate (%)</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  cursor={{ fill: '#f8fafc' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey="attendance" name="Attendance %" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={30} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
@@ -54,9 +95,19 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
       { label: 'Avg CGPA', value: '8.2', icon: TrendingUp, colorClass: 'bg-emerald-100 text-emerald-600' },
       { label: 'Top Performers', value: '45', icon: Award, colorClass: 'bg-blue-100 text-blue-600' },
       { label: 'Needs Attention', value: '12', icon: Users, colorClass: 'bg-orange-100 text-orange-600' },
-      { label: 'Pass Rate', value: '94%', icon: CheckCircle, colorClass: 'bg-purple-100 text-purple-600' },
+      { label: 'Pass Rate', value: '94%', icon: BookOpen, colorClass: 'bg-purple-100 text-purple-600' },
     ]
   };
+
+  const chartData = [
+    { name: 'Week 1', cgpa: 7.8, attendance: 95 },
+    { name: 'Week 2', cgpa: 7.9, attendance: 92 },
+    { name: 'Week 3', cgpa: 8.0, attendance: 96 },
+    { name: 'Week 4', cgpa: 8.1, attendance: 94 },
+    { name: 'Week 5', cgpa: 8.2, attendance: 97 },
+    { name: 'Week 6', cgpa: 8.4, attendance: 95 },
+    { name: 'Week 7', cgpa: 8.5, attendance: 98 },
+  ];
 
   const attendanceData = {
     stats: [
