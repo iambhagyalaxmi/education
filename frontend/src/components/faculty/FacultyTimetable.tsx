@@ -402,6 +402,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
   };
 
   switch (activeTab) {
+    case 'timetable':
     case 'timetable-weekly':
       return renderWeeklySchedule();
     case 'timetable-today':
