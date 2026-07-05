@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   PlaneTakeoff, 
   Calendar,
@@ -11,6 +12,11 @@ interface FacultyLeaveProps {
 }
 
 export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
+  const [leaveType, setLeaveType] = useState('Casual Leave (CL)');
+  const [leaveDays, setLeaveDays] = useState('1');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [reason, setReason] = useState('');
 
   const renderApplyLeave = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -23,7 +29,11 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Leave Type</label>
-              <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select 
+                value={leaveType}
+                onChange={(e) => setLeaveType(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
                 <option>Casual Leave (CL)</option>
                 <option>Sick Leave (SL)</option>
                 <option>Earned Leave (EL)</option>
@@ -32,25 +42,61 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Number of Days</label>
-              <input type="number" min="1" defaultValue="1" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <input 
+                type="number" 
+                min="1" 
+                value={leaveDays}
+                onChange={(e) => setLeaveDays(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">From Date</label>
-              <input type="date" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" />
+              <input 
+                type="date" 
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" 
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">To Date</label>
-              <input type="date" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" />
+              <input 
+                type="date" 
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" 
+              />
             </div>
           </div>
 
           <div className="mb-6">
             <label className="block text-sm font-semibold text-slate-700 mb-2">Reason for Leave</label>
-            <textarea rows={4} placeholder="Please provide a brief reason..." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+            <textarea 
+              rows={4} 
+              placeholder="Please provide a brief reason..." 
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            ></textarea>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-            <button className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+            <button 
+              onClick={() => {
+                if (fromDate && toDate && reason) {
+                  alert('Leave Application Submitted Successfully!');
+                  setLeaveType('Casual Leave (CL)');
+                  setLeaveDays('1');
+                  setFromDate('');
+                  setToDate('');
+                  setReason('');
+                } else {
+                  alert('Please fill out all fields before submitting.');
+                }
+              }}
+              className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+            >
               Submit Leave Application
             </button>
           </div>
@@ -205,7 +251,10 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-          <button className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors">
+          <button 
+            onClick={() => alert('Application successfully withdrawn.')}
+            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+          >
             Withdraw Application
           </button>
         </div>
