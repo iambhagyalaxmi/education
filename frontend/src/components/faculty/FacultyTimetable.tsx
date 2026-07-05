@@ -43,6 +43,14 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     }, 1500);
   };
 
+  const [attendanceTaken, setAttendanceTaken] = useState<number[]>([]);
+
+  const handleTakeAttendance = (index: number) => {
+    if (!attendanceTaken.includes(index)) {
+      setAttendanceTaken(prev => [...prev, index]);
+    }
+  };
+
   const renderWeeklySchedule = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
@@ -244,9 +252,22 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-100 flex gap-3">
-              <button className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors
-                ${cls.active ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
-                Take Attendance
+              <button 
+                onClick={() => handleTakeAttendance(i)}
+                disabled={attendanceTaken.includes(i)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2
+                ${attendanceTaken.includes(i) ? 'bg-emerald-100 text-emerald-800 cursor-default' : 
+                  cls.active ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm' : 
+                  'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}
+              >
+                {attendanceTaken.includes(i) ? (
+                  <>
+                    <CheckCircle2 size={18} />
+                    Attendance Recorded
+                  </>
+                ) : (
+                  'Take Attendance'
+                )}
               </button>
             </div>
           </div>
