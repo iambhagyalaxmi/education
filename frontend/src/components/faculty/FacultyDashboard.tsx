@@ -61,6 +61,7 @@ export default function FacultyDashboard() {
       case 'exams-internal':
       case 'exams-final':
         return <FacultyExaminations activeTab={activeTab} />;
+      case 'timetable':
       case 'timetable-weekly':
       case 'timetable-today':
       case 'timetable-exam':
@@ -70,6 +71,7 @@ export default function FacultyDashboard() {
       case 'materials-video':
       case 'materials-notes':
         return <FacultyMaterials activeTab={activeTab} />;
+      case 'communication':
       case 'comm-students':
       case 'comm-admin':
       case 'comm-announcements':
