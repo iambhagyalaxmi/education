@@ -127,6 +127,7 @@ export default function FacultyDashboard() {
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           darkMode={darkMode}
           toggleDarkMode={() => setDarkMode(!darkMode)}
+          setActiveTab={setActiveTab}
         />
 
         {/* Dashboard Content */}

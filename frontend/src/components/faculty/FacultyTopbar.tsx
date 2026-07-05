@@ -17,9 +17,10 @@ interface TopbarProps {
   toggleSidebar: () => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
+  setActiveTab: (tab: string) => void;
 }
 
-export default function FacultyTopbar({ toggleSidebar, darkMode, toggleDarkMode }: TopbarProps) {
+export default function FacultyTopbar({ toggleSidebar, darkMode, toggleDarkMode, setActiveTab }: TopbarProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
@@ -58,16 +59,25 @@ export default function FacultyTopbar({ toggleSidebar, darkMode, toggleDarkMode 
 
         {/* Action Icons */}
         <div className="flex items-center gap-1 sm:gap-2 border-r border-slate-200 pr-2 sm:pr-4">
-          <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors relative group">
+          <button 
+            onClick={() => setActiveTab('timetable')}
+            className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors relative group"
+          >
             <Calendar size={20} />
           </button>
           
-          <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors relative group">
+          <button 
+            onClick={() => setActiveTab('communication')}
+            className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors relative group"
+          >
             <MessageSquare size={20} />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-white"></span>
           </button>
           
-          <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors relative group">
+          <button 
+            onClick={() => setActiveTab('notifications')}
+            className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors relative group"
+          >
             <Bell size={20} />
             <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-red-500 rounded-full transform translate-x-1/4 -translate-y-1/4">
               3
