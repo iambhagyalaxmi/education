@@ -37,7 +37,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
     } catch (err) {
       console.error(err);
       // Fallback data if backend is down
-      setStudents([
+      setStudents(prev => prev.length > 0 ? prev : [
         { id: 'STU001', firstName: 'Arjun', lastName: 'Das', course: { name: 'B.Tech CS' }, batch: { academicYear: '2024-2027' }, attendance: '92%', grade: 'A', status: 'active' },
         { id: 'STU002', firstName: 'Neha', lastName: 'Gupta', course: { name: 'B.Tech IT' }, batch: { academicYear: '2023-2026' }, attendance: '85%', grade: 'B+', status: 'active' },
       ]);
@@ -60,7 +60,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
           { id: 'c3', name: 'BBA', code: 'BBA101', batches: [{ id: 'b4', academicYear: '2024-2027' }] }
         ]);
       });
-  }, [activeTab]);
+  }, []);
 
   const handleRegister = async (e: any) => {
     e.preventDefault();
