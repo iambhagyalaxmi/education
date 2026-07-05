@@ -17,7 +17,10 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">{title}</h2>
-        <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+        <button 
+          onClick={() => alert(`Starting download for ${title} full report...`)}
+          className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
+        >
           <Download size={18} /> Export Full Report
         </button>
       </div>
