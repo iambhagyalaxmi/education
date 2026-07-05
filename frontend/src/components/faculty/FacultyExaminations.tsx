@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   FileText, 
   Upload, 
@@ -6,7 +6,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Download,
-  Award
+  Award,
+  X
 } from 'lucide-react';
 
 interface FacultyExaminationsProps {
@@ -16,6 +17,34 @@ interface FacultyExaminationsProps {
 export default function FacultyExaminations({ activeTab }: FacultyExaminationsProps) {
   const [isSubmittingExam, setIsSubmittingExam] = useState(false);
   const [isExamSubmitted, setIsExamSubmitted] = useState(false);
+  
+  const [selectedPaper, setSelectedPaper] = useState<File | null>(null);
+  const paperInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePaperChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedPaper(e.target.files[0]);
+    }
+  };
+
+  const handlePaperDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setSelectedPaper(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handlePaperDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleRemovePaper = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPaper(null);
+    if (paperInputRef.current) {
+      paperInputRef.current.value = '';
+    }
+  };
 
   const handleSubmitExam = () => {
     setIsSubmittingExam(true);
@@ -75,12 +104,42 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
 
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-2">Upload Paper (PDF)</label>
-          <div className="border-2 border-dashed border-emerald-200 bg-emerald-50/50 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-emerald-50 transition-colors cursor-pointer group">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Upload size={24} />
-            </div>
-            <p className="text-sm font-bold text-emerald-800">Click to upload securely</p>
-            <p className="text-xs text-emerald-600/70 mt-1">Only PDF files are accepted for security reasons.</p>
+          <input 
+            type="file" 
+            ref={paperInputRef} 
+            onChange={handlePaperChange} 
+            className="hidden" 
+            accept=".pdf"
+          />
+          <div 
+            onClick={() => paperInputRef.current?.click()}
+            onDragOver={handlePaperDragOver}
+            onDrop={handlePaperDrop}
+            className="border-2 border-dashed border-emerald-200 bg-emerald-50/50 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-emerald-50 transition-colors cursor-pointer group relative"
+          >
+            {selectedPaper ? (
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-3">
+                  <FileText size={32} />
+                </div>
+                <p className="text-sm font-bold text-slate-800">{selectedPaper.name}</p>
+                <p className="text-xs text-slate-500 mt-1">{(selectedPaper.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <button 
+                  onClick={handleRemovePaper}
+                  className="mt-4 px-4 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5"
+                >
+                  <X size={16} /> Remove Document
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Upload size={24} />
+                </div>
+                <p className="text-sm font-bold text-emerald-800">Click to upload securely</p>
+                <p className="text-xs text-emerald-600/70 mt-1">Only PDF files are accepted for security reasons.</p>
+              </>
+            )}
           </div>
         </div>
         
