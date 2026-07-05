@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   FileText, 
   Upload, 
@@ -13,13 +14,43 @@ interface FacultyExaminationsProps {
 }
 
 export default function FacultyExaminations({ activeTab }: FacultyExaminationsProps) {
+  const [isSubmittingExam, setIsSubmittingExam] = useState(false);
+  const [isExamSubmitted, setIsExamSubmitted] = useState(false);
+
+  const handleSubmitExam = () => {
+    setIsSubmittingExam(true);
+    setTimeout(() => {
+      setIsSubmittingExam(false);
+      setIsExamSubmitted(true);
+      setTimeout(() => setIsExamSubmitted(false), 3000);
+    }, 1500);
+  };
 
   const renderUploadQuestionPapers = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Upload Question Papers</h2>
-        <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-          Submit to Exam Branch
+        <button 
+          onClick={handleSubmitExam}
+          disabled={isSubmittingExam || isExamSubmitted}
+          className={`px-4 py-2 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+            ${isExamSubmitted ? 'bg-emerald-100 text-emerald-700 cursor-default' : 
+              isSubmittingExam ? 'bg-emerald-400 text-white cursor-not-allowed' : 
+              'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+        >
+          {isSubmittingExam ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Submitting...
+            </>
+          ) : isExamSubmitted ? (
+            <>
+              <CheckCircle2 size={18} />
+              Submitted Successfully
+            </>
+          ) : (
+            'Submit to Exam Branch'
+          )}
         </button>
       </div>
 
