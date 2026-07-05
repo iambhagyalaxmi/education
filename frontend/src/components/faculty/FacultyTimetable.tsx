@@ -45,6 +45,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
 
   const [attendanceTaken, setAttendanceTaken] = useState<number[]>([]);
   const [selectedDate, setSelectedDate] = useState('2026-10-19');
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const handleDateClick = () => {
@@ -55,6 +56,22 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
         dateInputRef.current.showPicker();
       }
     }
+  };
+
+  const handleExportPDF = () => {
+    setIsExportingPDF(true);
+    setTimeout(() => {
+      setIsExportingPDF(false);
+      // Mock download logic
+      const blob = new Blob(["This is a mockup Exam Schedule PDF."], { type: 'application/pdf' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "Exam_Schedule.pdf");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 1500);
   };
 
   const handleTakeAttendance = (index: number) => {
@@ -309,8 +326,22 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Exam Schedule / Invigilation Duties</h2>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
-            Export as PDF
+          <button 
+            onClick={handleExportPDF}
+            disabled={isExportingPDF}
+            className={`px-4 py-2 bg-white border border-slate-200 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isExportingPDF ? 'text-slate-400 cursor-wait' : 'text-slate-700 hover:bg-slate-50'}`}
+          >
+            {isExportingPDF ? (
+              <>
+                <span className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                Generating...
+              </>
+            ) : (
+              <>
+                <Download size={16}/> Export as PDF
+              </>
+            )}
           </button>
         </div>
       </div>
