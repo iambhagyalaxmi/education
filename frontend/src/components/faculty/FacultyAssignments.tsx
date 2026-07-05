@@ -65,6 +65,17 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
     setActiveReviewIndex((prev) => (prev + 1) % mockReviewStudents.length);
   };
 
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
+
+  const handlePublish = () => {
+    setIsPublishing(true);
+    setTimeout(() => {
+      setIsPublishing(false);
+      setIsPublished(true);
+    }, 1500);
+  };
+
   const renderCreateAssignment = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
@@ -354,8 +365,27 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
           </div>
         </div>
 
-        <button className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl w-full text-lg">
-          Publish Results to Students
+        <button 
+          onClick={handlePublish}
+          disabled={isPublishing || isPublished}
+          className={`px-8 py-3 font-bold rounded-xl transition-colors shadow-lg w-full text-lg flex items-center justify-center gap-2
+            ${isPublished ? 'bg-emerald-100 text-emerald-700 cursor-default shadow-none' : 
+              isPublishing ? 'bg-emerald-400 text-white cursor-not-allowed' : 
+              'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-xl'}`}
+        >
+          {isPublishing ? (
+            <>
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Publishing...
+            </>
+          ) : isPublished ? (
+            <>
+              <CheckCircle2 size={24} />
+              Results Published Successfully
+            </>
+          ) : (
+            'Publish Results to Students'
+          )}
         </button>
       </div>
     </div>
