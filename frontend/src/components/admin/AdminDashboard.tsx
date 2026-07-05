@@ -49,7 +49,7 @@ export default function AdminDashboard() {
       return <AdminAdmissions activeTab={activeTab} />;
     }
     if (activeTab.startsWith('students-')) {
-      return <AdminStudents activeTab={activeTab} />;
+      return <AdminStudents activeTab={activeTab} setActiveTab={setActiveTab} />;
     }
     if (activeTab.startsWith('faculty-')) {
       return <AdminFaculty activeTab={activeTab} />;
