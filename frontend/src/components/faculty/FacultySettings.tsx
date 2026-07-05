@@ -109,7 +109,10 @@ export default function FacultySettings() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-              <button className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+              <button 
+                onClick={() => alert("Settings preferences saved successfully!")}
+                className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+              >
                 Save Preferences
               </button>
             </div>
