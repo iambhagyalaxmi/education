@@ -66,6 +66,26 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
     }, 1500);
   };
 
+  const [isCalculatingInternals, setIsCalculatingInternals] = useState(false);
+  const [isInternalsCalculated, setIsInternalsCalculated] = useState(false);
+  const [isExportingInternals, setIsExportingInternals] = useState(false);
+
+  const handleCalculateInternals = () => {
+    setIsCalculatingInternals(true);
+    setTimeout(() => {
+      setIsCalculatingInternals(false);
+      setIsInternalsCalculated(true);
+      setTimeout(() => setIsInternalsCalculated(false), 3000);
+    }, 1500);
+  };
+
+  const handleExportInternals = () => {
+    setIsExportingInternals(true);
+    setTimeout(() => {
+      setIsExportingInternals(false);
+    }, 1500);
+  };
+
   const handleSubmitExam = () => {
     setIsSubmittingExam(true);
     setTimeout(() => {
@@ -289,8 +309,27 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
           <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
             <option>CS401: Data Structures</option>
           </select>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-            Calculate Internals
+          <button 
+            onClick={handleCalculateInternals}
+            disabled={isCalculatingInternals || isInternalsCalculated}
+            className={`px-4 py-2 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2
+              ${isInternalsCalculated ? 'bg-emerald-100 text-emerald-700 cursor-default' : 
+                isCalculatingInternals ? 'bg-emerald-400 text-white cursor-not-allowed' : 
+                'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+          >
+            {isCalculatingInternals ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Calculating...
+              </>
+            ) : isInternalsCalculated ? (
+              <>
+                <CheckCircle2 size={18} />
+                Calculated successfully
+              </>
+            ) : (
+              'Calculate Internals'
+            )}
           </button>
         </div>
       </div>
@@ -305,7 +344,23 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
             />
           </div>
-          <button className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"><Download size={16}/> Export Internals</button>
+          <button 
+            onClick={handleExportInternals}
+            disabled={isExportingInternals}
+            className={`text-sm font-semibold flex items-center gap-1 transition-colors
+              ${isExportingInternals ? 'text-emerald-400 cursor-wait' : 'text-emerald-600 hover:text-emerald-700'}`}
+          >
+            {isExportingInternals ? (
+              <>
+                <span className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Download size={16}/> Export Internals
+              </>
+            )}
+          </button>
         </div>
         
         <div className="overflow-x-auto">
