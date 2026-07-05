@@ -158,10 +158,16 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
             </div>
 
             <div className="mt-auto flex gap-3">
-              <button className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+              <button 
+                onClick={() => alert(`Edit details for ${meeting.course} ${meeting.type} session.`)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+              >
                 Edit Details
               </button>
-              <button className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">
+              <button 
+                onClick={() => alert(`Starting ${platform} meeting for ${meeting.course}... Redirecting you to ${meeting.link}`)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+              >
                 Start Meeting
               </button>
             </div>
