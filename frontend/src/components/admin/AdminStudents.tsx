@@ -20,6 +20,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
     lastName: '',
     email: '',
     phone: '',
+    profilePic: '',
     courseId: '',
     batchId: ''
   });
@@ -71,6 +72,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
         id: Date.now().toString(),
         firstName: formData.firstName,
         lastName: formData.lastName,
+        profilePic: formData.profilePic,
         course: courses.find(c => c.id === formData.courseId),
         batch: { academicYear: formData.batchId },
         status: 'Active',
@@ -86,7 +88,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
       });
       
       setSuccessMsg('Student registered successfully!');
-      setFormData({ firstName: '', lastName: '', email: '', phone: '', courseId: '', batchId: '' });
+      setFormData({ firstName: '', lastName: '', email: '', phone: '', profilePic: '', courseId: '', batchId: '' });
       if (setActiveTab) {
         setTimeout(() => setActiveTab('students-list'), 1500);
       }
@@ -147,8 +149,12 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                 <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm uppercase">
-                        {student.firstName?.charAt(0) || 'S'}
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm uppercase overflow-hidden">
+                        {student.profilePic ? (
+                          <img src={student.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          student.firstName?.charAt(0) || 'S'
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-slate-800 dark:text-slate-200">{student.firstName} {student.lastName}</p>
@@ -231,6 +237,36 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
           <div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Profile Picture</label>
+                <div className="flex items-center gap-4">
+                  {formData.profilePic ? (
+                    <img src={formData.profilePic} alt="Profile preview" className="w-16 h-16 rounded-full object-cover border border-slate-200" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400">
+                      <UserPlus size={24} />
+                    </div>
+                  )}
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const formDataUpload = new FormData();
+                      formDataUpload.append('image', file);
+                      try {
+                        const res = await fetch('/api/upload', { method: 'POST', body: formDataUpload });
+                        const data = await res.json();
+                        if (data.url) setFormData({...formData, profilePic: data.url});
+                      } catch (err) {
+                        console.error('Upload failed', err);
+                      }
+                    }}
+                    className="text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                  />
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">First Name *</label>
                 <input type="text" required value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="e.g. Rahul" />
@@ -291,7 +327,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
           </div>
 
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <button type="button" onClick={() => {setError(''); setSuccessMsg(''); setFormData({firstName: '', lastName: '', email: '', phone: '', courseId: '', batchId: ''})}} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <button type="button" onClick={() => {setError(''); setSuccessMsg(''); setFormData({firstName: '', lastName: '', email: '', phone: '', profilePic: '', courseId: '', batchId: ''})}} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
               Clear
             </button>
             <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">

@@ -77,6 +77,7 @@ model Student {
   lastName  String
   email     String   @unique
   phone     String?
+  profilePic String?
   status    String   @default("active") // active, graduated, dropped
   joinedAt  DateTime @default(now())
 
@@ -111,6 +112,7 @@ model User {
   role          String         @default("student") // student, counselor, faculty, staff, admin
   department    String?        // e.g., Computer Science, Admissions
   isActive      Boolean        @default(true)
+  profilePic    String?
   lastLoginAt   DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now()) @updatedAt

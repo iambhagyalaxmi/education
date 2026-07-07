@@ -5,7 +5,7 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
   const [searchTerm, setSearchTerm] = useState('');
   const [facultyList, setFacultyList] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', department: '', role: 'faculty' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', department: '', role: 'faculty', profilePic: '' });
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -33,6 +33,7 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
       name: form.name,
       email: form.email,
       department: form.department,
+      profilePic: form.profilePic,
       isActive: true
     };
     setFacultyList(prev => [newFaculty, ...prev]);
@@ -45,7 +46,7 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
 
     setSaving(false);
     setShowModal(false);
-    setForm({ name: '', email: '', phone: '', department: '', role: 'faculty' });
+    setForm({ name: '', email: '', phone: '', department: '', role: 'faculty', profilePic: '' });
     setSuccessMsg('Faculty added successfully!');
     setTimeout(() => setSuccessMsg(''), 3000);
   };
@@ -82,6 +83,35 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
               <button onClick={() => setShowModal(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"><X size={20} /></button>
             </div>
             <form onSubmit={saveFaculty} className="p-6 space-y-4">
+              <div className="flex flex-col items-center mb-4">
+                <div className="relative mb-2">
+                  {form.profilePic ? (
+                    <img src={form.profilePic} alt="Profile preview" className="w-20 h-20 rounded-full object-cover border-2 border-indigo-100" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-400">
+                      <UserPlus size={28} />
+                    </div>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const formDataUpload = new FormData();
+                    formDataUpload.append('image', file);
+                    try {
+                      const res = await fetch('/api/upload', { method: 'POST', body: formDataUpload });
+                      const data = await res.json();
+                      if (data.url) setForm({...form, profilePic: data.url});
+                    } catch (err) {
+                      console.error('Upload failed', err);
+                    }
+                  }}
+                  className="text-xs text-slate-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 max-w-[200px]"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Full Name *</label>
                 <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm" />
@@ -140,8 +170,12 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
                 <tr key={faculty.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm">
-                        {faculty.name.charAt(0)}
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm overflow-hidden">
+                        {faculty.profilePic ? (
+                          <img src={faculty.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          faculty.name.charAt(0)
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-slate-800 dark:text-slate-200">{faculty.name}</p>
