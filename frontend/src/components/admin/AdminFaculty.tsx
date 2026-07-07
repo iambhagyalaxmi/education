@@ -96,18 +96,25 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
                 <input 
                   type="file" 
                   accept="image/*"
-                  onChange={async (e) => {
+                  onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    const formDataUpload = new FormData();
-                    formDataUpload.append('image', file);
-                    try {
-                      const res = await fetch('/api/upload', { method: 'POST', body: formDataUpload });
-                      const data = await res.json();
-                      if (data.url) setForm({...form, profilePic: data.url});
-                    } catch (err) {
-                      console.error('Upload failed', err);
-                    }
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onloadend = async () => {
+                      const base64Image = reader.result;
+                      try {
+                        const res = await fetch('/api/upload', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ image: base64Image })
+                        });
+                        const data = await res.json();
+                        if (data.url) setForm({...form, profilePic: data.url});
+                      } catch (err) {
+                        console.error('Upload failed', err);
+                      }
+                    };
                   }}
                   className="text-xs text-slate-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 max-w-[200px]"
                 />

@@ -250,18 +250,25 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                   <input 
                     type="file" 
                     accept="image/*"
-                    onChange={async (e) => {
+                    onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      const formDataUpload = new FormData();
-                      formDataUpload.append('image', file);
-                      try {
-                        const res = await fetch('/api/upload', { method: 'POST', body: formDataUpload });
-                        const data = await res.json();
-                        if (data.url) setFormData({...formData, profilePic: data.url});
-                      } catch (err) {
-                        console.error('Upload failed', err);
-                      }
+                      const reader = new FileReader();
+                      reader.readAsDataURL(file);
+                      reader.onloadend = async () => {
+                        const base64Image = reader.result;
+                        try {
+                          const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ image: base64Image })
+                          });
+                          const data = await res.json();
+                          if (data.url) setFormData({...formData, profilePic: data.url});
+                        } catch (err) {
+                          console.error('Upload failed', err);
+                        }
+                      };
                     }}
                     className="text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                   />

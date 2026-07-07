@@ -1,9 +1,10 @@
-import express from 'express';
-import multer from 'multer';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { config as dotenvConfig } from 'dotenv';
+import path from 'path';
 
-const router = express.Router();
+// For local express server, load env vars
+dotenvConfig({ path: path.resolve(__dirname, '../../.env') });
 
 // Configure Cloudinary
 cloudinary.config({
@@ -12,40 +13,43 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Configure Multer Storage for Cloudinary
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'education_app', // Folder name in Cloudinary
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
-  } as any
-});
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
 
-const upload = multer({ storage: storage }).single('image');
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-// Upload Endpoint
-router.post('/', (req, res) => {
-  upload(req, res, function (err) {
-    if (err) {
-      console.error('Multer upload error:', err);
-      return res.status(500).json({ error: 'Image upload failed: ' + err.message });
-    }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  if (req.method === 'POST') {
     try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No image uploaded' });
+      const { image } = req.body;
+      if (!image) {
+        return res.status(400).json({ error: 'No image provided in request body.' });
       }
-      
-      // The uploaded file details are in req.file
-      // The Cloudinary URL is stored in req.file.path
-      res.status(200).json({ 
-        url: req.file.path,
+
+      // Upload the base64 string to Cloudinary
+      const result = await cloudinary.uploader.upload(image, {
+        folder: 'education_app',
+        resource_type: 'auto',
+      });
+
+      return res.status(200).json({ 
+        url: result.secure_url,
         message: 'Image uploaded successfully'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image to Cloudinary:', error);
-      res.status(500).json({ error: 'Internal server error during upload' });
+      return res.status(500).json({ error: error.message || 'Internal server error during upload' });
     }
-  });
-});
+  }
 
-export default router;
+  return res.status(405).json({ error: 'Method not allowed' });
+}

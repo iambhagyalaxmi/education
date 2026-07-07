@@ -62,7 +62,7 @@ app.all('/api/timetable', timetableHandler as any);
 app.all('/api/materials', materialsHandler as any);
 
 import uploadHandler from './api/upload';
-app.use('/api/upload', uploadHandler as any);
+app.all('/api/upload', uploadHandler as any);
 
 // For local development or non-Vercel deployments, serve the frontend
 import path from 'path';
