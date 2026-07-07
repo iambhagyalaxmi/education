@@ -21,25 +21,31 @@ const storage = new CloudinaryStorage({
   } as any
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage }).single('image');
 
 // Upload Endpoint
-router.post('/', upload.single('image'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image uploaded' });
+router.post('/', (req, res) => {
+  upload(req, res, function (err) {
+    if (err) {
+      console.error('Multer upload error:', err);
+      return res.status(500).json({ error: 'Image upload failed: ' + err.message });
     }
-    
-    // The uploaded file details are in req.file
-    // The Cloudinary URL is stored in req.file.path
-    res.status(200).json({ 
-      url: req.file.path,
-      message: 'Image uploaded successfully'
-    });
-  } catch (error) {
-    console.error('Error uploading image to Cloudinary:', error);
-    res.status(500).json({ error: 'Internal server error during upload' });
-  }
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image uploaded' });
+      }
+      
+      // The uploaded file details are in req.file
+      // The Cloudinary URL is stored in req.file.path
+      res.status(200).json({ 
+        url: req.file.path,
+        message: 'Image uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Error uploading image to Cloudinary:', error);
+      res.status(500).json({ error: 'Internal server error during upload' });
+    }
+  });
 });
 
 export default router;

@@ -26,6 +26,20 @@ model Course {
   careerPaths         CareerPath[]
   brochureUrl         String? 
   applyUrl            String? 
+  subjects            Subject[]
+}
+
+model Subject {
+  id          String   @id @default(uuid()) @db.Uuid
+  courseId    String   @db.Uuid
+  code        String   @unique
+  name        String
+  semester    Int
+  credits     Int      @default(3)
+  type        String   @default("core")
+  createdAt   DateTime @default(now())
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model FeeStructure {

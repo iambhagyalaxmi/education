@@ -54,7 +54,7 @@ export default function AdminDashboard() {
     if (activeTab === 'faculty-list') {
       return <AdminFaculty activeTab={activeTab} />;
     }
-    if (activeTab === 'courses-list' || activeTab === 'courses-batches') {
+    if (activeTab === 'courses-list' || activeTab === 'courses-batches' || activeTab === 'courses-subjects') {
       return <AdminCourses activeTab={activeTab} />;
     }
     if (activeTab === 'staff-list') {

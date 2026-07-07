@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
-      const { firstName, lastName, email, phone, courseId, batchId, status } = req.body;
+      const { firstName, lastName, email, phone, courseId, batchId, status, profilePic } = req.body;
       const newStudent = await prisma.student.create({
         data: {
           firstName,
@@ -29,6 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           phone,
           courseId,
           batchId,
+          profilePic,
           status: status || 'active'
         },
         include: { course: true, batch: true }

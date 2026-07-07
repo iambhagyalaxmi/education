@@ -34,6 +34,7 @@ import libraryHandler from './api/library';
 import departmentsHandler from './api/departments';
 import timetableHandler from './api/timetable';
 import materialsHandler from './api/materials';
+import subjectsHandler from './api/subjects';
 
 app.use('/api/auth', authRoutes); // Keep legacy auth
 
@@ -46,6 +47,7 @@ app.all('/api/gallery', galleryHandler as any);
 app.all('/api/tickets', ticketsHandler as any);
 app.all('/api/students', studentsHandler as any);
 app.all('/api/courses', coursesHandler as any);
+app.all('/api/subjects', subjectsHandler as any);
 app.all('/api/batches', batchesHandler as any);
 app.all('/api/staff', staffHandler as any);
 app.all('/api/hostel', hostelHandler as any);
