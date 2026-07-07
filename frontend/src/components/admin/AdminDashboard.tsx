@@ -51,16 +51,16 @@ export default function AdminDashboard() {
     if (activeTab.startsWith('students-')) {
       return <AdminStudents activeTab={activeTab} setActiveTab={setActiveTab} />;
     }
-    if (activeTab.startsWith('faculty-')) {
+    if (activeTab === 'faculty-list') {
       return <AdminFaculty activeTab={activeTab} />;
     }
-    if (activeTab.startsWith('courses-')) {
+    if (activeTab === 'courses-list' || activeTab === 'courses-batches') {
       return <AdminCourses activeTab={activeTab} />;
     }
-    if (activeTab.startsWith('staff-')) {
+    if (activeTab === 'staff-list') {
       return <AdminStaff activeTab={activeTab} />;
     }
-    if (activeTab.startsWith('dept-')) {
+    if (activeTab === 'dept-list') {
       return <AdminDepartments activeTab={activeTab} />;
     }
     if (activeTab.startsWith('timetable-')) {
