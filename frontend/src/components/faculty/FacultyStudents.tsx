@@ -10,7 +10,8 @@ import {
   TrendingUp,
   Award,
   X,
-  Save
+  Save,
+  UserPlus
 } from 'lucide-react';
 
 interface FacultyStudentsProps {
@@ -49,7 +50,7 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
 
   const [students, setStudents] = useState(MOCK_STUDENTS);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ name: '', email: '', roll: '', batch: '' });
+  const [addForm, setAddForm] = useState({ name: '', email: '', roll: '', batch: '', profilePic: '' });
 
   const totalPages = Math.ceil(students.length / itemsPerPage);
   const paginatedStudents = students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -61,12 +62,13 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
       email: addForm.email,
       roll: addForm.roll,
       batch: addForm.batch,
+      profilePic: addForm.profilePic,
       attendance: 100,
       status: 'Active'
     };
     setStudents([newStudent, ...students]);
     setShowAddModal(false);
-    setAddForm({ name: '', email: '', roll: '', batch: '' });
+    setAddForm({ name: '', email: '', roll: '', batch: '', profilePic: '' });
   };
 
   const renderStudentList = () => (
@@ -118,16 +120,20 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {paginatedStudents.map((student, i) => (
-                <tr key={i} className="hover:bg-slate-50 transition-colors group">
+              {paginatedStudents.map((student, idx) => (
+                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                        {student.name.charAt(0)}
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm overflow-hidden">
+                        {(student as any).profilePic ? (
+                          <img src={(student as any).profilePic} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          student.name.charAt(0)
+                        )}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-900">{student.name}</div>
-                        <div className="text-xs text-slate-500">{student.email}</div>
+                        <p className="font-semibold text-slate-800">{student.name}</p>
+                        <p className="text-xs text-slate-500">{student.email}</p>
                       </div>
                     </div>
                   </td>
@@ -518,6 +524,35 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
               </button>
             </div>
             <form onSubmit={handleAddStudent} className="p-6 space-y-4">
+              <div className="flex flex-col items-center mb-4">
+                <div className="relative mb-2">
+                  {addForm.profilePic ? (
+                    <img src={addForm.profilePic} alt="Profile preview" className="w-20 h-20 rounded-full object-cover border-2 border-emerald-100" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400">
+                      <UserPlus size={28} />
+                    </div>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const formDataUpload = new FormData();
+                    formDataUpload.append('image', file);
+                    try {
+                      const res = await fetch('/api/upload', { method: 'POST', body: formDataUpload });
+                      const data = await res.json();
+                      if (data.url) setAddForm({...addForm, profilePic: data.url});
+                    } catch (err) {
+                      console.error('Upload failed', err);
+                    }
+                  }}
+                  className="text-xs text-slate-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 max-w-[200px]"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name *</label>
                 <input required type="text" value={addForm.name} onChange={(e) => setAddForm({...addForm, name: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
