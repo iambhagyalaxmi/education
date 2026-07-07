@@ -516,14 +516,14 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
       {/* Add Student Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
               <h3 className="text-xl font-bold text-slate-800">Add New Student</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleAddStudent} className="p-6 space-y-4">
+            <form onSubmit={handleAddStudent} className="p-6 space-y-4 overflow-y-auto">
               <div className="flex flex-col items-center mb-4">
                 <div className="relative mb-2">
                   {addForm.profilePic ? (
@@ -569,7 +569,7 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Course Batch *</label>
                 <input required type="text" placeholder="e.g. Sem 4 - B1" value={addForm.batch} onChange={(e) => setAddForm({...addForm, batch: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
               </div>
-              <div className="pt-4 flex justify-end gap-3">
+              <div className="pt-4 flex justify-end gap-3 sticky bottom-0 bg-white pb-2">
                 <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
                 <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
                   <Save size={18} /> Add Student
