@@ -317,6 +317,9 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                   {formData.courseId && courses.find(c => c.id === formData.courseId)?.batches?.map((b: any) => (
                     <option key={b.id} value={b.id}>{b.academicYear}</option>
                   ))}
+                  {formData.courseId && courses.find(c => c.id === formData.courseId)?.batches?.length === 0 && (
+                    <option value="" disabled>No batches added yet. Add a batch in Courses first.</option>
+                  )}
                 </select>
               </div>
               <div className="md:col-span-2">

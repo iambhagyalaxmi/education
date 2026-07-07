@@ -105,6 +105,7 @@ export default function AdminDashboard() {
       'staff-add': 'Add Staff',
       'staff-roles': 'Roles & Permissions',
       'courses-list': 'Courses',
+      'courses-batches': 'Batch Management',
       'courses-subjects': 'Subjects',
       'courses-syllabus': 'Syllabus',
       'courses-semester': 'Semester Management',

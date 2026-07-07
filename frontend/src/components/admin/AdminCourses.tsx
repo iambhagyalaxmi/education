@@ -90,6 +90,19 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     setTimeout(() => setSuccess(''), 3000);
   };
 
+  const handleDeleteBatch = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this batch?')) return;
+    try {
+      const res = await fetch(`/api/batches?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete batch');
+      setSuccess('Batch deleted successfully!');
+      fetchCourses();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const renderCourseList = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
       
@@ -254,7 +267,80 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     </div>
   );
 
+  const renderBatchManagement = () => {
+    const allBatches = courses.flatMap(c => 
+      (c.batches || []).map((b: any) => ({
+        ...b,
+        courseName: c.name,
+        courseCode: c.code
+      }))
+    ).sort((a, b) => b.startYear - a.startYear);
+
+    return (
+      <div className="space-y-6 animate-fade-in-up pb-10">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Batch Management</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage academic batches and intakes across all courses.</p>
+          </div>
+          <button onClick={() => setShowAddBatch(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+            <Plus size={18} /> Add New Batch
+          </button>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                  <th className="p-4 pl-6">Course</th>
+                  <th className="p-4">Academic Year</th>
+                  <th className="p-4">Duration</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {allBatches.map((batch) => (
+                  <tr key={batch.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                    <td className="p-4 pl-6">
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-slate-200">{batch.courseName}</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{batch.courseCode}</p>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-semibold rounded-full text-sm">
+                        {batch.academicYear}
+                      </span>
+                    </td>
+                    <td className="p-4 font-medium text-slate-600 dark:text-slate-400">
+                      {batch.startYear} - {batch.endYear}
+                    </td>
+                    <td className="p-4">
+                      <button onClick={() => handleDeleteBatch(batch.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {allBatches.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-slate-500">
+                      No batches found. Add a batch to get started.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   switch (activeTab) {
+    case 'courses-batches':
+      return renderBatchManagement();
     case 'courses-list':
       return renderCourseList();
     default:

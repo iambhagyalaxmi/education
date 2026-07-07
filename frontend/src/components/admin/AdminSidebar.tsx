@@ -101,6 +101,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen, setIsOpe
       id: 'courses',
       subItems: [
         { id: 'courses-list', label: 'Courses' },
+        { id: 'courses-batches', label: 'Batch Management' },
         { id: 'courses-subjects', label: 'Subjects' },
         { id: 'courses-syllabus', label: 'Syllabus' },
         { id: 'courses-semester', label: 'Semester Management' }
