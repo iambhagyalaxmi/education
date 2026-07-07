@@ -22,9 +22,12 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       if (res.ok) {
         const data = await res.json();
         setCourses(data);
+      } else {
+        setError('Failed to fetch courses. Please make sure the backend server is running.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError('Network error: Could not fetch courses. Is your backend server running on port 5000?');
     }
   };
 
