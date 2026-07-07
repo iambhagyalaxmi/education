@@ -133,7 +133,7 @@ export default function ChatWidget() {
           >
             <div className="relative shrink-0 w-11 h-11">
               <img
-                src="/child_book_avatar.png"
+                src="https://res.cloudinary.com/adte9bpr/image/upload/v1783429121/education_app/assets/child_book_avatar.jpg"
                 alt="EduBot"
                 className="w-11 h-11 rounded-full object-cover border-2 border-white/40 shadow-md"
               />
@@ -160,7 +160,7 @@ export default function ChatWidget() {
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center px-4 animate-in fade-in duration-500">
                 <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden mb-4 shadow-lg border-4 border-blue-100 /40 flex items-center justify-center">
-                  <img src="/child_book_avatar.png" alt="EduBot" className="w-full h-full object-cover" />
+                  <img src="https://res.cloudinary.com/adte9bpr/image/upload/v1783429121/education_app/assets/child_book_avatar.jpg" alt="EduBot" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-slate-800  font-bold text-lg mb-1">How can we help?</h3>
                 <p className="text-slate-500  text-sm leading-relaxed">
@@ -174,7 +174,7 @@ export default function ChatWidget() {
                 <div className={`flex gap-3 max-w-full ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                   {msg.sender !== 'user' && (
                     <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-blue-200  shadow-sm mt-1">
-                      <img src="/child_book_avatar.png" alt="EduBot" className="w-full h-full object-cover" />
+                      <img src="https://res.cloudinary.com/adte9bpr/image/upload/v1783429121/education_app/assets/child_book_avatar.jpg" alt="EduBot" className="w-full h-full object-cover" />
                     </div>
                   )}
                   <div className={`flex flex-col gap-1 min-w-[60px] max-w-[80%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
@@ -323,7 +323,7 @@ export default function ChatWidget() {
             {isTyping && (
               <div className="flex gap-3 items-end">
                 <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-blue-200  shadow-sm">
-                  <img src="/child_book_avatar.png" alt="EduBot" className="w-full h-full object-cover" />
+                  <img src="https://res.cloudinary.com/adte9bpr/image/upload/v1783429121/education_app/assets/child_book_avatar.jpg" alt="EduBot" className="w-full h-full object-cover" />
                 </div>
                 <div className="bg-white  border border-slate-200/60  rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
                   <div className="flex gap-1.5 items-center h-2">
@@ -402,7 +402,7 @@ export default function ChatWidget() {
           </div>
         ) : (
           <img
-            src="/child_book_avatar.png"
+            src="https://res.cloudinary.com/adte9bpr/image/upload/v1783429121/education_app/assets/child_book_avatar.jpg"
             alt="Open EduBot chat"
             className={`w-full h-full object-cover transition-all duration-300 ${
               bookOpen ? 'scale-125 brightness-125' : 'scale-100'

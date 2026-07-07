@@ -109,7 +109,7 @@ export default function AuthLogin({ onLogin }: { onLogin: (role: string) => void
                 onClick={() => onLogin(role || '')}
                 className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
               >
-                <img className="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
+                <img className="h-5 w-5 mr-2" src="https://res.cloudinary.com/adte9bpr/image/upload/v1783429011/education_app/assets/google_logo.svg" alt="Google logo" />
                 Google
               </button>
             </div>

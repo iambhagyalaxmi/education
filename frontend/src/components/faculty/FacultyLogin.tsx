@@ -185,7 +185,7 @@ export default function FacultyLogin({ onLogin }: { onLogin: () => void }) {
               disabled={isLoading}
               className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 hover:shadow-sm"
             >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+              <img src="https://res.cloudinary.com/adte9bpr/image/upload/v1783429011/education_app/assets/google_logo.svg" alt="Google" className="w-5 h-5" />
               Continue with Google
             </button>
           </div>
