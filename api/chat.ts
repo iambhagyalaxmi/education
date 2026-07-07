@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import { config as dotenvConfig } from 'dotenv';
 
-// Load .env from the root directory (works locally; on Vercel, env vars are injected automatically)
+// Load .env from the backend root directory
 dotenvConfig({ path: path.resolve(__dirname, '../.env') });
 
 const prisma = new PrismaClient();
@@ -404,7 +404,6 @@ async function generateResponse(message: string, sessionId: string): Promise<{ t
       messages.push({
         tool_call_id: toolCall.id,
         role: 'tool',
-        name: toolCall.function.name,
         content: toolResult,
       });
     }
