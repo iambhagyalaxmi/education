@@ -47,8 +47,27 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
     { name: 'Oliver Twist', email: 'oliver.t@student.edu', roll: 'CS24-015', batch: 'Sem 4 - B1', attendance: 68, status: 'Warning' },
   ];
 
-  const totalPages = Math.ceil(MOCK_STUDENTS.length / itemsPerPage);
-  const paginatedStudents = MOCK_STUDENTS.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const [students, setStudents] = useState(MOCK_STUDENTS);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ name: '', email: '', roll: '', batch: '' });
+
+  const totalPages = Math.ceil(students.length / itemsPerPage);
+  const paginatedStudents = students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleAddStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newStudent = {
+      name: addForm.name,
+      email: addForm.email,
+      roll: addForm.roll,
+      batch: addForm.batch,
+      attendance: 100,
+      status: 'Active'
+    };
+    setStudents([newStudent, ...students]);
+    setShowAddModal(false);
+    setAddForm({ name: '', email: '', roll: '', batch: '' });
+  };
 
   const renderStudentList = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -58,7 +77,7 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
           <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 flex-1 sm:flex-none justify-center">
             <Download size={18} /> Export
           </button>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex-1 sm:flex-none justify-center">
+          <button onClick={() => setShowAddModal(true)} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex-1 sm:flex-none justify-center">
             + Add Student
           </button>
         </div>
@@ -452,35 +471,73 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-800">Edit Student Profile</h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <X size={24} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold text-slate-800">Edit Student Record</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm">
+                <X size={20} />
               </button>
             </div>
-            <form onSubmit={(e) => { e.preventDefault(); setShowEditModal(false); }} className="p-6 space-y-4">
+            <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
-                <input required type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-                <input required type="email" value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="email" value={editForm.email} onChange={(e) => setEditForm({...editForm, email: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Phone Number</label>
-                <input required type="text" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" value={editForm.phone} onChange={(e) => setEditForm({...editForm, phone: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Date of Birth</label>
-                <input required type="text" value={editForm.dob} onChange={e => setEditForm({...editForm, dob: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" value={editForm.dob} onChange={(e) => setEditForm({...editForm, dob: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
+              </div>
+            </div>
+            <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button onClick={() => setShowEditModal(false)} className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
+              <button onClick={() => setShowEditModal(false)} className="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+                <Save size={18} /> Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Student Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold text-slate-800">Add New Student</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleAddStudent} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name *</label>
+                <input required type="text" value={addForm.name} onChange={(e) => setAddForm({...addForm, name: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address *</label>
+                <input required type="email" value={addForm.email} onChange={(e) => setAddForm({...addForm, email: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Roll No *</label>
+                <input required type="text" value={addForm.roll} onChange={(e) => setAddForm({...addForm, roll: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Course Batch *</label>
+                <input required type="text" placeholder="e.g. Sem 4 - B1" value={addForm.batch} onChange={(e) => setAddForm({...addForm, batch: e.target.value})} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800" />
               </div>
               <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
-                <button type="submit" className="px-4 py-2 font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
-                  <Save size={18} /> Save Changes
+                <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
+                <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+                  <Save size={18} /> Add Student
                 </button>
               </div>
             </form>
