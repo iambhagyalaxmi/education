@@ -21,7 +21,9 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
 
   const fetchCourses = async () => {
     try {
-      const res = await fetch('/api/courses');
+      const res = await fetch(`/api/courses?t=${new Date().getTime()}`, {
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         setCourses(data);
@@ -36,6 +38,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
 
   useEffect(() => {
     fetchCourses();
+    fetchSubjects();
   }, [activeTab]);
 
   const handleAddCourse = async (e: any) => {
@@ -112,7 +115,9 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
 
   const fetchSubjects = async () => {
     try {
-      const res = await fetch('/api/subjects');
+      const res = await fetch(`/api/subjects?t=${new Date().getTime()}`, {
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         setSubjects(data);
