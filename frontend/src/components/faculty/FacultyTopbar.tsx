@@ -99,7 +99,7 @@ export default function FacultyTopbar({ toggleSidebar, darkMode, toggleDarkMode,
             className="flex items-center gap-3 p-1 rounded-xl hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <img 
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
+              src="https://res.cloudinary.com/adte9bpr/image/upload/v1783428500/education_app/avatars/avatars_01_default_faculty_avatar.jpg" 
               alt="Faculty Profile" 
               className="w-9 h-9 rounded-full ring-2 ring-white shadow-sm object-cover"
             />
