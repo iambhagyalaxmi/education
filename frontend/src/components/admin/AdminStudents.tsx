@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Download, UserPlus, Edit, Trash2, Eye } from 'lucide-react';
+import { Search, Filter, Download, UserPlus, Edit, Trash2, Eye, X } from 'lucide-react';
 
 interface AdminStudentsProps {
   activeTab: string;
@@ -14,6 +14,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
   const [successMsg, setSuccessMsg] = useState('');
   const [courses, setCourses] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewingStudent, setViewingStudent] = useState<any>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -246,7 +247,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                   </td>
                   <td className="p-4 pr-6">
                     <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors" title="View Profile">
+                      <button onClick={() => setViewingStudent(student)} className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors" title="View Profile">
                         <Eye size={18} />
                       </button>
                       <button onClick={() => handleEdit(student)} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
@@ -270,6 +271,69 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
           </table>
         </div>
       </div>
+
+      {viewingStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-fade-in-up border border-slate-100 dark:border-slate-800">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Eye size={20} className="text-indigo-600 dark:text-indigo-400" /> 
+                Student Profile
+              </h3>
+              <button onClick={() => setViewingStudent(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-2xl uppercase overflow-hidden shadow-sm border border-indigo-200 dark:border-indigo-800/50">
+                  {viewingStudent.profilePic ? (
+                    <img src={viewingStudent.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    viewingStudent.firstName?.charAt(0) || 'S'
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold text-slate-800 dark:text-white">{viewingStudent.firstName} {viewingStudent.lastName}</h4>
+                  <p className="text-sm font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded inline-block mt-1 border border-slate-200 dark:border-slate-700">ID: {viewingStudent.id.substring(0,8)}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-semibold uppercase tracking-wider">Course</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">{viewingStudent.course?.name || 'Unassigned'}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-semibold uppercase tracking-wider">Batch</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">{viewingStudent.batch?.academicYear || 'N/A'}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 col-span-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-semibold uppercase tracking-wider">Email Address</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">{viewingStudent.email || 'Not Provided'}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-semibold uppercase tracking-wider">Phone</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">{viewingStudent.phone || 'N/A'}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-semibold uppercase tracking-wider">Attendance</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">{viewingStudent.attendance || 'N/A'}</p>
+                    <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${parseInt(viewingStudent.attendance) > 85 ? 'bg-emerald-500' : 'bg-orange-500'}`} style={{ width: viewingStudent.attendance || '0%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 flex justify-end">
+              <button onClick={() => setViewingStudent(null)} className="px-5 py-2 font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Close Profile</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 
