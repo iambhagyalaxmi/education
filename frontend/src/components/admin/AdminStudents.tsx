@@ -480,7 +480,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                       </span>
                     </td>
                     <td className="p-4 pr-6 text-right">
-                      <button className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors flex items-center justify-end gap-1 w-full">
+                      <button onClick={() => setViewingStudent(student)} className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors flex items-center justify-end gap-1 w-full">
                         View <Eye size={16} />
                       </button>
                     </td>
