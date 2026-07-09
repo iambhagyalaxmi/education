@@ -12,7 +12,8 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
   // Forms
   const [courseForm, setCourseForm] = useState({ code: '', name: '', durationYears: '4', description: '' });
   const [batchForm, setBatchForm] = useState({ courseId: '', academicYear: '', startYear: '', endYear: '' });
-  const [subjectForm, setSubjectForm] = useState({ courseId: '', code: '', name: '', semester: '1', credits: '3', type: 'core' });
+  const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
+  const [subjectForm, setSubjectForm] = useState({ courseId: '', name: '', code: '', credits: '', semester: '1', type: 'core' });
   const [subjects, setSubjects] = useState<any[]>([]);
   const [showAddSubject, setShowAddSubject] = useState(false);
   
@@ -75,21 +76,26 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/batches', {
-        method: 'POST',
+      const isEditing = !!editingBatchId;
+      const url = isEditing ? `/api/batches?id=${editingBatchId}` : '/api/batches';
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(batchForm)
       });
       if (!res.ok) {
-        let errMsg = 'Failed to add batch';
+        let errMsg = isEditing ? 'Failed to update batch' : 'Failed to add batch';
         try {
           const errData = await res.json();
           if (errData.error) errMsg = errData.error;
         } catch (e) {}
         throw new Error(errMsg);
       }
-      setSuccess('Batch added successfully!');
+      setSuccess(isEditing ? 'Batch updated successfully!' : 'Batch added successfully!');
       setBatchForm({ courseId: '', academicYear: '', startYear: '', endYear: '' });
+      setEditingBatchId(null);
       setShowAddBatch(false);
       fetchCourses();
     } catch (err: unknown) {
@@ -97,6 +103,17 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     }
     setLoading(false);
     setTimeout(() => setSuccess(''), 3000);
+  };
+
+  const handleEditBatch = (batch: any) => {
+    setEditingBatchId(batch.id);
+    setBatchForm({
+      courseId: batch.courseId,
+      academicYear: batch.academicYear,
+      startYear: String(batch.startYear),
+      endYear: String(batch.endYear)
+    });
+    setShowAddBatch(true);
   };
 
   const handleDeleteBatch = async (id: string) => {
@@ -256,7 +273,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Batch Management</h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage academic batches and intakes across all courses.</p>
           </div>
-          <button onClick={() => setShowAddBatch(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+          <button onClick={() => { setEditingBatchId(null); setBatchForm({courseId:'', academicYear:'', startYear:'', endYear:''}); setShowAddBatch(true); }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
             <Plus size={18} /> Add New Batch
           </button>
         </div>
@@ -290,9 +307,14 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
                       {batch.startYear} - {batch.endYear}
                     </td>
                     <td className="p-4">
-                      <button onClick={() => handleDeleteBatch(batch.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleEditBatch(batch)} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                          <Edit size={18} />
+                        </button>
+                        <button onClick={() => handleDeleteBatch(batch.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -440,7 +462,9 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
             <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Add New Batch</h3>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+                {editingBatchId ? 'Edit Batch' : 'Add New Batch'}
+              </h3>
               <button onClick={() => setShowAddBatch(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
                 <X size={24} />
               </button>
@@ -471,7 +495,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setShowAddBatch(false)} className="px-4 py-2 font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
                 <button type="submit" disabled={loading} className="px-4 py-2 font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
-                  {loading ? 'Adding...' : 'Save Batch'}
+                  {loading ? 'Saving...' : (editingBatchId ? 'Update Batch' : 'Save Batch')}
                 </button>
               </div>
             </form>

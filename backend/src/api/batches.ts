@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -30,6 +30,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
       return res.status(201).json(newBatch);
+    }
+
+    if (req.method === 'PUT') {
+      const { id } = req.query;
+      const { courseId, academicYear, startYear, endYear } = req.body;
+      const updatedBatch = await prisma.batch.update({
+        where: { id: String(id) },
+        data: {
+          courseId,
+          academicYear,
+          startYear: parseInt(startYear),
+          endYear: parseInt(endYear)
+        }
+      });
+      return res.status(200).json(updatedBatch);
     }
 
     if (req.method === 'DELETE') {
