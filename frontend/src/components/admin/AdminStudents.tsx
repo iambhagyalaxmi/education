@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Download, UserPlus, Edit, Trash2, Eye, X } from 'lucide-react';
+import { Search, Filter, Download, UserPlus, Edit, Trash2, Eye, X, Check } from 'lucide-react';
 
 interface AdminStudentsProps {
   activeTab: string;
@@ -15,6 +15,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
   const [courses, setCourses] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingStudent, setViewingStudent] = useState<any>(null);
+  const [editAttendanceMode, setEditAttendanceMode] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -541,8 +542,10 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Attendance Management</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors">
-          <Edit size={18} /> Edit Attendance
+        <button 
+          onClick={() => setEditAttendanceMode(!editAttendanceMode)}
+          className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors ${editAttendanceMode ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'}`}>
+          {editAttendanceMode ? <><Check size={18} /> Save Attendance</> : <><Edit size={18} /> Edit Attendance</>}
         </button>
       </div>
 
@@ -572,25 +575,43 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {students.map((student) => (
+              {students.map((student) => {
+                const attValue = parseInt(student.attendance || '0');
+                return (
                 <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6 font-medium text-slate-800 dark:text-slate-200">{student.firstName} {student.lastName}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">120</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400">{Math.floor(120 * (parseInt(student.attendance) / 100))}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400">{Math.floor(120 * (attValue / 100))}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">{student.attendance}</span>
+                      {editAttendanceMode ? (
+                        <div className="flex items-center gap-1">
+                          <input 
+                            type="number" 
+                            min="0" max="100" 
+                            value={attValue} 
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setStudents(prev => prev.map(s => s.id === student.id ? { ...s, attendance: `${val}%` } : s));
+                            }}
+                            className="w-16 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded focus:outline-none focus:border-indigo-500 text-sm"
+                          />
+                          <span className="text-slate-500">%</span>
+                        </div>
+                      ) : (
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{student.attendance || '0%'}</span>
+                      )}
                     </div>
                   </td>
                   <td className="p-4 pr-6 text-right">
                     <span className={`px-2 py-1 text-xs font-bold rounded text-white ${
-                      parseInt(student.attendance) >= 75 ? 'bg-emerald-500' : 'bg-rose-500'
+                      attValue >= 75 ? 'bg-emerald-500' : 'bg-rose-500'
                     }`}>
-                      {parseInt(student.attendance) >= 75 ? 'Regular' : 'Defaulter'}
+                      {attValue >= 75 ? 'Regular' : 'Defaulter'}
                     </span>
                   </td>
                 </tr>
-              ))}
+              )})}
               {students.length === 0 && (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-slate-500 dark:text-slate-400">
