@@ -22,7 +22,9 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
   const fetchStaff = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/staff');
+      const res = await fetch('/api/staff', { 
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } 
+      });
       if (res.ok) {
         const data = await res.json();
         setStaffList(data);
@@ -49,6 +51,15 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
     setSuccessMsg('');
     try {
       const isEditing = !!editingId;
+      
+      // Optimistic UI update for immediate feedback
+      if (isEditing) {
+        setStaffList(prev => prev.map(s => s.id === editingId ? { ...s, ...formData } : s));
+      } else {
+        const optimisticStaff = { id: 'temp-' + Date.now(), ...formData, status: 'Active' };
+        setStaffList(prev => [optimisticStaff, ...prev]);
+      }
+
       const url = isEditing ? `/api/staff?id=${editingId}` : '/api/staff';
       const method = isEditing ? 'PUT' : 'POST';
       
