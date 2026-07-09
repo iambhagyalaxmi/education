@@ -11,6 +11,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
   
   // Forms
   const [courseForm, setCourseForm] = useState({ code: '', name: '', durationYears: '4', description: '' });
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
   const [batchForm, setBatchForm] = useState({ courseId: '', academicYear: '', startYear: '', endYear: '' });
   const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
   const [subjectForm, setSubjectForm] = useState({ courseId: '', name: '', code: '', credits: '', semester: '1', type: 'core' });
@@ -47,21 +48,26 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/courses', {
-        method: 'POST',
+      const isEditing = !!editingCourseId;
+      const url = isEditing ? `/api/courses?id=${editingCourseId}` : '/api/courses';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(courseForm)
       });
       if (!res.ok) {
-        let errMsg = 'Failed to add course';
+        let errMsg = isEditing ? 'Failed to update course' : 'Failed to add course';
         try {
           const errData = await res.json();
           if (errData.error) errMsg = errData.error;
         } catch (e) {}
         throw new Error(errMsg);
       }
-      setSuccess('Course added successfully!');
+      setSuccess(isEditing ? 'Course updated successfully!' : 'Course added successfully!');
       setCourseForm({ code: '', name: '', durationYears: '4', description: '' });
+      setEditingCourseId(null);
       setShowAddCourse(false);
       fetchCourses();
     } catch (err: unknown) {
@@ -69,6 +75,30 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     }
     setLoading(false);
     setTimeout(() => setSuccess(''), 3000);
+  };
+
+  const handleEditCourse = (course: any) => {
+    setEditingCourseId(course.id);
+    setCourseForm({
+      code: course.code,
+      name: course.name,
+      durationYears: String(course.durationYears),
+      description: course.description || ''
+    });
+    setShowAddCourse(true);
+  };
+
+  const handleDeleteCourse = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this course?')) return;
+    try {
+      const res = await fetch(`/api/courses?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete course');
+      setSuccess('Course deleted successfully!');
+      fetchCourses();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
+    }
   };
 
   const handleAddBatch = async (e: React.FormEvent) => {
@@ -194,7 +224,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage academic programs and degree courses.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => setShowAddCourse(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+          <button onClick={() => { setEditingCourseId(null); setCourseForm({ code: '', name: '', durationYears: '4', description: '' }); setShowAddCourse(true); }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
             <Plus size={18} /> Add Course
           </button>
         </div>
@@ -232,10 +262,10 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
                   </td>
                   <td className="p-4 pr-6">
                     <div className="flex gap-2">
-                      <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                      <button onClick={() => handleEditCourse(course)} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                      <button onClick={() => handleDeleteCourse(course.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
                         <Trash2 size={18} />
                       </button>
                     </div>
@@ -405,11 +435,17 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto">
 
-      
+      {/* Toast notifications */}
       {success && (
-        <div className="flex items-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-lg">
+        <div className="fixed bottom-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in-up z-50">
           <CheckCircle size={20} />
           <span className="font-medium">{success}</span>
+        </div>
+      )}
+      {error && !showAddCourse && !showAddBatch && !showAddSubject && (
+        <div className="fixed bottom-4 right-4 bg-rose-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in-up z-50">
+          <X size={20} />
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
@@ -419,7 +455,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-fade-in-up">
             <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Add New Course</h3>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editingCourseId ? 'Edit Course' : 'Add New Course'}</h3>
               <button onClick={() => setShowAddCourse(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
                 <X size={24} />
               </button>
@@ -445,7 +481,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setShowAddCourse(false)} className="px-4 py-2 font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
                 <button type="submit" disabled={loading} className="px-4 py-2 font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
-                  {loading ? 'Adding...' : 'Save Course'}
+                  {loading ? 'Saving...' : 'Save Course'}
                 </button>
               </div>
             </form>

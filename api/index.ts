@@ -342,6 +342,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const newBatch = await prisma.batch.create({ data: { courseId, academicYear, startYear: parseInt(startYear), endYear: parseInt(endYear) } });
         return res.status(201).json(newBatch);
       }
+      if (req.method === 'PUT') {
+        const id = req.query.id as string || req.body.id;
+        if (!id) return res.status(400).json({ error: 'Missing ID' });
+        const { courseId, academicYear, startYear, endYear } = req.body;
+        const updatedBatch = await prisma.batch.update({
+          where: { id },
+          data: { courseId, academicYear, startYear: parseInt(startYear), endYear: parseInt(endYear) }
+        });
+        return res.status(200).json(updatedBatch);
+      }
       if (req.method === 'DELETE') {
         const { id } = req.query;
         await prisma.batch.delete({ where: { id: String(id) } });
@@ -362,7 +372,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       if (req.method === 'PUT') {
         const { id } = req.query;
-        const updatedCourse = await prisma.course.update({ where: { id: String(id) }, data: req.body });
+        const { code, name, durationYears, description } = req.body;
+        
+        // Build data object
+        const dataToUpdate: any = {};
+        if (code !== undefined) dataToUpdate.code = code;
+        if (name !== undefined) dataToUpdate.name = name;
+        if (durationYears !== undefined) dataToUpdate.durationYears = parseInt(durationYears);
+        if (description !== undefined) dataToUpdate.description = description;
+
+        const updatedCourse = await prisma.course.update({ where: { id: String(id) }, data: dataToUpdate });
         return res.status(200).json(updatedCourse);
       }
       if (req.method === 'DELETE') {
@@ -652,7 +671,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ---- SUBJECTS ----
     if (route === 'subjects') {
       if (req.method === 'GET') {
-        const subjects = await prisma.subject.findMany({ include: { course: true }, orderBy: [{ course: { name: 'asc' } }, { semester: 'asc' }] });
+        const subjects = await prisma.subject.findMany({ include: { course: true }, orderBy: { semester: 'asc' } });
+        subjects.sort((a, b) => (a.course?.name || '').localeCompare(b.course?.name || ''));
         return res.status(200).json(subjects);
       }
       if (req.method === 'POST') {

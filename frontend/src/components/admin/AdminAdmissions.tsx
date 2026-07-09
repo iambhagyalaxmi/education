@@ -47,9 +47,18 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
         setApplications(prev => prev.map(a => a.id === editingId ? { ...form, id: editingId } : a));
         await fetch(`/api/admissions?id=${editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       } else {
-        const newApp = { ...form, id: Date.now().toString() };
+        const tempId = Date.now().toString();
+        const newApp = { ...form, id: tempId };
         setApplications(prev => [newApp, ...prev]);
-        await fetch('/api/admissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+        try {
+          const res = await fetch('/api/admissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+          if (res.ok) {
+            const savedApp = await res.json();
+            setApplications(prev => prev.map(a => a.id === tempId ? savedApp : a));
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
     } catch (e) {
       console.log('Backend sync failed, using local state');
