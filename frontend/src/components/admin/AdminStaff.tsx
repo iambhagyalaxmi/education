@@ -55,6 +55,7 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
       setSuccessMsg('Staff member registered successfully!');
       setFormData({ name: '', email: '', phone: '', role: '', department: '' });
       fetchStaff();
+      if (setActiveTab) setActiveTab('staff-list');
     } catch (err: unknown) {
       setError((err instanceof Error ? err.message : String(err)));
     }

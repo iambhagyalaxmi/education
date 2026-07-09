@@ -15,7 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { role } = req.query;
       const staff = await prisma.user.findMany({
         where: {
-          role: role ? String(role) : { in: ['faculty', 'staff'] }
+          role: role ? String(role) : { not: 'student' }
         },
         orderBy: { createdAt: 'desc' }
       });
