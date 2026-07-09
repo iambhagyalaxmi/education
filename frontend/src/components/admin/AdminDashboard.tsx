@@ -7,6 +7,7 @@ import AdminAdmissions from './AdminAdmissions';
 import AdminStudents from './AdminStudents';
 import AdminAnalytics from './AdminAnalytics';
 import AdminFaculty from './AdminFaculty';
+import AdminFacultyWorkload from './AdminFacultyWorkload';
 import AdminCourses from './AdminCourses';
 import AdminStaff from './AdminStaff';
 import AdminDepartments from './AdminDepartments';
@@ -53,6 +54,9 @@ export default function AdminDashboard() {
     }
     if (activeTab === 'faculty-list') {
       return <AdminFaculty activeTab={activeTab} />;
+    }
+    if (activeTab === 'faculty-workload') {
+      return <AdminFacultyWorkload />;
     }
     if (activeTab === 'courses-list' || activeTab === 'courses-batches' || activeTab === 'courses-subjects') {
       return <AdminCourses activeTab={activeTab} />;
