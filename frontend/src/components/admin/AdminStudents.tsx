@@ -13,6 +13,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [courses, setCourses] = useState<any[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -67,28 +68,49 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
     setError('');
     setSuccessMsg('');
     try {
-      // Optimistic UI update
-      const newStudent = {
-        id: Date.now().toString(),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        profilePic: formData.profilePic,
-        course: courses.find(c => c.id === formData.courseId),
-        batch: { academicYear: formData.batchId },
-        status: 'Active',
-        attendance: '100%',
-        grade: 'N/A'
-      };
-      setStudents(prev => [newStudent, ...prev]);
+      if (editingId) {
+        const updatedStudent = {
+          ...students.find(s => s.id === editingId),
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          profilePic: formData.profilePic,
+          course: courses.find(c => c.id === formData.courseId) || undefined,
+          batch: { academicYear: courses.find(c => c.id === formData.courseId)?.batches?.find((b: any) => b.id === formData.batchId)?.academicYear || formData.batchId },
+          courseId: formData.courseId,
+          batchId: formData.batchId
+        };
+        setStudents(prev => prev.map(s => s.id === editingId ? updatedStudent : s));
 
-      await fetch('/api/students', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+        await fetch(`/api/students?id=${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        setSuccessMsg('Student updated successfully!');
+      } else {
+        const newStudent = {
+          id: Date.now().toString(),
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          profilePic: formData.profilePic,
+          course: courses.find(c => c.id === formData.courseId),
+          batch: { academicYear: courses.find(c => c.id === formData.courseId)?.batches?.find((b: any) => b.id === formData.batchId)?.academicYear || formData.batchId },
+          status: 'Active',
+          attendance: '100%',
+          grade: 'N/A'
+        };
+        setStudents(prev => [newStudent, ...prev]);
+
+        await fetch('/api/students', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        setSuccessMsg('Student registered successfully!');
+      }
       
-      setSuccessMsg('Student registered successfully!');
       setFormData({ firstName: '', lastName: '', email: '', phone: '', profilePic: '', courseId: '', batchId: '' });
+      setEditingId(null);
       if (setActiveTab) {
         setTimeout(() => setActiveTab('students-list'), 1500);
       }
@@ -97,12 +119,45 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
     }
   };
 
+  const handleEdit = (student: any) => {
+    setFormData({
+      firstName: student.firstName || '',
+      lastName: student.lastName || '',
+      email: student.email || '',
+      phone: student.phone || '',
+      profilePic: student.profilePic || '',
+      courseId: student.courseId || '',
+      batchId: student.batchId || ''
+    });
+    setEditingId(student.id);
+    if (setActiveTab) setActiveTab('students-add');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this student?')) return;
+    try {
+      const res = await fetch(`/api/students?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete student');
+      setStudents(prev => prev.filter(s => s.id !== id));
+      setSuccessMsg('Student deleted successfully!');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err) {
+      console.error(err);
+      setError('Error deleting student');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   const renderStudentList = () => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Student Directory</h2>
         <button 
-          onClick={() => setActiveTab && setActiveTab('students-add')}
+          onClick={() => {
+            setFormData({ firstName: '', lastName: '', email: '', phone: '', profilePic: '', courseId: '', batchId: '' });
+            setEditingId(null);
+            if (setActiveTab) setActiveTab('students-add');
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
           <UserPlus size={18} /> Add Student
@@ -194,10 +249,10 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                       <button className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors" title="View Profile">
                         <Eye size={18} />
                       </button>
-                      <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                      <button onClick={() => handleEdit(student)} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                      <button onClick={() => handleDelete(student.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
                         <Trash2 size={18} />
                       </button>
                     </div>
@@ -222,8 +277,8 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
     <div className="space-y-6 animate-fade-in-up pb-10">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Student Registration Form</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Enter details to manually register a new student.</p>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{editingId ? 'Edit Student Profile' : 'Student Registration Form'}</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{editingId ? 'Update details for this student.' : 'Enter details to manually register a new student.'}</p>
         </div>
       </div>
 
@@ -342,7 +397,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
               Clear
             </button>
             <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">
-              {loading ? 'Registering...' : 'Register Student'}
+              {loading ? 'Saving...' : (editingId ? 'Update Student' : 'Register Student')}
             </button>
           </div>
         </form>
