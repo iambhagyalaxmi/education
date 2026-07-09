@@ -177,9 +177,6 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage academic programs and degree courses.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => setShowAddBatch(true)} className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">
-            <Plus size={18} /> Add Batch
-          </button>
           <button onClick={() => setShowAddCourse(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
             <Plus size={18} /> Add Course
           </button>
