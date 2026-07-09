@@ -26,11 +26,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     if (req.method === 'PUT') {
       const targetId = req.query.id as string || req.body.id;
-      const { status } = req.body;
+      const { status, appId, name, course, date, score } = req.body;
       if (!targetId) return res.status(400).json({ error: 'Missing ID' });
+      
+      const updateData: any = {};
+      if (status !== undefined) updateData.status = status;
+      if (appId !== undefined) updateData.appId = appId;
+      if (name !== undefined) updateData.name = name;
+      if (course !== undefined) updateData.course = course;
+      if (date !== undefined) updateData.date = date;
+      if (score !== undefined) updateData.score = score;
+
       const updatedApp = await prisma.admissionApplication.update({
         where: { id: targetId },
-        data: { status }
+        data: updateData
       });
       return res.status(200).json(updatedApp);
     }

@@ -1,12 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Download, UserPlus, CheckCircle, XCircle, Clock, X } from 'lucide-react';
+import { Search, Filter, Download, UserPlus, CheckCircle, XCircle, Clock, X, Edit2 } from 'lucide-react';
 
 export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [applications, setApplications] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ appId: '', name: '', course: '', date: '', score: '', status: 'Pending' });
+
+  const openEditModal = (app: any) => {
+    setForm({
+      appId: app.appId || '',
+      name: app.name || '',
+      course: app.course || '',
+      date: app.date || '',
+      score: app.score || '',
+      status: app.status || 'Pending'
+    });
+    setEditingId(app.id);
+    setShowModal(true);
+  };
 
   const fetchApplications = () => {
     fetch('/api/admissions').then(res => res.json()).then(data => setApplications(Array.isArray(data) ? data : [])).catch(console.error);
@@ -28,18 +42,22 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
     e.preventDefault();
     setSaving(true);
     
-    // Optimistic UI update for demo purposes
-    const newApp = { ...form, id: Date.now().toString() };
-    setApplications(prev => [newApp, ...prev]);
-
     try {
-      await fetch('/api/admissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      if (editingId) {
+        setApplications(prev => prev.map(a => a.id === editingId ? { ...form, id: editingId } : a));
+        await fetch(`/api/admissions?id=${editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      } else {
+        const newApp = { ...form, id: Date.now().toString() };
+        setApplications(prev => [newApp, ...prev]);
+        await fetch('/api/admissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      }
     } catch (e) {
       console.log('Backend sync failed, using local state');
     }
     
     setSaving(false);
     setShowModal(false);
+    setEditingId(null);
     setForm({ appId: '', name: '', course: '', date: '', score: '', status: 'Pending' });
   };
 
@@ -48,7 +66,7 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">New Applications</h2>
         <div className="flex gap-2">
-          <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+          <button onClick={() => { setEditingId(null); setForm({ appId: '', name: '', course: '', date: '', score: '', status: 'Pending' }); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
             <UserPlus size={18} /> New Application
           </button>
         </div>
@@ -59,7 +77,7 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg animate-fade-in-up">
             <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white">New Admission Application</h3>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editingId ? 'Edit Application' : 'New Admission Application'}</h3>
               <button onClick={() => setShowModal(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"><X size={20} /></button>
             </div>
             <form onSubmit={submitApplication} className="p-6 space-y-4">
@@ -90,7 +108,7 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
               <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
                 <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-60">
-                  {saving ? 'Submitting...' : 'Submit Application'}
+                  {saving ? 'Saving...' : (editingId ? 'Save Changes' : 'Submit Application')}
                 </button>
               </div>
             </form>
@@ -161,6 +179,9 @@ export default function AdminAdmissions({ activeTab }: { activeTab: string }) {
                       </button>
                       <button onClick={() => updateStatus(app.id, 'Rejected')} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Reject">
                         <XCircle size={18} />
+                      </button>
+                      <button onClick={() => openEditModal(app)} className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors" title="Edit">
+                        <Edit2 size={18} />
                       </button>
                     </div>
                   </td>
