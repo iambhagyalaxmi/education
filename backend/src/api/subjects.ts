@@ -14,8 +14,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET') {
       const subjects = await prisma.subject.findMany({
         include: { course: true },
-        orderBy: [{ course: { name: 'asc' } }, { semester: 'asc' }]
+        orderBy: { semester: 'asc' }
       });
+      subjects.sort((a, b) => (a.course?.name || '').localeCompare(b.course?.name || ''));
       return res.status(200).json(subjects);
     }
 

@@ -34,9 +34,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
+      const { code, name, durationYears, description } = req.body;
+      
+      const dataToUpdate: any = {};
+      if (code !== undefined) dataToUpdate.code = code;
+      if (name !== undefined) dataToUpdate.name = name;
+      if (durationYears !== undefined) dataToUpdate.durationYears = parseInt(durationYears);
+      if (description !== undefined) dataToUpdate.description = description;
+
       const updatedCourse = await prisma.course.update({
         where: { id: String(id) },
-        data: req.body
+        data: dataToUpdate
       });
       return res.status(200).json(updatedCourse);
     }
