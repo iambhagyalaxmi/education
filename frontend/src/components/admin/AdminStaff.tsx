@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, Download, Plus, Shield, Edit, Trash2, ShieldAlert, Key } from 'lucide-react';
 
-export default function AdminStaff({ activeTab }: { activeTab: string }) {
+export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: string, setActiveTab?: (tab: string) => void }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [staffList, setStaffList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ export default function AdminStaff({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Staff Directory</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage non-teaching staff across all departments.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => setActiveTab && setActiveTab('staff-add')} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> Add Staff
         </button>
       </div>
