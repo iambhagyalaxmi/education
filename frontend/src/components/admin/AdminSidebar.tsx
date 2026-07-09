@@ -80,7 +80,6 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen, setIsOpe
       id: 'faculty',
       subItems: [
         { id: 'faculty-list', label: 'Faculty List' },
-        { id: 'faculty-add', label: 'Add Faculty' },
         { id: 'faculty-departments', label: 'Departments' },
         { id: 'faculty-workload', label: 'Workload' }
       ]
