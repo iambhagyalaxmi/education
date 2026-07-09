@@ -61,6 +61,16 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to remove this staff member?')) return;
+    try {
+      await fetch(`/api/staff?id=${id}`, { method: 'DELETE' });
+      fetchStaff();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const renderStaffList = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
       <div className="flex justify-between items-center">
@@ -144,7 +154,7 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
                       <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                      <button onClick={() => handleDelete(staff.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
                         <Trash2 size={18} />
                       </button>
                     </div>
