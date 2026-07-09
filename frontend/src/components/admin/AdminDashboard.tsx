@@ -60,7 +60,7 @@ export default function AdminDashboard() {
     if (activeTab === 'staff-list') {
       return <AdminStaff activeTab={activeTab} />;
     }
-    if (activeTab === 'dept-list') {
+    if (activeTab === 'dept-list' || activeTab === 'faculty-departments') {
       return <AdminDepartments activeTab={activeTab} />;
     }
     if (activeTab.startsWith('timetable-')) {
