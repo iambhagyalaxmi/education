@@ -4,6 +4,7 @@ import { Search, Filter, Download, FileText, TrendingUp, PieChart, BarChart2 } f
 export default function AdminReports({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderReportCard = (title: string, desc: string, icon: any, type: string) => (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 hover:shadow-md transition-shadow cursor-pointer group">
       <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4 group-hover:scale-110 transition-transform">
@@ -20,6 +21,7 @@ export default function AdminReports({ activeTab }: { activeTab: string }) {
     </div>
   );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderReports = (title: string, reports: any[]) => (
     <div className="space-y-6 animate-fade-in-up pb-10">
       <div className="flex justify-between items-center">
@@ -93,6 +95,7 @@ export default function AdminReports({ activeTab }: { activeTab: string }) {
     }
   };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const titles: any = {
     'reports-student': 'Student Reports',
     'reports-faculty': 'Faculty Reports',

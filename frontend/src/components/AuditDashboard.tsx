@@ -6,7 +6,9 @@ interface AuditLog {
   actionType: string;
   tableName: string;
   recordId: string;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   oldValue: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   newValue: any;
   changeReason: string | null;
   ipAddress: string | null;

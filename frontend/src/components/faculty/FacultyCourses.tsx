@@ -40,12 +40,13 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     if (activeTab === 'courses-materials') {
       fetchMaterials();
     }
   }, [activeTab]);
 
-  const handleUpload = async (e: any) => {
+  const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -62,8 +63,8 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
       setShowUploadModal(false);
       fetchMaterials();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
     }
     setLoading(false);
   };

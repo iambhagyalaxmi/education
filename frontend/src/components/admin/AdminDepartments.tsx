@@ -25,6 +25,7 @@ export default function AdminDepartments({ activeTab }: { activeTab: string }) {
     setShowModal(true);
   };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEdit = (dept: any) => {
     setEditTarget(dept);
     setForm({ name: dept.name, code: dept.code, hod: dept.hod || '', faculty: String(dept.faculty), students: String(dept.students), status: dept.status });

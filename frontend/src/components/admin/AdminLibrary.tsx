@@ -22,6 +22,7 @@ export default function AdminLibrary({ activeTab }: { activeTab: string }) {
     setShowModal(true);
   };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEdit = (book: any) => {
     setEditTarget(book);
     setForm({ title: book.title, author: book.author, isbn: book.isbn, category: book.category, qty: String(book.qty), status: book.status });

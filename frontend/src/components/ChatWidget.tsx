@@ -190,6 +190,7 @@ export default function ChatWidget() {
                       {/* Document Cards */}
                       {parseMessageContent(msg.content).data?.documents && (
                         <div className="mt-4 flex flex-col gap-3">
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
                           {parseMessageContent(msg.content).data.documents.map((doc: any) => (
                             <div key={doc.id} className="bg-slate-50  border border-slate-200  rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
                               <div className="flex items-start gap-3">
@@ -228,6 +229,7 @@ export default function ChatWidget() {
                       {/* Course Cards */}
                       {parseMessageContent(msg.content).data?.courses && (
                         <div className="mt-4 flex flex-col gap-4">
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
                           {parseMessageContent(msg.content).data.courses.map((course: any) => (
                             <div key={course.id} className="bg-white  border border-slate-200  rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                               

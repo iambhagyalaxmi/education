@@ -41,7 +41,7 @@ export default function AdminStaff({ activeTab }: { activeTab: string }) {
     fetchStaff();
   }, [activeTab]);
 
-  const handleRegister = async (e: any) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
@@ -55,8 +55,8 @@ export default function AdminStaff({ activeTab }: { activeTab: string }) {
       setSuccessMsg('Staff member registered successfully!');
       setFormData({ name: '', email: '', phone: '', role: '', department: '' });
       fetchStaff();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
     }
   };
 

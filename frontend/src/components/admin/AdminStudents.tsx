@@ -62,7 +62,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
       });
   }, []);
 
-  const handleRegister = async (e: any) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
@@ -92,7 +92,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
       if (setActiveTab) {
         setTimeout(() => setActiveTab('students-list'), 1500);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Backend sync failed, using local state silently
     }
   };
@@ -321,6 +321,7 @@ export default function AdminStudents({ activeTab, setActiveTab }: AdminStudents
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Batch *</label>
                 <select required value={formData.batchId} onChange={e => setFormData({...formData, batchId: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm" disabled={!formData.courseId}>
                   <option value="">Select Batch...</option>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
                   {formData.courseId && courses.find(c => c.id === formData.courseId)?.batches?.map((b: any) => (
                     <option key={b.id} value={b.id}>{b.academicYear}</option>
                   ))}

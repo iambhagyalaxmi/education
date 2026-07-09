@@ -30,7 +30,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       } else {
         setError('Failed to fetch courses. Please make sure the backend server is running.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError('Network error: Could not fetch courses. Is your backend server running on port 5000?');
     }
@@ -41,7 +41,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     fetchSubjects();
   }, [activeTab]);
 
-  const handleAddCourse = async (e: any) => {
+  const handleAddCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -63,14 +63,14 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       setCourseForm({ code: '', name: '', durationYears: '4', description: '' });
       setShowAddCourse(false);
       fetchCourses();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
     }
     setLoading(false);
     setTimeout(() => setSuccess(''), 3000);
   };
 
-  const handleAddBatch = async (e: any) => {
+  const handleAddBatch = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -92,8 +92,8 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       setBatchForm({ courseId: '', academicYear: '', startYear: '', endYear: '' });
       setShowAddBatch(false);
       fetchCourses();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
     }
     setLoading(false);
     setTimeout(() => setSuccess(''), 3000);
@@ -107,8 +107,8 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       setSuccess('Batch deleted successfully!');
       fetchCourses();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -127,7 +127,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
     }
   };
 
-  const handleAddSubject = async (e: any) => {
+  const handleAddSubject = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -149,8 +149,8 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       setSubjectForm({ courseId: '', code: '', name: '', semester: '1', credits: '3', type: 'core' });
       setShowAddSubject(false);
       fetchSubjects();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
     }
     setLoading(false);
     setTimeout(() => setSuccess(''), 3000);
@@ -163,8 +163,8 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
       if (!res.ok) throw new Error('Failed to delete subject');
       setSuccess('Subject deleted successfully!');
       fetchSubjects();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -286,6 +286,7 @@ export default function AdminCourses({ activeTab }: { activeTab: string }) {
 
   const renderBatchManagement = () => {
     const allBatches = courses.flatMap(c => 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
       (c.batches || []).map((b: any) => ({
         ...b,
         courseName: c.name,

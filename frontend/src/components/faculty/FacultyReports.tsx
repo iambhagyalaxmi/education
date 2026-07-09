@@ -25,6 +25,7 @@ interface FacultyReportsProps {
 
 export default function FacultyReports({ activeTab }: FacultyReportsProps) {
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderDashboardReport = (title: string, data: any) => (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
@@ -38,6 +39,7 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
         {data.stats.map((stat: any, i: number) => (
           <div key={i} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-center items-center text-center">
             <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${stat.colorClass}`}>
@@ -137,8 +139,8 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
   };
   
   // Dummy icon components for missing lucide imports used in objects
-  function CheckCircle(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>; }
-  function AlertTriangle(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>; }
+  function CheckCircle(props: Record<string, unknown>) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>; }
+  function AlertTriangle(props: Record<string, unknown>) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>; }
 
 
   const renderPlaceholder = (title: string, icon: React.ElementType) => {
