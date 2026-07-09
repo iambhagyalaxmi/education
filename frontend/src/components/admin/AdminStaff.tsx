@@ -8,6 +8,8 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   // Form State
   const [formData, setFormData] = useState({
     name: '',
@@ -46,19 +48,37 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
     setError('');
     setSuccessMsg('');
     try {
-      const res = await fetch('/api/staff', {
-        method: 'POST',
+      const isEditing = !!editingId;
+      const url = isEditing ? `/api/staff?id=${editingId}` : '/api/staff';
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (!res.ok) throw new Error('Registration failed');
-      setSuccessMsg('Staff member registered successfully!');
+      if (!res.ok) throw new Error(isEditing ? 'Failed to update staff' : 'Registration failed');
+      
+      setSuccessMsg(isEditing ? 'Staff member updated successfully!' : 'Staff member registered successfully!');
       setFormData({ name: '', email: '', phone: '', role: '', department: '' });
+      setEditingId(null);
       fetchStaff();
       if (setActiveTab) setActiveTab('staff-list');
     } catch (err: unknown) {
       setError((err instanceof Error ? err.message : String(err)));
     }
+  };
+
+  const handleEdit = (staff: any) => {
+    setEditingId(staff.id);
+    setFormData({
+      name: staff.name,
+      email: staff.email,
+      phone: staff.phone || '',
+      role: staff.role,
+      department: staff.department || ''
+    });
+    if (setActiveTab) setActiveTab('staff-add');
   };
 
   const handleDelete = async (id: string) => {
@@ -151,7 +171,7 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
                   </td>
                   <td className="p-4 pr-6">
                     <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                      <button onClick={() => handleEdit(staff)} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
                       <button onClick={() => handleDelete(staff.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
@@ -172,8 +192,12 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
     <div className="space-y-6 animate-fade-in-up pb-10">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Staff Registration Form</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Enter details to onboard a new staff member.</p>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
+            {editingId ? 'Edit Staff Member' : 'Staff Registration Form'}
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            {editingId ? 'Update details for this staff member.' : 'Enter details to onboard a new staff member.'}
+          </p>
         </div>
       </div>
 
@@ -226,11 +250,17 @@ export default function AdminStaff({ activeTab, setActiveTab }: { activeTab: str
           </div>
 
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <button type="button" onClick={() => {setError(''); setSuccessMsg(''); setFormData({name: '', email: '', phone: '', role: '', department: ''})}} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              Clear
+            <button type="button" onClick={() => {
+              setError(''); 
+              setSuccessMsg(''); 
+              setFormData({name: '', email: '', phone: '', role: '', department: ''});
+              setEditingId(null);
+              if (setActiveTab) setActiveTab('staff-list');
+            }} className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              Cancel
             </button>
             <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">
-              {loading ? 'Registering...' : 'Register Staff'}
+              {loading ? 'Registering...' : (editingId ? 'Update Staff' : 'Register Staff')}
             </button>
           </div>
         </form>
