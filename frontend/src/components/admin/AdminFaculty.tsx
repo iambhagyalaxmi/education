@@ -6,6 +6,7 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
   const [facultyList, setFacultyList] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', department: '', role: 'faculty', profilePic: '' });
+  const [departments, setDepartments] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -21,7 +22,13 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
       });
   };
 
-  useEffect(() => { fetchFaculty(); }, []);
+  useEffect(() => { 
+    fetchFaculty(); 
+    fetch('/api/departments')
+      .then(res => res.json())
+      .then(data => setDepartments(Array.isArray(data) ? data : []))
+      .catch(() => setDepartments([]));
+  }, []);
 
   const saveFaculty = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +142,22 @@ export default function AdminFaculty({ activeTab: _activeTab }: { activeTab: str
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Department *</label>
-                <input type="text" required value={form.department} onChange={e => setForm({...form, department: e.target.value})} placeholder="e.g. Computer Science" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm" />
+                <select required value={form.department} onChange={e => setForm({...form, department: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm">
+                  <option value="">Select Department...</option>
+                  {departments.length > 0 ? (
+                    departments.map(dept => (
+                      <option key={dept.id} value={dept.name}>{dept.name}</option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Information Technology">Information Technology</option>
+                      <option value="Mechanical Engineering">Mechanical Engineering</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Physics">Physics</option>
+                    </>
+                  )}
+                </select>
               </div>
               <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
