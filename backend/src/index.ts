@@ -42,10 +42,12 @@ import gradingHandler from './api/grading';
 import announcementsHandler from './api/announcements';
 import messagesHandler from './api/messages';
 import internalChatHandler from './api/internalChat';
+import lessonPlansHandler from './api/lessonPlans';
 
 app.use('/api/auth', authRoutes); // Keep legacy auth
 
 // Map Vercel serverless functions to Express routes
+app.all('/api/lesson-plans', lessonPlansHandler as any);
 app.all('/api/analytics', analyticsHandler as any);
 app.all('/api/audit', auditHandler as any);
 app.all('/api/chat', chatHandler as any);

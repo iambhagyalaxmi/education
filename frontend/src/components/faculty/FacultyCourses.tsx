@@ -26,6 +26,8 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
   const [showCreatePlanModal, setShowCreatePlanModal] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [uploadForm, setUploadForm] = useState({ title: '', description: '', fileType: 'PDF', fileSize: '2048' });
+  const [plans, setPlans] = useState<any[]>([]);
+  const [planForm, setPlanForm] = useState({ topic: '', date: '', duration: '', objectives: '', tool: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -41,10 +43,22 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
     }
   };
 
+  const fetchPlans = async () => {
+    try {
+      const res = await fetch('/api/lesson-plans');
+      if (res.ok) setPlans(await res.json());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     if (activeTab === 'courses-materials') {
       fetchMaterials();
+    }
+    if (activeTab === 'courses-plans') {
+      fetchPlans();
     }
   }, [activeTab]);
 
@@ -78,6 +92,41 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
       if (res.ok) {
         fetchMaterials();
       }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreatePlan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch('/api/lesson-plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(planForm)
+      });
+      if (res.ok) {
+        setSuccess('Lesson plan created successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+        setShowCreatePlanModal(false);
+        setPlanForm({ topic: '', date: '', duration: '', objectives: '', tool: '' });
+        fetchPlans();
+      } else {
+        setError('Failed to create lesson plan');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePlan = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this lesson plan?')) return;
+    try {
+      const res = await fetch(`/api/lesson-plans?id=${id}`, { method: 'DELETE' });
+      if (res.ok) fetchPlans();
     } catch (err) {
       console.error(err);
     }
@@ -400,25 +449,35 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {[
-                { date: 'Mon, Oct 18', topic: 'Binary Search Trees (BST) Introduction', tool: 'Chalk & Board, Slides', status: 'Completed', color: 'emerald' },
-                { date: 'Wed, Oct 20', topic: 'BST Operations: Insertion, Deletion', tool: 'Live Coding, Projector', status: 'In Progress', color: 'blue' },
-                { date: 'Fri, Oct 22', topic: 'AVL Trees Overview and Rotations', tool: 'Interactive Animation, Slides', status: 'Pending', color: 'slate' }
-              ].map((lesson, i) => (
-                <tr key={i} className="hover:bg-slate-50 transition-colors group">
-                  <td className="px-6 py-4 font-semibold text-slate-900">{lesson.date}</td>
-                  <td className="px-6 py-4">{lesson.topic}</td>
-                  <td className="px-6 py-4 text-slate-500">{lesson.tool}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-${lesson.color}-100 text-${lesson.color}-700`}>
-                      {lesson.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button onClick={() => alert('Opening context menu...')} className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button>
+              {plans.length > 0 ? plans.map((lesson) => {
+                const isCompleted = lesson.status === 'Completed';
+                const isInProgress = lesson.status === 'In Progress';
+                const color = isCompleted ? 'emerald' : isInProgress ? 'blue' : 'slate';
+                
+                return (
+                  <tr key={lesson.id} className="hover:bg-slate-50 transition-colors group">
+                    <td className="px-6 py-4 font-semibold text-slate-900">{new Date(lesson.date).toLocaleDateString()}</td>
+                    <td className="px-6 py-4">{lesson.topic}</td>
+                    <td className="px-6 py-4 text-slate-500">{lesson.tool}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-${color}-100 text-${color}-700`}>
+                        {lesson.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => handleDeletePlan(lesson.id)} className="text-slate-400 hover:text-red-600 transition-colors" title="Delete">
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              }) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                    No lesson plans found. Click "+ Create Plan" to add one.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -433,28 +492,36 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={(e) => { e.preventDefault(); setShowCreatePlanModal(false); alert('Lesson plan created successfully!'); }} className="p-6 space-y-4">
+            <form onSubmit={handleCreatePlan} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Topic / Title</label>
-                <input type="text" placeholder="e.g. Introduction to Trees" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
+                <input type="text" value={planForm.topic} onChange={e => setPlanForm({...planForm, topic: e.target.value})} placeholder="e.g. Introduction to Trees" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Date</label>
-                  <input type="date" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
+                  <input type="date" value={planForm.date} onChange={e => setPlanForm({...planForm, date: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Duration (mins)</label>
-                  <input type="number" placeholder="60" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
+                  <input type="number" value={planForm.duration} onChange={e => setPlanForm({...planForm, duration: e.target.value})} placeholder="60" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Pedagogical Tool</label>
+                  <input type="text" value={planForm.tool} onChange={e => setPlanForm({...planForm, tool: e.target.value})} placeholder="e.g. Chalk & Board, Slides" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Objectives</label>
-                <textarea rows={3} placeholder="What will students learn?" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required></textarea>
+                <textarea rows={3} value={planForm.objectives} onChange={e => setPlanForm({...planForm, objectives: e.target.value})} placeholder="What will students learn?" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required></textarea>
               </div>
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setShowCreatePlanModal(false)} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
-                <button type="submit" className="px-4 py-2 font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">Save Plan</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Saving...' : 'Save Plan'}
+                </button>
               </div>
             </form>
           </div>

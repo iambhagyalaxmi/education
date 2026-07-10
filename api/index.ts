@@ -678,6 +678,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ---- LESSON PLANS ----
+    if (route === 'lesson-plans') {
+      if (req.method === 'GET') {
+        const plans = await prisma.lessonPlan.findMany({ orderBy: { date: 'asc' } });
+        return res.status(200).json(plans);
+      }
+      if (req.method === 'POST') {
+        const { topic, date, duration, objectives, tool } = req.body;
+        const newPlan = await prisma.lessonPlan.create({ data: { topic, date: new Date(date), duration: parseInt(duration), objectives, tool: tool || 'Standard Tool', status: 'Pending' } });
+        return res.status(201).json(newPlan);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (id) await prisma.lessonPlan.delete({ where: { id: String(id) } });
+        return res.status(204).end();
+      }
+    }
+
     // ---- MESSAGES ----
     if (route === 'messages') {
       if (req.method === 'GET') {
