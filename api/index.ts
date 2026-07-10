@@ -686,6 +686,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ---- INTERNAL CHAT ----
+    if (route === 'internal-chat') {
+      if (req.method === 'GET') {
+        const { chatId } = req.query;
+        if (chatId) {
+          const messages = await prisma.internalChatMessage.findMany({ where: { chatId: String(chatId) }, orderBy: { createdAt: 'asc' } });
+          return res.status(200).json(messages);
+        } else {
+          const chats = await prisma.internalChat.findMany({ orderBy: { updatedAt: 'desc' }, include: { messages: { orderBy: { createdAt: 'desc' }, take: 1 } } });
+          return res.status(200).json(chats);
+        }
+      }
+      if (req.method === 'POST') {
+        const { action, name, type, chatId, senderId, senderName, content } = req.body;
+        if (action === 'CREATE_CHAT') {
+          const chat = await prisma.internalChat.create({ data: { name: name || 'New Group', type: type || 'Group' } });
+          return res.status(201).json(chat);
+        } 
+        if (action === 'SEND_MESSAGE') {
+          const message = await prisma.internalChatMessage.create({ data: { chatId: String(chatId), senderId: String(senderId), senderName: String(senderName || 'Unknown User'), content: String(content) } });
+          await prisma.internalChat.update({ where: { id: String(chatId) }, data: { updatedAt: new Date() } });
+          return res.status(201).json(message);
+        }
+        return res.status(400).json({ error: 'Invalid action' });
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (id) await prisma.internalChat.delete({ where: { id: String(id) } });
+        return res.status(204).end();
+      }
+    }
+
     // ---- SEMESTERS ----
     if (route === 'semesters') {
       if (req.method === 'GET') {

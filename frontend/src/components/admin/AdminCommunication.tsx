@@ -14,6 +14,12 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
   const [messages, setMessages] = useState<any[]>([]);
   const [msgForm, setMsgForm] = useState({ type: 'Email', audience: 'All Students', subject: '', body: '' });
 
+  // Internal Chat State
+  const [internalChats, setInternalChats] = useState<any[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [newChatMessage, setNewChatMessage] = useState('');
+
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -25,9 +31,18 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
     fetch('/api/messages').then(res => res.json()).then(data => setMessages(Array.isArray(data) ? data : [])).catch(console.error);
   };
 
+  const fetchInternalChats = () => {
+    fetch('/api/internal-chat').then(res => res.json()).then(data => setInternalChats(Array.isArray(data) ? data : [])).catch(console.error);
+  };
+  
+  const fetchChatMessages = (chatId: string) => {
+    fetch(`/api/internal-chat?chatId=${chatId}`).then(res => res.json()).then(data => setChatMessages(Array.isArray(data) ? data : [])).catch(console.error);
+  };
+
   useEffect(() => {
     fetchAnnouncements();
     fetchMessages();
+    fetchInternalChats();
   }, []);
 
   const saveAnnouncement = async (e: React.FormEvent) => {
@@ -54,6 +69,38 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
     setTimeout(() => setSuccessMsg(''), 3000);
     fetchAnnouncements();
   };
+
+  const createNewChat = async () => {
+    const name = prompt('Enter a name for the new Group Chat:');
+    if (!name) return;
+    setSaving(true);
+    await fetch('/api/internal-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'CREATE_CHAT', name, type: 'Group' }) });
+    setSaving(false);
+    fetchInternalChats();
+  };
+
+  const sendChatMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChatMessage.trim() || !activeChatId) return;
+    
+    await fetch('/api/internal-chat', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ action: 'SEND_MESSAGE', chatId: activeChatId, senderId: 'admin', senderName: 'Administrator', content: newChatMessage }) 
+    });
+    
+    setNewChatMessage('');
+    fetchChatMessages(activeChatId);
+    fetchInternalChats();
+  };
+
+  useEffect(() => {
+    if (activeChatId) {
+      fetchChatMessages(activeChatId);
+      const interval = setInterval(() => fetchChatMessages(activeChatId), 3000);
+      return () => clearInterval(interval);
+    }
+  }, [activeChatId]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,16 +311,94 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Internal Chat System</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Monitor and manage internal messaging.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Communicate with staff and administrators.</p>
         </div>
-        <button onClick={() => alert('Opening group chat configuration...')} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={createNewChat} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <MessageSquare size={18} /> New Group Chat
         </button>
       </div>
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col items-center justify-center h-64">
-        <MessageSquare size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
-        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Chat Module Active</h3>
-        <p className="text-slate-500 dark:text-slate-400 mt-2 text-center max-w-md">The real-time internal communication server is running. No active administrative alerts at this time.</p>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex h-[600px] overflow-hidden">
+        {/* Sidebar */}
+        <div className="w-1/3 border-r border-slate-100 dark:border-slate-800 flex flex-col">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+            <h3 className="font-bold text-slate-700 dark:text-slate-200">Chat Groups</h3>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {internalChats.map((chat) => (
+              <button 
+                key={chat.id}
+                onClick={() => setActiveChatId(chat.id)}
+                className={`w-full text-left p-3 rounded-xl transition-colors flex flex-col gap-1 ${activeChatId === chat.id ? 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent'}`}
+              >
+                <div className="flex justify-between items-center w-full">
+                  <span className={`font-bold ${activeChatId === chat.id ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                    {chat.name}
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    {new Date(chat.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                  {chat.messages && chat.messages.length > 0 ? (
+                    <span>{chat.messages[0].senderName}: {chat.messages[0].content}</span>
+                  ) : (
+                    <span className="italic">No messages yet</span>
+                  )}
+                </div>
+              </button>
+            ))}
+            {internalChats.length === 0 && (
+              <div className="p-4 text-center text-slate-500 text-sm">No chat groups available.</div>
+            )}
+          </div>
+        </div>
+        
+        {/* Chat Area */}
+        <div className="w-2/3 flex flex-col bg-slate-50 dark:bg-slate-900/50">
+          {activeChatId ? (
+            <>
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center">
+                <h3 className="font-bold text-slate-800 dark:text-slate-200">
+                  {internalChats.find(c => c.id === activeChatId)?.name}
+                </h3>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {chatMessages.map(msg => (
+                  <div key={msg.id} className={`flex flex-col max-w-[80%] ${msg.senderId === 'admin' ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+                    <span className="text-xs text-slate-500 mb-1 ml-1">{msg.senderName}</span>
+                    <div className={`px-4 py-2 rounded-2xl ${msg.senderId === 'admin' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none'}`}>
+                      {msg.content}
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-1">{new Date(msg.createdAt).toLocaleTimeString()}</span>
+                  </div>
+                ))}
+                {chatMessages.length === 0 && (
+                  <div className="h-full flex items-center justify-center text-slate-400 italic">No messages in this chat. Start the conversation!</div>
+                )}
+              </div>
+              <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                <form onSubmit={sendChatMessage} className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={newChatMessage}
+                    onChange={e => setNewChatMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
+                  />
+                  <button type="submit" disabled={!newChatMessage.trim()} className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                    <Send size={18} className="ml-1" />
+                  </button>
+                </form>
+              </div>
+            </>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-slate-400">
+              <MessageSquare size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
+              <p>Select a chat group to view messages</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
