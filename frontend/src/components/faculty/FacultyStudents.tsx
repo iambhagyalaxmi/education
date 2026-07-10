@@ -14,7 +14,8 @@ import {
   Edit3,
   Send,
   Plus,
-  UploadCloud
+  UploadCloud,
+  CheckCircle
 } from 'lucide-react';
 
 interface FacultyStudentsProps {
