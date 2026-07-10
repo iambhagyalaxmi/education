@@ -3,7 +3,6 @@ import {
   Users, 
   Search, 
   Filter, 
-  MoreVertical, 
   Download, 
   Mail, 
   Eye,
@@ -11,7 +10,10 @@ import {
   Award,
   X,
   Save,
-  UserPlus
+  UserPlus,
+  Edit3,
+  Send,
+  Plus
 } from 'lucide-react';
 
 interface FacultyStudentsProps {
@@ -51,6 +53,9 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
   const [students, setStudents] = useState(MOCK_STUDENTS);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({ name: '', email: '', roll: '', batch: '', profilePic: '' });
+
+  const [showViewModal, setShowViewModal] = useState<any>(null);
+  const [showMessageModal, setShowMessageModal] = useState<any>(null);
 
   const totalPages = Math.ceil(students.length / itemsPerPage);
   const paginatedStudents = students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -165,14 +170,17 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => alert(`Viewing profile for ${student.name}...`)} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="View Profile">
+                      <button onClick={() => setShowViewModal(student)} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="View Profile">
                         <Eye size={18} />
                       </button>
-                      <button onClick={() => alert(`Opening message window for ${student.name}...`)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Message">
+                      <button onClick={() => setShowMessageModal(student)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Message">
                         <Mail size={18} />
                       </button>
-                      <button onClick={() => alert(`Opening context menu for ${student.name}...`)} className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors">
-                        <MoreVertical size={18} />
+                      <button onClick={() => {
+                        setEditForm({...editForm, name: student.name, email: student.email});
+                        setShowEditModal(true);
+                      }} className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors" title="Edit Student">
+                        <Edit3 size={18} />
                       </button>
                     </div>
                   </td>
@@ -580,6 +588,81 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
                 <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
                 <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
                   <Save size={18} /> Add Student
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Profile Modal */}
+      {showViewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-fade-in-up">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-lg font-bold">
+                  {showViewModal.name.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800">{showViewModal.name}</h3>
+                  <p className="text-sm text-slate-500">{showViewModal.roll}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowViewModal(null)} className="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <p className="text-sm text-slate-500 mb-1">Email</p>
+                <p className="font-medium text-slate-800">{showViewModal.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 mb-1">Batch</p>
+                <p className="font-medium text-slate-800">{showViewModal.batch}</p>
+              </div>
+              <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl">
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Attendance</p>
+                  <p className={`font-bold ${showViewModal.attendance > 75 ? 'text-emerald-700' : 'text-orange-700'}`}>{showViewModal.attendance}%</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Status</p>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${showViewModal.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>{showViewModal.status}</span>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-slate-100 bg-slate-50">
+              <button onClick={() => setShowViewModal(null)} className="w-full py-2.5 bg-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-300 transition-colors">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Modal */}
+      {showMessageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-fade-in-up">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold text-slate-800">New Message to {showMessageModal.name}</h3>
+              <button onClick={() => setShowMessageModal(null)} className="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); setShowMessageModal(null); alert('Message sent successfully!'); }} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Subject</label>
+                <input required type="text" placeholder="e.g. Regarding your attendance..." className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Message</label>
+                <textarea required rows={4} placeholder="Type your message here..." className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"></textarea>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowMessageModal(null)} className="px-5 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                <button type="submit" className="px-5 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2">
+                  <Send size={18} /> Send Message
                 </button>
               </div>
             </form>
