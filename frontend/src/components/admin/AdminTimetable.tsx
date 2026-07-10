@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Clock, Edit2, Calendar, MapPin, Trash2, X, Edit } from 'lucide-react';
+import { Search, Plus, Clock, Edit2, MapPin, Trash2, X, Edit } from 'lucide-react';
 
 export default function AdminTimetable({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
