@@ -413,8 +413,8 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
                       {lesson.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <button className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button>
+                  <td className="px-6 py-4 text-right">
+                    <button onClick={() => alert('Opening context menu...')} className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button>
                   </td>
                 </tr>
               ))}

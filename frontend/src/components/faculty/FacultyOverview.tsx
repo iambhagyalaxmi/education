@@ -182,7 +182,7 @@ export default function FacultyOverview() {
                   <td className="px-6 py-4">Lab 3</td>
                   <td className="px-6 py-4">Sem 4 - B2</td>
                   <td className="px-6 py-4"><span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"><CheckCircle2 size={14} /> Completed</span></td>
-                  <td className="px-6 py-4 text-right"><button className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button></td>
+                  <td className="px-6 py-4 text-right"><button onClick={() => alert('Opening context menu...')} className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button></td>
                 </tr>
                 <tr className="hover:bg-slate-50 transition-colors group border-l-4 border-l-purple-500">
                   <td className="px-6 py-4 font-semibold text-slate-900">10:30 AM</td>
@@ -190,7 +190,7 @@ export default function FacultyOverview() {
                   <td className="px-6 py-4">Room 402</td>
                   <td className="px-6 py-4">Sem 4 - B1</td>
                   <td className="px-6 py-4"><span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700"><Clock size={14} /> Ongoing</span></td>
-                  <td className="px-6 py-4 text-right"><button className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button></td>
+                  <td className="px-6 py-4 text-right"><button onClick={() => alert('Opening context menu...')} className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button></td>
                 </tr>
                 <tr className="hover:bg-slate-50 transition-colors group">
                   <td className="px-6 py-4 font-semibold text-slate-900">01:00 PM</td>
@@ -198,7 +198,7 @@ export default function FacultyOverview() {
                   <td className="px-6 py-4">Room 405</td>
                   <td className="px-6 py-4">Sem 6 - A</td>
                   <td className="px-6 py-4"><span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600"><Clock size={14} /> Upcoming</span></td>
-                  <td className="px-6 py-4 text-right"><button className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button></td>
+                  <td className="px-6 py-4 text-right"><button onClick={() => alert('Opening context menu...')} className="text-slate-400 hover:text-emerald-600 transition-colors"><MoreVertical size={18} /></button></td>
                 </tr>
               </tbody>
             </table>
