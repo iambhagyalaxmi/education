@@ -359,6 +359,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ---- CLASSROOMS ----
+    if (route === 'classrooms') {
+      if (req.method === 'GET') {
+        const classrooms = await prisma.classroom.findMany({ orderBy: { room: 'asc' } });
+        return res.status(200).json(classrooms);
+      }
+      if (req.method === 'POST') {
+        const { room, type, capacity, building, status } = req.body;
+        if (!room || !type || !capacity || !building) return res.status(400).json({ error: 'Missing required fields' });
+        const classroom = await prisma.classroom.create({ data: { room, type, capacity: parseInt(capacity), building, status: status || 'Available' } });
+        return res.status(201).json(classroom);
+      }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        const { room, type, capacity, building, status } = req.body;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Classroom ID is required' });
+        const dataToUpdate: any = {};
+        if (room !== undefined) dataToUpdate.room = room;
+        if (type !== undefined) dataToUpdate.type = type;
+        if (capacity !== undefined) dataToUpdate.capacity = parseInt(capacity);
+        if (building !== undefined) dataToUpdate.building = building;
+        if (status !== undefined) dataToUpdate.status = status;
+        const classroom = await prisma.classroom.update({ where: { id }, data: dataToUpdate });
+        return res.status(200).json(classroom);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Classroom ID is required' });
+        await prisma.classroom.delete({ where: { id } });
+        return res.status(200).json({ success: true });
+      }
+    }
+
     // ---- COURSES ----
     if (route === 'courses') {
       if (req.method === 'GET') {
@@ -507,6 +540,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ---- GRADING ----
+    if (route === 'grading') {
+      if (req.method === 'GET') {
+        const gradingScales = await prisma.gradingScale.findMany({ orderBy: { minScore: 'desc' } });
+        return res.status(200).json(gradingScales);
+      }
+      if (req.method === 'POST') {
+        const { grade, minScore, maxScore, gpa } = req.body;
+        if (!grade || minScore === undefined || maxScore === undefined || gpa === undefined) return res.status(400).json({ error: 'Missing required fields' });
+        const gradingScale = await prisma.gradingScale.create({ data: { grade, minScore: parseInt(minScore), maxScore: parseInt(maxScore), gpa: parseFloat(gpa) } });
+        return res.status(201).json(gradingScale);
+      }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        const { grade, minScore, maxScore, gpa } = req.body;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Grading scale ID is required' });
+        const dataToUpdate: any = {};
+        if (grade !== undefined) dataToUpdate.grade = grade;
+        if (minScore !== undefined) dataToUpdate.minScore = parseInt(minScore);
+        if (maxScore !== undefined) dataToUpdate.maxScore = parseInt(maxScore);
+        if (gpa !== undefined) dataToUpdate.gpa = parseFloat(gpa);
+        const gradingScale = await prisma.gradingScale.update({ where: { id }, data: dataToUpdate });
+        return res.status(200).json(gradingScale);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Grading scale ID is required' });
+        await prisma.gradingScale.delete({ where: { id } });
+        return res.status(200).json({ success: true });
+      }
+    }
+
     // ---- HOSTEL ----
     if (route === 'hostel') {
       const url = req.url || '';
@@ -621,6 +686,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ---- SEMESTERS ----
+    if (route === 'semesters') {
+      if (req.method === 'GET') {
+        const semesters = await prisma.semester.findMany({ orderBy: { startDate: 'desc' } });
+        return res.status(200).json(semesters);
+      }
+      if (req.method === 'POST') {
+        const { name, startDate, endDate, status } = req.body;
+        if (!name || !startDate || !endDate) return res.status(400).json({ error: 'Missing required fields' });
+        const semester = await prisma.semester.create({ data: { name, startDate: new Date(startDate), endDate: new Date(endDate), status: status || 'Upcoming' } });
+        return res.status(201).json(semester);
+      }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        const { name, startDate, endDate, status } = req.body;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Semester ID is required' });
+        const dataToUpdate: any = {};
+        if (name !== undefined) dataToUpdate.name = name;
+        if (startDate !== undefined) dataToUpdate.startDate = new Date(startDate);
+        if (endDate !== undefined) dataToUpdate.endDate = new Date(endDate);
+        if (status !== undefined) dataToUpdate.status = status;
+        const semester = await prisma.semester.update({ where: { id }, data: dataToUpdate });
+        return res.status(200).json(semester);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Semester ID is required' });
+        await prisma.semester.delete({ where: { id } });
+        return res.status(200).json({ success: true });
+      }
+    }
+
     // ---- STAFF ----
     if (route === 'staff') {
       if (req.method === 'GET') {
@@ -685,6 +782,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { id } = req.query;
         if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Subject ID is required' });
         await prisma.subject.delete({ where: { id } });
+        return res.status(200).json({ success: true });
+      }
+    }
+
+    // ---- SYLLABUS ----
+    if (route === 'syllabus') {
+      if (req.method === 'GET') {
+        const { subjectId } = req.query;
+        const whereClause = subjectId ? { subjectId: String(subjectId) } : {};
+        const syllabuses = await prisma.syllabus.findMany({ where: whereClause, include: { subject: true }, orderBy: { createdAt: 'desc' } });
+        return res.status(200).json(syllabuses);
+      }
+      if (req.method === 'POST') {
+        const { subjectId, title, description, topics } = req.body;
+        if (!subjectId || !title || !topics) return res.status(400).json({ error: 'Missing required fields' });
+        const syllabus = await prisma.syllabus.create({ data: { subjectId, title, description, topics } });
+        return res.status(201).json(syllabus);
+      }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        const { title, description, topics } = req.body;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Syllabus ID is required' });
+        const dataToUpdate: any = {};
+        if (title !== undefined) dataToUpdate.title = title;
+        if (description !== undefined) dataToUpdate.description = description;
+        if (topics !== undefined) dataToUpdate.topics = topics;
+        const syllabus = await prisma.syllabus.update({ where: { id }, data: dataToUpdate });
+        return res.status(200).json(syllabus);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Syllabus ID is required' });
+        await prisma.syllabus.delete({ where: { id } });
         return res.status(200).json({ success: true });
       }
     }
