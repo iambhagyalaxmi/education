@@ -12,7 +12,8 @@ import {
   CheckCircle,
   File,
   Upload,
-  Trash2
+  Trash2,
+  Edit3
 } from 'lucide-react';
 
 interface FacultyCoursesProps {
@@ -27,7 +28,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
   const [selectedFileName, setSelectedFileName] = useState('');
   const [uploadForm, setUploadForm] = useState({ title: '', description: '', fileType: 'PDF', fileSize: '2048' });
   const [plans, setPlans] = useState<any[]>([]);
-  const [planForm, setPlanForm] = useState({ topic: '', date: '', duration: '', objectives: '', tool: '' });
+  const [planForm, setPlanForm] = useState({ id: '', topic: '', date: '', duration: '', objectives: '', tool: '', status: 'Pending' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -101,25 +102,43 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('/api/lesson-plans', {
-        method: 'POST',
+      const isEditing = !!planForm.id;
+      const url = isEditing ? `/api/lesson-plans?id=${planForm.id}` : '/api/lesson-plans';
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(planForm)
       });
+      
       if (res.ok) {
-        setSuccess('Lesson plan created successfully!');
+        setSuccess(`Lesson plan ${isEditing ? 'updated' : 'created'} successfully!`);
         setTimeout(() => setSuccess(''), 3000);
         setShowCreatePlanModal(false);
-        setPlanForm({ topic: '', date: '', duration: '', objectives: '', tool: '' });
+        setPlanForm({ id: '', topic: '', date: '', duration: '', objectives: '', tool: '', status: 'Pending' });
         fetchPlans();
       } else {
-        setError('Failed to create lesson plan');
+        setError(`Failed to ${isEditing ? 'update' : 'create'} lesson plan`);
       }
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const openEditPlan = (plan: any) => {
+    setPlanForm({
+      id: plan.id,
+      topic: plan.topic,
+      date: new Date(plan.date).toISOString().split('T')[0],
+      duration: plan.duration.toString(),
+      objectives: plan.objectives,
+      tool: plan.tool,
+      status: plan.status
+    });
+    setShowCreatePlanModal(true);
   };
 
   const handleDeletePlan = async (id: string) => {
@@ -419,7 +438,10 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
             <option>CS401: Data Structures</option>
             <option>CS402: Operating Systems</option>
           </select>
-          <button onClick={() => setShowCreatePlanModal(true)} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+          <button onClick={() => {
+            setPlanForm({ id: '', topic: '', date: '', duration: '', objectives: '', tool: '', status: 'Pending' });
+            setShowCreatePlanModal(true);
+          }} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
             + Create Plan
           </button>
         </div>
@@ -465,9 +487,14 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button onClick={() => handleDeletePlan(lesson.id)} className="text-slate-400 hover:text-red-600 transition-colors" title="Delete">
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex justify-end gap-1">
+                        <button onClick={() => openEditPlan(lesson)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit">
+                          <Edit3 size={18} />
+                        </button>
+                        <button onClick={() => handleDeletePlan(lesson.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -487,7 +514,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-xl animate-fade-in-up">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-800">Create Lesson Plan</h3>
+              <h3 className="text-xl font-bold text-slate-800">{planForm.id ? 'Edit Lesson Plan' : 'Create Lesson Plan'}</h3>
               <button onClick={() => setShowCreatePlanModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <X size={24} />
               </button>
@@ -508,9 +535,17 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Pedagogical Tool</label>
-                  <input type="text" value={planForm.tool} onChange={e => setPlanForm({...planForm, tool: e.target.value})} placeholder="e.g. Chalk & Board, Slides" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <input type="text" value={planForm.tool} onChange={e => setPlanForm({...planForm, tool: e.target.value})} placeholder="e.g. Chalk & Board" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Status</label>
+                  <select value={planForm.status} onChange={e => setPlanForm({...planForm, status: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
                 </div>
               </div>
               <div>

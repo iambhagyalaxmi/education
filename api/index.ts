@@ -689,6 +689,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const newPlan = await prisma.lessonPlan.create({ data: { topic, date: new Date(date), duration: parseInt(duration), objectives, tool: tool || 'Standard Tool', status: 'Pending' } });
         return res.status(201).json(newPlan);
       }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        const { topic, date, duration, objectives, tool, status } = req.body;
+        if (id) {
+          const updatedPlan = await prisma.lessonPlan.update({
+            where: { id: String(id) },
+            data: { topic, date: date ? new Date(date) : undefined, duration: duration ? parseInt(duration) : undefined, objectives, tool, status }
+          });
+          return res.status(200).json(updatedPlan);
+        }
+        return res.status(400).json({ error: 'Plan ID required' });
+      }
       if (req.method === 'DELETE') {
         const { id } = req.query;
         if (id) await prisma.lessonPlan.delete({ where: { id: String(id) } });

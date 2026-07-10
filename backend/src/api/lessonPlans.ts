@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -31,6 +31,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
       return res.status(201).json(newPlan);
+    }
+
+    if (req.method === 'PUT') {
+      const { id } = req.query;
+      const { topic, date, duration, objectives, tool, status } = req.body;
+      if (!id) return res.status(400).json({ error: 'Plan ID is required' });
+      
+      const updatedPlan = await prisma.lessonPlan.update({
+        where: { id: String(id) },
+        data: {
+          topic,
+          date: date ? new Date(date) : undefined,
+          duration: duration ? parseInt(duration) : undefined,
+          objectives,
+          tool,
+          status
+        }
+      });
+      return res.status(200).json(updatedPlan);
     }
 
     if (req.method === 'DELETE') {
