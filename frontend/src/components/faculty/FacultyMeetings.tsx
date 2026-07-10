@@ -17,6 +17,10 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
   const [startTime, setStartTime] = useState('');
   const [duration, setDuration] = useState('60');
   const [agenda, setAgenda] = useState('');
+  const [scheduledMeetings, setScheduledMeetings] = useState([
+    { course: 'CS401: Data Structures', type: 'Lecture', link: 'meet.google.com/abc-defg-hij', platform: 'Google Meet', active: true },
+    { course: 'CS402: Operating Systems', type: 'Doubt Clearing', link: 'zoom.us/j/987654321', platform: 'Zoom', active: false },
+  ]);
 
   const renderScheduleOnlineClass = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -95,7 +99,21 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
           <button 
             onClick={() => {
               if (date && startTime && agenda) {
+                const newLink = platform === 'Google Meet' 
+                  ? `meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 6)}-${Math.random().toString(36).substring(2, 5)}` 
+                  : `zoom.us/j/${Math.floor(Math.random() * 1000000000)}`;
+                
+                const newMeeting = {
+                  course: course.split(':')[0] || course,
+                  type: agenda,
+                  link: newLink,
+                  platform,
+                  active: true
+                };
+                
+                setScheduledMeetings([newMeeting, ...scheduledMeetings]);
                 alert(`Successfully generated and scheduled ${platform} link for ${course}!`);
+                
                 setPlatform('Google Meet');
                 setCourse('CS401: Data Structures - Batch A');
                 setDate('');
@@ -128,10 +146,13 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[
-          { course: 'CS401: Data Structures', type: 'Lecture', link: platform === 'Google Meet' ? 'meet.google.com/abc-defg-hij' : 'zoom.us/j/123456789', active: true },
-          { course: 'CS402: Operating Systems', type: 'Doubt Clearing', link: platform === 'Google Meet' ? 'meet.google.com/xyz-uvwx-yz1' : 'zoom.us/j/987654321', active: false },
-        ].map((meeting, i) => (
+        {scheduledMeetings.filter(m => m.platform === platform).length === 0 ? (
+          <div className="col-span-1 lg:col-span-2 text-center p-8 bg-slate-50 rounded-2xl border border-slate-100">
+            <p className="text-slate-500 font-medium">No scheduled meetings for {platform}.</p>
+          </div>
+        ) : scheduledMeetings
+            .filter(meeting => meeting.platform === platform)
+            .map((meeting, i) => (
           <div key={i} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col hover:border-emerald-200 transition-colors">
             <div className="flex justify-between items-start mb-4">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
