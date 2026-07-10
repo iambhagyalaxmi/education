@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -52,6 +52,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
       
       return res.status(201).json(newMaterial);
+    }
+
+    if (req.method === 'DELETE') {
+      const { id } = req.query;
+      if (!id) return res.status(400).json({ error: 'Material ID is required' });
+      await prisma.document.delete({ where: { id: String(id) } });
+      return res.status(204).end();
     }
   } catch (error: any) {
     console.error('Materials API Error:', error);

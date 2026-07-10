@@ -11,7 +11,8 @@ import {
   X,
   CheckCircle,
   File,
-  Upload
+  Upload,
+  Trash2
 } from 'lucide-react';
 
 interface FacultyCoursesProps {
@@ -67,6 +68,18 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
       setError((err instanceof Error ? err.message : String(err)));
     }
     setLoading(false);
+  };
+
+  const handleDeleteMaterial = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this material?')) return;
+    try {
+      const res = await fetch(`/api/materials?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchMaterials();
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const renderAssignedCourses = () => (
@@ -173,9 +186,14 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
                   <p className="text-xs text-slate-400 font-medium">{Math.round(file.fileSize / 1024)} MB • Uploaded {new Date(file.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
-              <a href={file.fileUrl || '#'} download className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
-                <Download size={18} />
-              </a>
+              <div className="flex gap-1">
+                <a href={file.fileUrl || '#'} download className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                  <Download size={18} />
+                </a>
+                <button onClick={() => handleDeleteMaterial(file.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <Trash2 size={18} />
+                </button>
+              </div>
             </div>
           ))}
           {materials.length === 0 && (

@@ -671,6 +671,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const newMaterial = await prisma.document.create({ data: { title, description: description || title, fileType: fileType.toUpperCase(), fileSize: parseInt(fileSize) || 1024, fileUrl: mockFileUrl, categoryId: category.id, keywords: [], status: 'active' } });
         return res.status(201).json(newMaterial);
       }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (id) await prisma.document.delete({ where: { id: String(id) } });
+        return res.status(204).end();
+      }
     }
 
     // ---- MESSAGES ----
