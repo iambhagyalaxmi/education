@@ -24,6 +24,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
       return res.status(201).json(newExam);
     }
+    if (req.method === 'PUT') {
+      const { id } = req.query;
+      if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Missing ID' });
+      const { name, course, date, time, room, status } = req.body;
+      const updatedExam = await prisma.examination.update({
+        where: { id },
+        data: { name, course, date, time, room, status }
+      });
+      return res.status(200).json(updatedExam);
+    }
+    if (req.method === 'DELETE') {
+      const { id } = req.query;
+      if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Missing ID' });
+      await prisma.examination.delete({ where: { id } });
+      return res.status(204).end();
+    }
   } catch (error: any) {
     console.error('Examinations API Error:', error);
     return res.status(500).json({ error: error.message || 'Internal Server Error' });

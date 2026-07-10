@@ -35,6 +35,10 @@ import departmentsHandler from './api/departments';
 import timetableHandler from './api/timetable';
 import materialsHandler from './api/materials';
 import subjectsHandler from './api/subjects';
+import syllabusHandler from './api/syllabus';
+import semestersHandler from './api/semesters';
+import classroomsHandler from './api/classrooms';
+import gradingHandler from './api/grading';
 
 app.use('/api/auth', authRoutes); // Keep legacy auth
 
@@ -48,11 +52,15 @@ app.all('/api/tickets', ticketsHandler as any);
 app.all('/api/students', studentsHandler as any);
 app.all('/api/courses', coursesHandler as any);
 app.all('/api/subjects', subjectsHandler as any);
+app.all('/api/syllabus', syllabusHandler as any);
+app.all('/api/semesters', semestersHandler as any);
+app.all('/api/classrooms', classroomsHandler as any);
+app.all('/api/grading', gradingHandler as any);
+app.use('/api/hostel', hostelHandler as any);
 app.all('/api/batches', batchesHandler as any);
 app.all('/api/staff', staffHandler as any);
-app.all('/api/hostel', hostelHandler as any);
-app.all('/api/transport', transportHandler as any);
-app.all('/api/hr', hrHandler as any);
+app.use('/api/transport', transportHandler as any);
+app.use('/api/hr', hrHandler as any);
 app.all('/api/admissions', admissionsHandler as any);
 app.all('/api/fees', feesHandler as any);
 app.all('/api/examinations', examinationsHandler as any);

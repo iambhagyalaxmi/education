@@ -21,6 +21,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
       return res.status(201).json(newEntry);
     }
+    if (req.method === 'PUT') {
+      const { id } = req.query;
+      if (!id || typeof id !== 'string') return res.status(400).json({ error: 'Missing ID' });
+      const { day, time, subject, faculty, room, course } = req.body;
+      const updatedEntry = await prisma.timetableEntry.update({
+        where: { id },
+        data: { day, time, subject, faculty, room, course }
+      });
+      return res.status(200).json(updatedEntry);
+    }
     if (req.method === 'DELETE') {
       const id = req.query.id as string;
       if (!id) return res.status(400).json({ error: 'Missing ID' });

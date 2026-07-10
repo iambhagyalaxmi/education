@@ -5,11 +5,113 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [rooms, setRooms] = useState<any[]>([]);
   const [allocations, setAllocations] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  
+  const [showRoomModal, setShowRoomModal] = useState(false);
+  const [showAllocationModal, setShowAllocationModal] = useState(false);
+  const [editRoomId, setEditRoomId] = useState<string | null>(null);
+  const [editAllocationId, setEditAllocationId] = useState<string | null>(null);
+  const [roomForm, setRoomForm] = useState({ roomNumber: '', block: '', roomType: 'AC', totalBeds: '', status: 'Available' });
+  const [allocationForm, setAllocationForm] = useState({ studentId: '', roomId: '', status: 'Allocated' });
+  const [loading, setLoading] = useState(false);
+
+  const fetchRooms = async () => {
+    try {
+      const res = await fetch('/api/hostel/rooms');
+      if (res.ok) setRooms(await res.json());
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchAllocations = async () => {
+    try {
+      const res = await fetch('/api/hostel/allocations');
+      if (res.ok) setAllocations(await res.json());
+    } catch (err) { console.error(err); }
+  };
 
   useEffect(() => {
-    fetch('/api/hostel/rooms').then(res => res.json()).then(data => setRooms(data)).catch(console.error);
-    fetch('/api/hostel/allocations').then(res => res.json()).then(data => setAllocations(data)).catch(console.error);
+    fetchRooms();
+    fetchAllocations();
+    fetch('/api/students').then(res => res.json()).then(data => setStudents(data)).catch(console.error);
   }, []);
+
+  const handleAddRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('/api/hostel/rooms', {
+        method: editRoomId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...roomForm, id: editRoomId })
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert("Error saving room: " + (data.error || 'Server error.'));
+        return;
+      }
+      setShowRoomModal(false);
+      setEditRoomId(null);
+      setRoomForm({ roomNumber: '', block: '', roomType: 'AC', totalBeds: '', status: 'Available' });
+      fetchRooms();
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteRoom = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this room? All allocations will be removed.')) return;
+    try {
+      const response = await fetch(`/api/hostel/rooms?id=${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete room');
+      fetchRooms();
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting room');
+    }
+  };
+
+  const handleAllocateRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('/api/hostel/allocations', {
+        method: editAllocationId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...allocationForm, id: editAllocationId })
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert("Error allocating room: " + (data.error || 'Server error.'));
+        return;
+      }
+      setShowAllocationModal(false);
+      setEditAllocationId(null);
+      setAllocationForm({ studentId: '', roomId: '', status: 'Allocated' });
+      fetchAllocations();
+      fetchRooms(); // refresh occupancy
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAllocation = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this allocation?')) return;
+    try {
+      const response = await fetch(`/api/hostel/allocations?id=${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete allocation');
+      fetchAllocations();
+      fetchRooms(); // refresh occupancy
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting allocation');
+    }
+  };
 
   const renderRooms = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -18,7 +120,7 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Hostel Rooms Overview</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage hostel blocks, room types, and availability.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => { setEditRoomId(null); setRoomForm({ roomNumber: '', block: '', roomType: 'AC', totalBeds: '', status: 'Available' }); setShowRoomModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> Add Room
         </button>
       </div>
@@ -84,10 +186,20 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
                   </td>
                   <td className="p-4 pr-6 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                      <button onClick={() => {
+                        setEditRoomId(item.id);
+                        setRoomForm({
+                          roomNumber: item.room,
+                          block: item.block,
+                          roomType: item.type,
+                          totalBeds: item.total.toString(),
+                          status: item.status
+                        });
+                        setShowRoomModal(true);
+                      }} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                      <button onClick={() => handleDeleteRoom(item.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
                         <Trash2 size={18} />
                       </button>
                     </div>
@@ -108,7 +220,11 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Room Allocation</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Assign and manage student hostel accommodations.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+        <button onClick={() => {
+          setEditAllocationId(null);
+          setAllocationForm({ studentId: '', roomId: '', status: 'Allocated' });
+          setShowAllocationModal(true);
+        }} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
           <UserCheck size={18} /> Allocate Room
         </button>
       </div>
@@ -123,12 +239,21 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
               }`}>
                 {alloc.status}
               </span>
-              <button className="text-slate-400 hover:text-indigo-600 transition-colors">
-                <Edit size={16} />
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => {
+                  setEditAllocationId(alloc.id);
+                  setAllocationForm({ studentId: alloc.studentId, roomId: rooms.find(r => r.room === alloc.room)?.id || '', status: alloc.status });
+                  setShowAllocationModal(true);
+                }} className="text-slate-400 hover:text-indigo-600 transition-colors" title="Edit">
+                  <Edit size={16} />
+                </button>
+                <button onClick={() => handleDeleteAllocation(alloc.id)} className="text-slate-400 hover:text-rose-600 transition-colors" title="Delete">
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
             <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-1">{alloc.student}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{alloc.studentId}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">ID: {alloc.studentId.substring(0, 8)}...</p>
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Assigned Room</p>
               {alloc.status === 'Allocated' ? (
@@ -140,6 +265,53 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
           </div>
         ))}
       </div>
+
+      {showAllocationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editAllocationId ? 'Edit Allocation' : 'Allocate Room to Student'}</h3>
+              <button onClick={() => setShowAllocationModal(false)} className="text-slate-400 hover:text-slate-500">
+                <Trash2 className="w-6 h-6 hidden" />
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleAllocateRoom} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Student</label>
+                <select required value={allocationForm.studentId} onChange={e => setAllocationForm({...allocationForm, studentId: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                  <option value="">Select Student...</option>
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>{s.firstName} {s.lastName}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Room</label>
+                <select required value={allocationForm.roomId} onChange={e => setAllocationForm({...allocationForm, roomId: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                  <option value="">Select Room...</option>
+                  {rooms.filter(r => (r.total - (r.occ || 0)) > 0).map(r => (
+                    <option key={r.id} value={r.id}>Room {r.room} (Block {r.block})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                <select required value={allocationForm.status} onChange={e => setAllocationForm({...allocationForm, status: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                  <option>Allocated</option>
+                  <option>Pending</option>
+                </select>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowAllocationModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Saving...' : 'Allocate Room'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -204,7 +376,64 @@ export default function AdminHostel({ activeTab }: { activeTab: string }) {
 
   switch (activeTab) {
     case 'hostel-rooms':
-      return renderRooms();
+      return (
+        <>
+          {renderRooms()}
+          {showRoomModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+                <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editRoomId ? 'Edit Room' : 'Add New Room'}</h3>
+                  <button onClick={() => setShowRoomModal(false)} className="text-slate-400 hover:text-slate-500">
+                    <Trash2 className="w-6 h-6 hidden" />
+                    &times;
+                  </button>
+                </div>
+                <form onSubmit={handleAddRoom} className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Room Number</label>
+                      <input type="text" required value={roomForm.roomNumber} onChange={e => setRoomForm({...roomForm, roomNumber: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Block</label>
+                      <input type="text" required value={roomForm.block} onChange={e => setRoomForm({...roomForm, block: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Room Type</label>
+                      <select required value={roomForm.roomType} onChange={e => setRoomForm({...roomForm, roomType: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                        <option>AC</option>
+                        <option>Non-AC</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Total Beds</label>
+                      <input type="number" required min="1" value={roomForm.totalBeds} onChange={e => setRoomForm({...roomForm, totalBeds: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                    <select required value={roomForm.status} onChange={e => setRoomForm({...roomForm, status: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                      <option>Available</option>
+                      <option>Partially Available</option>
+                      <option>Full</option>
+                      <option>Maintenance</option>
+                    </select>
+                  </div>
+                  <div className="pt-4 flex justify-end gap-3">
+                    <button type="button" onClick={() => setShowRoomModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                    <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                      {loading ? 'Saving...' : 'Save Room'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </>
+      );
     case 'hostel-allocation':
       return renderAllocation();
     case 'hostel-fees':

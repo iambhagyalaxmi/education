@@ -111,8 +111,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, isOpen, setIsOpe
       icon: Building2,
       id: 'departments',
       subItems: [
-        { id: 'dept-list', label: 'Department List' },
-        { id: 'dept-add', label: 'Add Department' }
+        { id: 'dept-list', label: 'Department List' }
       ]
     },
     {

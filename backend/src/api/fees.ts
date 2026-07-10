@@ -26,13 +26,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     if (req.method === 'PUT') {
       const targetId = req.query.id as string || req.body.id;
-      const { status } = req.body;
+      const { student, course, amount, dueDate, status, invoiceNo } = req.body;
       if (!targetId) return res.status(400).json({ error: 'Missing ID' });
       const updatedRecord = await prisma.feeRecord.update({
         where: { id: targetId },
-        data: { status }
+        data: { student, course, amount, dueDate, status, invoiceNo }
       });
       return res.status(200).json(updatedRecord);
+    }
+    if (req.method === 'DELETE') {
+      const targetId = req.query.id as string || req.body.id;
+      if (!targetId) return res.status(400).json({ error: 'Missing ID' });
+      await prisma.feeRecord.delete({
+        where: { id: targetId }
+      });
+      return res.status(204).end();
     }
   } catch (error: any) {
     console.error('Fees API Error:', error);

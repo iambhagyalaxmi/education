@@ -5,11 +5,53 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [payroll, setPayroll] = useState<any[]>([]);
   const [leaves, setLeaves] = useState<any[]>([]);
+  
+  const [staffList, setStaffList] = useState<any[]>([]);
+  const [showSalaryModal, setShowSalaryModal] = useState(false);
+  const [editSalaryId, setEditSalaryId] = useState<string | null>(null);
+  const [salaryForm, setSalaryForm] = useState({ userId: '', month: '', baseSalary: '', allowances: '', netPayable: '', status: 'Completed' });
+  const [loading, setLoading] = useState(false);
+
+  const fetchPayroll = () => fetch('/api/hr/payroll').then(res => res.json()).then(data => setPayroll(data)).catch(console.error);
 
   useEffect(() => {
-    fetch('/api/hr/payroll').then(res => res.json()).then(data => setPayroll(data)).catch(console.error);
+    fetchPayroll();
     fetch('/api/hr/leave').then(res => res.json()).then(data => setLeaves(data)).catch(console.error);
+    fetch('/api/staff').then(res => res.json()).then(data => setStaffList(data)).catch(console.error);
   }, []);
+
+  const handleSaveSalary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('/api/hr/payroll', {
+        method: editSalaryId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...salaryForm, id: editSalaryId })
+      });
+      if (response.ok) {
+        setShowSalaryModal(false);
+        fetchPayroll();
+      } else {
+        alert('Error saving salary record');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSalary = async (id: string) => {
+    if (!confirm('Delete this salary record?')) return;
+    try {
+      const response = await fetch(`/api/hr/payroll?id=${id}`, { method: 'DELETE' });
+      if (response.ok) fetchPayroll();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const renderSalary = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -18,7 +60,11 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Employee Salary</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage staff compensation, bonuses, and deductions.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => {
+          setEditSalaryId(null);
+          setSalaryForm({ userId: staffList[0]?.id || '', month: 'October 2024', baseSalary: '5000', allowances: '500', netPayable: '5500', status: 'Completed' });
+          setShowSalaryModal(true);
+        }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> Update Salary
         </button>
       </div>
@@ -71,11 +117,27 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
                   <td className="p-4 text-slate-600 dark:text-slate-400">{emp.dept}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400 font-medium">{emp.base}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400 font-medium">{emp.allow}</td>
-                  <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{emp.net}</td>
-                  <td className="p-4 pr-6 text-right">
-                    <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
-                      <Edit size={18} />
-                    </button>
+                  <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">${emp.net}</td>
+                  <td className="p-4 pr-6">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => {
+                        setEditSalaryId(emp.id);
+                        setSalaryForm({
+                          userId: '', // Cannot easily edit user for existing record in this simple view
+                          month: emp.month,
+                          baseSalary: emp.base,
+                          allowances: emp.allow,
+                          netPayable: emp.net,
+                          status: emp.status
+                        });
+                        setShowSalaryModal(true);
+                      }} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                        <Edit size={18} />
+                      </button>
+                      <button onClick={() => handleDeleteSalary(emp.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors" title="Delete">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -83,6 +145,51 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
           </table>
         </div>
       </div>
+
+      {showSalaryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editSalaryId ? 'Edit Salary Record' : 'New Salary Record'}</h3>
+              <button onClick={() => setShowSalaryModal(false)} className="text-slate-400 hover:text-slate-500">&times;</button>
+            </div>
+            <form onSubmit={handleSaveSalary} className="p-6 space-y-4">
+              {!editSalaryId && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Employee</label>
+                  <select required value={salaryForm.userId} onChange={e => setSalaryForm({...salaryForm, userId: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                    {staffList.map(s => <option key={s.id} value={s.id}>{s.name} ({s.role})</option>)}
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Month</label>
+                <input required type="text" value={salaryForm.month} onChange={e => setSalaryForm({...salaryForm, month: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. October 2024" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Base Salary</label>
+                  <input required type="text" value={salaryForm.baseSalary} onChange={e => setSalaryForm({...salaryForm, baseSalary: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Allowances</label>
+                  <input required type="text" value={salaryForm.allowances} onChange={e => setSalaryForm({...salaryForm, allowances: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Net Payable</label>
+                <input required type="text" value={salaryForm.netPayable} onChange={e => setSalaryForm({...salaryForm, netPayable: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowSalaryModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Saving...' : 'Save Record'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 

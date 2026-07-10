@@ -21,6 +21,8 @@ import AdminHR from './AdminHR';
 import AdminReports from './AdminReports';
 import AdminCommunication from './AdminCommunication';
 import AdminSettings from './AdminSettings';
+import AdminSyllabus from './AdminSyllabus';
+import AdminSemesters from './AdminSemesters';
 
 // Placeholders
 const Placeholder = ({ title }: { title: string }) => (
@@ -60,6 +62,12 @@ export default function AdminDashboard() {
     }
     if (activeTab === 'courses-list' || activeTab === 'courses-batches' || activeTab === 'courses-subjects') {
       return <AdminCourses activeTab={activeTab} />;
+    }
+    if (activeTab === 'courses-syllabus') {
+      return <AdminSyllabus />;
+    }
+    if (activeTab === 'courses-semester') {
+      return <AdminSemesters />;
     }
     if (activeTab === 'staff-list' || activeTab === 'staff-add' || activeTab === 'staff-roles') {
       return <AdminStaff activeTab={activeTab} setActiveTab={setActiveTab} />;
@@ -114,7 +122,6 @@ export default function AdminDashboard() {
       'courses-syllabus': 'Syllabus',
       'courses-semester': 'Semester Management',
       'dept-list': 'Department List',
-      'dept-add': 'Add Department',
       'timetable-schedule': 'Timetable',
       'timetable-allocation': 'Classroom Allocation',
       'exams-schedule': 'Exam Schedule',

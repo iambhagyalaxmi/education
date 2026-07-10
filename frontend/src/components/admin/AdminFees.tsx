@@ -1,13 +1,69 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Download, Plus, DollarSign, CreditCard, AlertCircle, Award, Edit } from 'lucide-react';
+import { Search, Filter, Download, Plus, DollarSign, CreditCard, AlertCircle, Award, Edit, Trash2, X } from 'lucide-react';
 
 export default function AdminFees({ activeTab }: { activeTab: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [feeRecords, setFeeRecords] = useState<any[]>([]);
 
-  useEffect(() => {
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    student: '', course: '', amount: '', dueDate: '', status: 'Pending', invoiceNo: ''
+  });
+
+  const fetchFees = () => {
     fetch('/api/fees').then(res => res.json()).then(data => setFeeRecords(Array.isArray(data) ? data : [])).catch(console.error);
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchFees();
+  }, [activeTab]);
+
+  const handleSaveFee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const url = editingId ? `/api/fees?id=${editingId}` : '/api/fees';
+      const method = editingId ? 'PUT' : 'POST';
+      const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert("Error saving record: " + (data.error || 'Check invoice number uniqueness.'));
+        setIsSubmitting(false);
+        return;
+      }
+
+      setShowModal(false);
+      fetchFees();
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server. Please ensure backend is running.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deleteFee = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this payment record?")) return;
+    await fetch(`/api/fees?id=${id}`, { method: 'DELETE' });
+    fetchFees();
+  };
+
+  const openAddModal = () => {
+    setForm({ student: '', course: '', amount: '', dueDate: '', status: 'Paid', invoiceNo: `INV-${Date.now()}` });
+    setEditingId(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (record: any) => {
+    setForm({ student: record.student, course: record.course, amount: record.amount, dueDate: record.dueDate, status: record.status, invoiceNo: record.invoiceNo });
+    setEditingId(record.id);
+    setShowModal(true);
+  };
 
   const renderStructure = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -70,7 +126,7 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Fee Collection Records</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track and manage student fee payments and receipts.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+        <button onClick={openAddModal} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
           <DollarSign size={18} /> Record Payment
         </button>
       </div>
@@ -110,8 +166,8 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {feeRecords.filter(r => r.status === 'Paid').map((record, i) => (
-                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+              {feeRecords.filter(r => r.status === 'Paid' && (r.student.toLowerCase().includes(searchTerm.toLowerCase()) || r.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()))).map((record, i) => (
+                <tr key={record.id || i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <p className="font-bold text-slate-800 dark:text-slate-200">{record.student}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{record.course}</p>
@@ -125,9 +181,14 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
                   </td>
                   <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{record.dueDate}</td>
                   <td className="p-4 pr-6 text-right">
-                    <button className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors" title="Download Receipt">
-                      <Download size={18} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => openEditModal(record)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors" title="Edit">
+                        <Edit size={18} />
+                      </button>
+                      <button onClick={() => deleteFee(record.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -145,8 +206,8 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Pending Fees & Defaulters</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track outstanding balances and send reminders.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-          <AlertCircle size={18} /> Send Mass Reminder
+        <button onClick={() => { setForm({ student: '', course: '', amount: '', dueDate: '', status: 'Pending', invoiceNo: `INV-${Date.now()}` }); setEditingId(null); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+          <AlertCircle size={18} /> Add Pending Record
         </button>
       </div>
 
@@ -164,7 +225,7 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {feeRecords.filter(r => r.status === 'Pending' || r.status === 'Overdue').map((record, i) => (
-                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                <tr key={record.id || i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <p className="font-bold text-slate-800 dark:text-slate-200">{record.student}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{record.invoiceNo}</p>
@@ -177,9 +238,14 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
                     }`}>{record.dueDate}</span>
                   </td>
                   <td className="p-4 pr-6 text-right">
-                    <button className="px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-lg transition-colors">
-                      Send Reminder
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => openEditModal(record)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors" title="Edit">
+                        <Edit size={18} />
+                      </button>
+                      <button onClick={() => deleteFee(record.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -238,17 +304,73 @@ export default function AdminFees({ activeTab }: { activeTab: string }) {
     </div>
   );
 
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case 'fees-structure': return renderStructure();
+      case 'fees-collection': return renderCollection();
+      case 'fees-pending': return renderPending();
+      case 'fees-scholarships': return renderScholarships();
+      default: return renderStructure();
+    }
+  };
 
-  switch (activeTab) {
-    case 'fees-structure':
-      return renderStructure();
-    case 'fees-collection':
-      return renderCollection();
-    case 'fees-pending':
-      return renderPending();
-    case 'fees-scholarships':
-      return renderScholarships();
-    default:
-      return renderStructure();
-  }
+  return (
+    <>
+      {renderActiveTab()}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+                {editingId ? 'Edit Payment Record' : 'Record New Payment'}
+              </h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-500">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveFee} className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Student Name</label>
+                  <input type="text" required value={form.student} onChange={e => setForm({...form, student: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Course / Program</label>
+                    <input type="text" required value={form.course} onChange={e => setForm({...form, course: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Receipt/Invoice No.</label>
+                    <input type="text" required value={form.invoiceNo} onChange={e => setForm({...form, invoiceNo: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-mono" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Amount</label>
+                    <input type="text" required placeholder="$0.00" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-bold text-emerald-600" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date</label>
+                    <input type="text" required placeholder="e.g. Oct 15, 2024" value={form.dueDate} onChange={e => setForm({...form, dueDate: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                    <select required value={form.status} onChange={e => setForm({...form, status: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm">
+                      <option value="Paid">Paid</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Overdue">Overdue</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md">Save Payment</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

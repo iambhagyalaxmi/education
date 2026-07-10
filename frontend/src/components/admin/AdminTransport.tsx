@@ -6,10 +6,144 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
   const [routes, setRoutes] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
 
+  const [showRouteModal, setShowRouteModal] = useState(false);
+  const [editRouteId, setEditRouteId] = useState<string | null>(null);
+  const [routeForm, setRouteForm] = useState({ routeNo: '', name: '', path: '', vehicleId: '', stops: '' });
+  
+  const [showVehicleModal, setShowVehicleModal] = useState(false);
+  const [vehicleForm, setVehicleForm] = useState({ vehicleId: '', type: 'Bus', plateNumber: '', condition: 'Good', status: 'Active' });
+
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [showDriverModal, setShowDriverModal] = useState(false);
+  const [editDriverId, setEditDriverId] = useState<string | null>(null);
+  const [driverForm, setDriverForm] = useState({ name: '', license: '', vehicle: '', route: '' });
+
+  const [loading, setLoading] = useState(false);
+
+  const fetchRoutes = async () => {
+    try {
+      const res = await fetch('/api/transport/routes');
+      if (res.ok) setRoutes(await res.json());
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchVehicles = async () => {
+    try {
+      const res = await fetch('/api/transport/vehicles');
+      if (res.ok) setVehicles(await res.json());
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchDrivers = async () => {
+    try {
+      const res = await fetch('/api/transport/drivers');
+      if (res.ok) setDrivers(await res.json());
+    } catch (err) { console.error(err); }
+  };
+
   useEffect(() => {
-    fetch('/api/transport/routes').then(res => res.json()).then(data => setRoutes(data)).catch(console.error);
-    fetch('/api/transport/vehicles').then(res => res.json()).then(data => setVehicles(data)).catch(console.error);
+    fetchRoutes();
+    fetchVehicles();
+    fetchDrivers();
   }, []);
+
+  const handleAddRoute = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('/api/transport/routes', {
+        method: editRouteId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...routeForm, id: editRouteId })
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert("Error saving route: " + (data.error || 'Server error.'));
+        return;
+      }
+      setShowRouteModal(false);
+      setEditRouteId(null);
+      setRouteForm({ routeNo: '', name: '', path: '', vehicleId: '', stops: '' });
+      fetchRoutes();
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteRoute = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this route?')) return;
+    try {
+      const response = await fetch(`/api/transport/routes?id=${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete route');
+      fetchRoutes();
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting route');
+    }
+  };
+
+  const handleAddVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('/api/transport/vehicles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(vehicleForm)
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert("Error saving vehicle: " + (data.error || 'Server error.'));
+        return;
+      }
+      setShowVehicleModal(false);
+      setVehicleForm({ vehicleId: '', type: 'Bus', plateNumber: '', condition: 'Good', status: 'Active' });
+      fetchVehicles();
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddDriver = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('/api/transport/drivers', {
+        method: editDriverId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...driverForm, id: editDriverId })
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert("Error saving driver: " + (data.error || 'Server error.'));
+        return;
+      }
+      setShowDriverModal(false);
+      fetchDrivers();
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteDriver = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this driver?')) return;
+    try {
+      const response = await fetch(`/api/transport/drivers?id=${id}`, { method: 'DELETE' });
+      if (response.ok) fetchDrivers();
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting driver');
+    }
+  };
 
   const renderRoutes = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
@@ -18,7 +152,11 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Bus Routes</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage institutional transport routes and stops.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => {
+          setEditRouteId(null);
+          setRouteForm({ routeNo: '', name: '', path: '', vehicleId: '', stops: '' });
+          setShowRouteModal(true);
+        }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> Add Route
         </button>
       </div>
@@ -72,10 +210,20 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
                   <td className="p-4 font-bold text-slate-700 dark:text-slate-300">{route.stops}</td>
                   <td className="p-4 pr-6 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                      <button onClick={() => {
+                        setEditRouteId(route.id);
+                        setRouteForm({
+                          routeNo: route.no,
+                          name: route.name,
+                          path: route.path,
+                          vehicleId: vehicles.find(v => v.id === route.vehicle)?.id || '',
+                          stops: route.stops.toString()
+                        });
+                        setShowRouteModal(true);
+                      }} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
                         <Edit size={18} />
                       </button>
-                      <button className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
+                      <button onClick={() => handleDeleteRoute(route.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors" title="Delete">
                         <Trash2 size={18} />
                       </button>
                     </div>
@@ -86,6 +234,57 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
           </table>
         </div>
       </div>
+
+      {showRouteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editRouteId ? 'Edit Route' : 'Add New Route'}</h3>
+              <button onClick={() => setShowRouteModal(false)} className="text-slate-400 hover:text-slate-500">
+                <Trash2 className="w-6 h-6 hidden" />
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleAddRoute} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Route No.</label>
+                  <input required type="text" value={routeForm.routeNo} onChange={e => setRouteForm({...routeForm, routeNo: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. 101" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Route Name</label>
+                  <input required type="text" value={routeForm.name} onChange={e => setRouteForm({...routeForm, name: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. City Center Express" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Path (Origin - Destination)</label>
+                <input required type="text" value={routeForm.path} onChange={e => setRouteForm({...routeForm, path: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. Campus - Downtown" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Total Stops</label>
+                  <input required type="number" value={routeForm.stops} onChange={e => setRouteForm({...routeForm, stops: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Assign Vehicle</label>
+                  <select value={routeForm.vehicleId} onChange={e => setRouteForm({...routeForm, vehicleId: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                    <option value="">Unassigned</option>
+                    {vehicles.map(v => (
+                      <option key={v.id} value={v.id}>{v.plate} ({v.type})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowRouteModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Saving...' : 'Save Route'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -93,10 +292,13 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
     <div className="space-y-6 animate-fade-in-up pb-10">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Vehicle Fleet Fleet</h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Vehicle Fleet</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage institutional buses and transport vehicles.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => {
+          setVehicleForm({ vehicleId: '', type: 'Bus', plateNumber: '', condition: 'Good', status: 'Active' });
+          setShowVehicleModal(true);
+        }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> Add Vehicle
         </button>
       </div>
@@ -130,6 +332,55 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
           </div>
         ))}
       </div>
+
+      {showVehicleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Add New Vehicle</h3>
+              <button onClick={() => setShowVehicleModal(false)} className="text-slate-400 hover:text-slate-500">
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleAddVehicle} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Vehicle ID</label>
+                  <input required type="text" value={vehicleForm.vehicleId} onChange={e => setVehicleForm({...vehicleForm, vehicleId: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. BUS-101" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">License Plate</label>
+                  <input required type="text" value={vehicleForm.plateNumber} onChange={e => setVehicleForm({...vehicleForm, plateNumber: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. ABC-1234" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Type</label>
+                  <select value={vehicleForm.type} onChange={e => setVehicleForm({...vehicleForm, type: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                    <option value="Bus">Bus</option>
+                    <option value="Van">Van</option>
+                    <option value="Car">Car</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Condition</label>
+                  <select value={vehicleForm.condition} onChange={e => setVehicleForm({...vehicleForm, condition: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Needs Maintenance">Needs Maintenance</option>
+                  </select>
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowVehicleModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Saving...' : 'Save Vehicle'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -140,7 +391,11 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Driver Details</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage transport staff, licenses, and route assignments.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => {
+          setEditDriverId(null);
+          setDriverForm({ name: '', license: '', vehicle: '', route: '' });
+          setShowDriverModal(true);
+        }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> Add Driver
         </button>
       </div>
@@ -158,11 +413,7 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { name: 'Robert Johnson', license: 'DL-98765432', vehicle: 'BUS-1042', route: 'R-01 (Downtown Express)' },
-                { name: 'William Smith', license: 'DL-12345678', vehicle: 'BUS-2055', route: 'R-02 (North Suburbs)' },
-                { name: 'David Lee', license: 'DL-55667788', vehicle: 'Unassigned', route: 'Unassigned' },
-              ].map((driver, i) => (
+              {drivers.map((driver, i) => (
                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -175,10 +426,24 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
                   <td className="p-4 font-mono text-sm text-slate-600 dark:text-slate-400">{driver.license}</td>
                   <td className="p-4 font-medium text-slate-700 dark:text-slate-300">{driver.vehicle}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">{driver.route}</td>
-                  <td className="p-4 pr-6 text-right">
-                    <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
-                      <Edit size={18} />
-                    </button>
+                  <td className="p-4 pr-6">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => {
+                        setEditDriverId(driver.id);
+                        setDriverForm({
+                          name: driver.name,
+                          license: driver.license,
+                          vehicle: driver.vehicle,
+                          route: driver.route
+                        });
+                        setShowDriverModal(true);
+                      }} className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                        <Edit size={18} />
+                      </button>
+                      <button onClick={() => handleDeleteDriver(driver.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors" title="Delete">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -186,6 +451,55 @@ export default function AdminTransport({ activeTab }: { activeTab: string }) {
           </table>
         </div>
       </div>
+
+      {showDriverModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editDriverId ? 'Edit Driver' : 'Add New Driver'}</h3>
+              <button onClick={() => setShowDriverModal(false)} className="text-slate-400 hover:text-slate-500">
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleAddDriver} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Driver Name</label>
+                <input required type="text" value={driverForm.name} onChange={e => setDriverForm({...driverForm, name: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. John Doe" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">License No.</label>
+                <input required type="text" value={driverForm.license} onChange={e => setDriverForm({...driverForm, license: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg" placeholder="e.g. DL-12345678" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Assign Vehicle</label>
+                  <select value={driverForm.vehicle} onChange={e => setDriverForm({...driverForm, vehicle: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                    <option value="Unassigned">Unassigned</option>
+                    {vehicles.map(v => (
+                      <option key={v.id} value={v.id}>{v.id}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Assign Route</label>
+                  <select value={driverForm.route} onChange={e => setDriverForm({...driverForm, route: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                    <option value="Unassigned">Unassigned</option>
+                    {routes.map(r => (
+                      <option key={r.id} value={r.no}>Route {r.no}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowDriverModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                  {loading ? 'Saving...' : 'Save Driver'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 

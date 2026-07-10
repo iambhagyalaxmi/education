@@ -7,51 +7,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── Core Education Data ───────────────────────────────────────────────────────
-
 model Course {
-  id             String          @id @default(uuid()) @db.Uuid
-  code           String          @unique // BCA, BSc, MCA, BTech
-  name           String
-  durationYears  Int
-  description    String?
-  createdAt      DateTime        @default(now())
-  feeStructures       FeeStructure[]
-  batches             Batch[]
-  students            Student[]
+  id                  String               @id @default(uuid()) @db.Uuid
+  code                String               @unique
+  name                String
+  durationYears       Int
+  description         String?
+  createdAt           DateTime             @default(now())
+  brochureUrl         String?
+  applyUrl            String?
   applications        Application[]
-  eligibilityCriteria EligibilityCriteria?
-  scholarships        Scholarship[]
-  placement           Placement?
+  batches             Batch[]
   careerPaths         CareerPath[]
-  brochureUrl         String? 
-  applyUrl            String? 
+  eligibilityCriteria EligibilityCriteria?
+  feeStructures       FeeStructure[]
+  placement           Placement?
+  scholarships        Scholarship[]
+  students            Student[]
   subjects            Subject[]
 }
 
 model Subject {
-  id          String   @id @default(uuid()) @db.Uuid
-  courseId    String   @db.Uuid
-  code        String   @unique
-  name        String
-  semester    Int
-  credits     Int      @default(3)
-  type        String   @default("core")
-  createdAt   DateTime @default(now())
+  id         String     @id @default(uuid()) @db.Uuid
+  courseId   String     @db.Uuid
+  code       String     @unique
+  name       String
+  semester   Int
+  credits    Int        @default(3)
+  type       String     @default("core")
+  createdAt  DateTime   @default(now())
+  course     Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  syllabuses Syllabus[]
+}
 
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+model Syllabus {
+  id          String   @id @default(uuid()) @db.Uuid
+  subjectId   String   @db.Uuid
+  title       String
+  description String?
+  topics      Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+}
+
+model Semester {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  status    String   @default("Upcoming")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FeeStructure {
   id              String   @id @default(uuid()) @db.Uuid
   courseId        String   @db.Uuid
-  academicYear    String   // e.g., "2024-2025"
+  academicYear    String
   admissionFee    Decimal  @db.Decimal(10, 2)
   tuitionFee      Decimal  @db.Decimal(10, 2)
   registrationFee Decimal  @db.Decimal(10, 2)
   totalFee        Decimal  @db.Decimal(10, 2)
   createdAt       DateTime @default(now())
-
   course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([courseId, academicYear])
@@ -60,11 +78,10 @@ model FeeStructure {
 model Batch {
   id           String            @id @default(uuid()) @db.Uuid
   courseId     String            @db.Uuid
-  academicYear String            // e.g., "2024-2027"
+  academicYear String
   startYear    Int
   endYear      Int
   createdAt    DateTime          @default(now())
-
   course       Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   students     Student[]
   statistic    StudentStatistic?
@@ -79,25 +96,23 @@ model StudentStatistic {
   studentsLeft      Int      @default(0)
   studentsGraduated Int      @default(0)
   updatedAt         DateTime @updatedAt
-
   batch             Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
 }
 
 model Student {
-  id        String   @id @default(uuid()) @db.Uuid
-  courseId  String   @db.Uuid
-  batchId   String   @db.Uuid
-  firstName String
-  lastName  String
-  email     String   @unique
-  phone     String?
-  profilePic String?
-  status    String   @default("active") // active, graduated, dropped
-  joinedAt  DateTime @default(now())
-
-  course    Course   @relation(fields: [courseId], references: [id])
-  batch     Batch    @relation(fields: [batchId], references: [id])
+  id                String             @id @default(uuid()) @db.Uuid
+  courseId          String             @db.Uuid
+  batchId           String             @db.Uuid
+  firstName         String
+  lastName          String
+  email             String             @unique
+  phone             String?
+  profilePic        String?
+  status            String             @default("active")
+  joinedAt          DateTime           @default(now())
   hostelAllocations HostelAllocation[]
+  batch             Batch              @relation(fields: [batchId], references: [id])
+  course            Course             @relation(fields: [courseId], references: [id])
 }
 
 model Application {
@@ -107,60 +122,54 @@ model Application {
   lastName     String
   email        String
   phone        String?
-  status       String   @default("pending") // pending, approved, rejected
+  status       String   @default("pending")
   academicYear String
   appliedAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
   course       Course   @relation(fields: [courseId], references: [id])
 }
 
-// ─── Existing Support/Chat Data ───────────────────────────────────────────────
-
 model User {
-  id            String         @id @default(uuid()) @db.Uuid
-  name          String
-  email         String         @unique
-  phone         String?
-  googleId      String?        @unique
-  role          String         @default("student") // student, counselor, faculty, staff, admin
-  department    String?        // e.g., Computer Science, Admissions
-  isActive      Boolean        @default(true)
-  profilePic    String?
-  lastLoginAt   DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @default(now()) @updatedAt
-
-  conversations     Conversation[]
-  tickets           Ticket[]
+  id                String             @id @default(uuid()) @db.Uuid
+  name              String
+  email             String             @unique
+  phone             String?
+  googleId          String?            @unique
+  role              String             @default("student")
+  department        String?
+  isActive          Boolean            @default(true)
+  profilePic        String?
+  lastLoginAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
   auditLogs         AuditLog[]
+  conversations     Conversation[]
   uploadedDocs      Document[]
   documentDownloads DocumentDownload[]
-  payrollRecords    PayrollRecord[]
   leaveRequests     LeaveRequest[]
+  payrollRecords    PayrollRecord[]
+  tickets           Ticket[]
 }
 
 model Conversation {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String?   @db.Uuid
-  sessionId String?   // For anonymous sessions
-  status    String    @default("active") // active, closed
-  startedAt DateTime  @default(now())
+  id        String     @id @default(uuid()) @db.Uuid
+  userId    String?    @db.Uuid
+  sessionId String?
+  status    String     @default("active")
+  startedAt DateTime   @default(now())
   endedAt   DateTime?
-
   user      User?      @relation(fields: [userId], references: [id])
-  messages  Message[]
   feedback  Feedback[]
+  messages  Message[]
 }
 
 model Message {
   id             String       @id @default(uuid()) @db.Uuid
   conversationId String       @db.Uuid
-  sender         String       // "user", "bot", "agent"
+  sender         String
   content        String
-  intent         String?      // detected intent
+  intent         String?
   timestamp      DateTime     @default(now())
-
   conversation   Conversation @relation(fields: [conversationId], references: [id])
 }
 
@@ -172,29 +181,27 @@ model Ticket {
   title        String
   description  String
   category     String
-  priority     String   @default("medium") // low, medium, high, critical
-  status       String   @default("open") // open, in-progress, resolved, closed
+  priority     String   @default("medium")
+  status       String   @default("open")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
   user         User?    @relation(fields: [userId], references: [id])
 }
 
 model Feedback {
   id             String       @id @default(uuid()) @db.Uuid
   conversationId String       @db.Uuid
-  rating         Int          // 1 to 5
+  rating         Int
   comments       String?
   createdAt      DateTime     @default(now())
-
   conversation   Conversation @relation(fields: [conversationId], references: [id])
 }
 
 model AuditLog {
   logId        String   @id @default(uuid()) @db.Uuid
   userId       String?  @db.Uuid
-  userRole     String?  // Admin, Counselor, Faculty, Staff
-  actionType   String   // INSERT, UPDATE, DELETE, LOGIN, LOGOUT
+  userRole     String?
+  actionType   String
   tableName    String
   recordId     String
   oldValue     Json?
@@ -203,15 +210,12 @@ model AuditLog {
   ipAddress    String?
   deviceInfo   String?
   createdAt    DateTime @default(now())
-
-  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user         User?    @relation(fields: [userId], references: [id])
 
   @@index([tableName, recordId])
   @@index([actionType])
   @@index([createdAt])
 }
-
-// ─── Document Management System ──────────────────────────────────────────────
 
 model DocumentCategory {
   id          String     @id @default(uuid()) @db.Uuid
@@ -221,23 +225,22 @@ model DocumentCategory {
 }
 
 model Document {
-  id           String   @id @default(uuid()) @db.Uuid
+  id           String             @id @default(uuid()) @db.Uuid
   title        String
-  categoryId   String   @db.Uuid
+  categoryId   String             @db.Uuid
   description  String
-  keywords     String[] // PostgreSQL supports String[]
+  keywords     String[]
   academicYear String?
   department   String?
-  version      String   @default("1.0")
+  version      String             @default("1.0")
   fileUrl      String
-  fileType     String   // PDF, DOCX, XLSX
-  fileSize     Int      // Size in bytes
-  language     String   @default("English")
-  status       String   @default("active") // active, archived
-  uploadedById String?  @db.Uuid
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  fileType     String
+  fileSize     Int
+  language     String             @default("English")
+  status       String             @default("active")
+  uploadedById String?            @db.Uuid
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
   category     DocumentCategory   @relation(fields: [categoryId], references: [id])
   uploadedBy   User?              @relation(fields: [uploadedById], references: [id])
   downloads    DocumentDownload[]
@@ -251,155 +254,132 @@ model DocumentDownload {
   userId       String?  @db.Uuid
   sessionId    String?
   downloadDate DateTime @default(now())
-
   document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user         User?    @relation(fields: [userId], references: [id])
 }
 
-// ─── AI Course Recommendation Models ──────────────────────────────────────────
-
 model EligibilityCriteria {
-  id                  String   @id @default(uuid()) @db.Uuid
-  courseId            String   @unique @db.Uuid
-  requiredQuals       String[] 
-  allowedStreams      String[] 
-  minPercentage       Float    
-  description         String?
-
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid()) @db.Uuid
+  courseId       String   @unique @db.Uuid
+  requiredQuals  String[]
+  allowedStreams String[]
+  minPercentage  Float
+  description    String?
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Scholarship {
-  id              String   @id @default(uuid()) @db.Uuid
-  courseId        String?  @db.Uuid
-  name            String
-  description     String?
-  eligibility     String
-  minPercentage   Float?
-  amount          String
-  deadline        DateTime?
-
-  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  id            String    @id @default(uuid()) @db.Uuid
+  courseId      String?   @db.Uuid
+  name          String
+  description   String?
+  eligibility   String
+  minPercentage Float?
+  amount        String
+  deadline      DateTime?
+  course        Course?   @relation(fields: [courseId], references: [id])
 }
 
 model Placement {
-  id              String   @id @default(uuid()) @db.Uuid
-  courseId        String   @unique @db.Uuid
-  placementRate   Float    
-  averageSalary   String   
-  topRecruiters   String[]
-
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id            String   @id @default(uuid()) @db.Uuid
+  courseId      String   @unique @db.Uuid
+  placementRate Float
+  averageSalary String
+  topRecruiters String[]
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model CareerPath {
-  id              String   @id @default(uuid()) @db.Uuid
-  courseId        String   @db.Uuid
-  roleName        String
-  industryDemand  String?
-
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id             String  @id @default(uuid()) @db.Uuid
+  courseId       String  @db.Uuid
+  roleName       String
+  industryDemand String?
+  course         Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
-
-// ─── Dashboard Gallery ────────────────────────────────────────────────────────
 
 model GalleryImage {
   id          String   @id @default(uuid()) @db.Uuid
   url         String
   title       String
   description String?
-  category    String   // "Hero", "Campus", "Featured", "Slider"
+  category    String
   order       Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// ─── Hostel Management ────────────────────────────────────────────────────────
-
 model HostelRoom {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String             @id @default(uuid()) @db.Uuid
   roomNumber  String
   block       String
   roomType    String
   totalBeds   Int
-  status      String   @default("Available")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  status      String             @default("Available")
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
   allocations HostelAllocation[]
 }
 
 model HostelAllocation {
-  id          String   @id @default(uuid()) @db.Uuid
-  studentId   String   @db.Uuid
-  roomId      String   @db.Uuid
-  status      String   @default("Allocated")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  student     Student    @relation(fields: [studentId], references: [id])
-  room        HostelRoom @relation(fields: [roomId], references: [id])
+  id        String     @id @default(uuid()) @db.Uuid
+  studentId String     @db.Uuid
+  roomId    String     @db.Uuid
+  status    String     @default("Allocated")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  room      HostelRoom @relation(fields: [roomId], references: [id])
+  student   Student    @relation(fields: [studentId], references: [id])
 }
 
-// ─── Transport Management ─────────────────────────────────────────────────────
-
 model TransportVehicle {
-  id          String   @id @default(uuid()) @db.Uuid
-  vehicleId   String   @unique
+  id          String           @id @default(uuid()) @db.Uuid
+  vehicleId   String           @unique
   type        String
   plateNumber String
   condition   String
-  status      String   @default("Active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  status      String           @default("Active")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   routes      TransportRoute[]
 }
 
 model TransportRoute {
-  id          String   @id @default(uuid()) @db.Uuid
-  routeNo     String   @unique
-  name        String
-  path        String
-  vehicleId   String?  @db.Uuid
-  stops       Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  vehicle     TransportVehicle? @relation(fields: [vehicleId], references: [id])
+  id        String            @id @default(uuid()) @db.Uuid
+  routeNo   String            @unique
+  name      String
+  path      String
+  vehicleId String?           @db.Uuid
+  stops     Int
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  vehicle   TransportVehicle? @relation(fields: [vehicleId], references: [id])
 }
 
-// ─── HR & Payroll Management ──────────────────────────────────────────────────
-
 model PayrollRecord {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @db.Uuid
-  month       String
-  baseSalary  String
-  allowances  String
-  netPayable  String
-  status      String   @default("Pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User     @relation(fields: [userId], references: [id])
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  month      String
+  baseSalary String
+  allowances String
+  netPayable String
+  status     String   @default("Pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model LeaveRequest {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @db.Uuid
-  type        String
-  duration    String
-  reason      String
-  status      String   @default("Pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  type      String
+  duration  String
+  reason    String
+  status    String   @default("Pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 }
-
-// --- Admissions, Fees & Examinations (Phase 4) ------------------------------
 
 model AdmissionApplication {
   id        String   @id @default(uuid()) @db.Uuid
@@ -407,7 +387,7 @@ model AdmissionApplication {
   name      String
   course    String
   date      String
-  status    String   @default("Pending") // Pending, Approved, Rejected
+  status    String   @default("Pending")
   score     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -419,7 +399,7 @@ model FeeRecord {
   course    String
   amount    String
   dueDate   String
-  status    String   @default("Pending") // Paid, Pending, Overdue
+  status    String   @default("Pending")
   invoiceNo String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -432,13 +412,20 @@ model Examination {
   date      String
   time      String
   room      String
-  status    String   @default("Upcoming") // Upcoming, Ongoing, Completed
+  status    String   @default("Upcoming")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
-// --- Library, Departments & Timetable (Phase 5) -----------------------------
+model GradingScale {
+  id        String   @id @default(uuid()) @db.Uuid
+  grade     String   @unique
+  minScore  Int
+  maxScore  Int
+  gpa       Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 model LibraryBook {
   id        String   @id @default(uuid()) @db.Uuid
@@ -447,7 +434,7 @@ model LibraryBook {
   isbn      String   @unique
   category  String
   qty       Int      @default(1)
-  status    String   @default("In Stock") // In Stock, Low Stock, Out of Stock
+  status    String   @default("In Stock")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -476,6 +463,16 @@ model TimetableEntry {
   updatedAt DateTime @updatedAt
 }
 
+model Classroom {
+  id        String   @id @default(uuid()) @db.Uuid
+  room      String
+  type      String
+  capacity  Int
+  building  String
+  status    String   @default("Available")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 model Announcement {
   id        String   @id @default(uuid()) @db.Uuid
@@ -488,9 +485,19 @@ model Announcement {
 
 model AppMessage {
   id        String   @id @default(uuid()) @db.Uuid
-  type      String   // Email, SMS, Push Notification
+  type      String
   audience  String
   subject   String?
   body      String
   createdAt DateTime @default(now())
+}
+
+model TransportDriver {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  license   String   @unique
+  vehicle   String
+  route     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

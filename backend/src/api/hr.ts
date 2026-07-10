@@ -40,6 +40,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         return res.status(201).json(newRecord);
       }
+      if (req.method === 'PUT') {
+        const { id, month, baseSalary, allowances, netPayable, status } = req.body;
+        if (!id) return res.status(400).json({ error: 'Missing payroll ID' });
+        const updatedRecord = await prisma.payrollRecord.update({
+          where: { id },
+          data: { month, baseSalary, allowances, netPayable, status: status || 'Completed' }
+        });
+        return res.status(200).json(updatedRecord);
+      }
+      if (req.method === 'DELETE') {
+        const id = req.query.id as string;
+        if (!id) return res.status(400).json({ error: 'Missing payroll ID' });
+        await prisma.payrollRecord.delete({ where: { id } });
+        return res.status(200).json({ success: true });
+      }
     }
 
     // Leave

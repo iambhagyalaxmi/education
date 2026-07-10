@@ -37,6 +37,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         return res.status(201).json(newRoute);
       }
+      if (req.method === 'PUT') {
+        const { id, routeNo, name, path, vehicleId, stops } = req.body;
+        if (!id) return res.status(400).json({ error: 'Missing route ID' });
+        const updatedRoute = await prisma.transportRoute.update({
+          where: { id },
+          data: { routeNo, name, path, vehicleId: vehicleId || null, stops: parseInt(stops) }
+        });
+        return res.status(200).json(updatedRoute);
+      }
+      if (req.method === 'DELETE') {
+        const id = req.query.id as string;
+        if (!id) return res.status(400).json({ error: 'Missing route ID' });
+        await prisma.transportRoute.delete({ where: { id } });
+        return res.status(200).json({ success: true });
+      }
     }
 
     // Vehicles
@@ -60,6 +75,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           data: { vehicleId, type, plateNumber, condition, status: status || 'Active' }
         });
         return res.status(201).json(newVehicle);
+      }
+    }
+
+    // Drivers
+    if (url.includes('/drivers')) {
+      if (req.method === 'GET') {
+        const drivers = await prisma.transportDriver.findMany();
+        return res.status(200).json(drivers);
+      }
+      if (req.method === 'POST') {
+        const { name, license, vehicle, route } = req.body;
+        const newDriver = await prisma.transportDriver.create({
+          data: { name, license, vehicle: vehicle || 'Unassigned', route: route || 'Unassigned' }
+        });
+        return res.status(201).json(newDriver);
+      }
+      if (req.method === 'PUT') {
+        const { id, name, license, vehicle, route } = req.body;
+        if (!id) return res.status(400).json({ error: 'Missing driver ID' });
+        const updatedDriver = await prisma.transportDriver.update({
+          where: { id },
+          data: { name, license, vehicle: vehicle || 'Unassigned', route: route || 'Unassigned' }
+        });
+        return res.status(200).json(updatedDriver);
+      }
+      if (req.method === 'DELETE') {
+        const id = req.query.id as string;
+        if (!id) return res.status(400).json({ error: 'Missing driver ID' });
+        await prisma.transportDriver.delete({ where: { id } });
+        return res.status(200).json({ success: true });
       }
     }
 
