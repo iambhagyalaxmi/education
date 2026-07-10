@@ -48,6 +48,7 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
 
   const [isLockingMarks, setIsLockingMarks] = useState(false);
   const [isMarksLocked, setIsMarksLocked] = useState(false);
+  const [isImportingCSV, setIsImportingCSV] = useState(false);
 
 
   // Marks Entry State
