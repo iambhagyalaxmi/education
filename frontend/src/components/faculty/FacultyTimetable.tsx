@@ -509,7 +509,16 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
                 </div>
               </div>
             </div>
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+              <button 
+                onClick={() => {
+                  alert('Change request initiated.');
+                  setSelectedDuty(null);
+                }}
+                className="px-6 py-2.5 bg-white text-slate-700 border border-slate-200 font-medium rounded-xl hover:bg-slate-50 hover:text-emerald-600 transition-colors"
+              >
+                Request Change
+              </button>
               <button 
                 onClick={() => setSelectedDuty(null)}
                 className="px-6 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors"
