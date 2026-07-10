@@ -5,6 +5,7 @@ import {
   Copy,
   Plus
 } from 'lucide-react';
+import axios from 'axios';
 
 interface FacultyMeetingsProps {
   activeTab: string;
@@ -14,13 +15,24 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
   const [platform, setPlatform] = useState('Google Meet');
   const [course, setCourse] = useState('CS401: Data Structures - Batch A');
   const [date, setDate] = useState('');
-  const [startTime, setStartTime] = useState('');
   const [duration, setDuration] = useState('60');
   const [agenda, setAgenda] = useState('');
-  const [scheduledMeetings, setScheduledMeetings] = useState([
-    { course: 'CS401: Data Structures', type: 'Lecture', link: 'meet.google.com/abc-defg-hij', platform: 'Google Meet', active: true },
-    { course: 'CS402: Operating Systems', type: 'Doubt Clearing', link: 'zoom.us/j/987654321', platform: 'Zoom', active: false },
-  ]);
+  const [scheduledMeetings, setScheduledMeetings] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch meetings on mount
+  useState(() => {
+    fetchMeetings();
+  });
+
+  async function fetchMeetings() {
+    try {
+      const res = await axios.get('/api/meetings');
+      setScheduledMeetings(res.data);
+    } catch (error) {
+      console.error('Failed to fetch meetings', error);
+    }
+  }
 
   const renderScheduleOnlineClass = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -97,36 +109,47 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
 
         <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
           <button 
-            onClick={() => {
+            disabled={isSubmitting}
+            onClick={async () => {
               if (date && startTime && agenda) {
+                setIsSubmitting(true);
                 const newLink = platform === 'Google Meet' 
                   ? `meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 6)}-${Math.random().toString(36).substring(2, 5)}` 
                   : `zoom.us/j/${Math.floor(Math.random() * 1000000000)}`;
                 
-                const newMeeting = {
-                  course: course.split(':')[0] || course,
-                  type: agenda,
-                  link: newLink,
-                  platform,
-                  active: true
-                };
-                
-                setScheduledMeetings([newMeeting, ...scheduledMeetings]);
-                alert(`Successfully generated and scheduled ${platform} link for ${course}!`);
-                
-                setPlatform('Google Meet');
-                setCourse('CS401: Data Structures - Batch A');
-                setDate('');
-                setStartTime('');
-                setDuration('60');
-                setAgenda('');
+                try {
+                  await axios.post('/api/meetings', {
+                    course: course.split(':')[0] || course,
+                    type: agenda,
+                    link: newLink,
+                    platform,
+                    date,
+                    startTime,
+                    duration
+                  });
+                  
+                  await fetchMeetings();
+                  alert(`Successfully generated and scheduled ${platform} link for ${course}!`);
+                  
+                  setPlatform('Google Meet');
+                  setCourse('CS401: Data Structures - Batch A');
+                  setDate('');
+                  setStartTime('');
+                  setDuration('60');
+                  setAgenda('');
+                } catch (error) {
+                  console.error(error);
+                  alert('Failed to schedule meeting. Make sure the backend is running.');
+                } finally {
+                  setIsSubmitting(false);
+                }
               } else {
                 alert('Please fill out all required fields (Date, Time, Agenda) to schedule.');
               }
             }}
-            className="px-8 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2"
+            className={`px-8 py-2.5 bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2 ${isSubmitting ? 'opacity-50 cursor-wait' : 'hover:bg-emerald-700'}`}
           >
-            <Plus size={18} /> Generate Link & Schedule
+            <Plus size={18} /> {isSubmitting ? 'Scheduling...' : 'Generate Link & Schedule'}
           </button>
         </div>
       </div>
@@ -157,11 +180,11 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
             <div className="flex justify-between items-start mb-4">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
                 ${meeting.type === 'Lecture' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                {meeting.type}
+                {meeting.type || 'Meeting'}
               </span>
               {meeting.active && (
                 <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ACTIVE CLASSROOM
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ACTIVE
                 </span>
               )}
             </div>
@@ -180,16 +203,26 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
 
             <div className="mt-auto flex gap-3">
               <button 
-                onClick={() => alert(`Edit details for ${meeting.course} ${meeting.type} session.`)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+                onClick={async () => {
+                  if (confirm('Are you sure you want to cancel this meeting?')) {
+                    try {
+                      await axios.delete(`/api/meetings?id=${meeting.id}`);
+                      fetchMeetings();
+                    } catch (e) {
+                      console.error(e);
+                      alert('Failed to cancel meeting.');
+                    }
+                  }
+                }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-white border border-red-200 text-red-600 hover:bg-red-50"
               >
-                Edit Details
+                Cancel
               </button>
               <button 
                 onClick={() => alert(`Starting ${platform} meeting for ${meeting.course}... Redirecting you to ${meeting.link}`)}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
               >
-                Start Meeting
+                Start
               </button>
             </div>
           </div>

@@ -149,6 +149,7 @@ model User {
   leaveRequests     LeaveRequest[]
   payrollRecords    PayrollRecord[]
   tickets           Ticket[]
+  meetings          Meeting[]
 }
 
 model Conversation {
@@ -543,4 +544,20 @@ model LessonPlan {
   status      String   @default("Pending")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Meeting {
+  id        String   @id @default(uuid()) @db.Uuid
+  course    String
+  type      String
+  platform  String
+  link      String
+  date      String
+  startTime String
+  duration  String
+  active    Boolean  @default(true)
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
