@@ -15,6 +15,7 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
   const [platform, setPlatform] = useState('Google Meet');
   const [course, setCourse] = useState('CS401: Data Structures - Batch A');
   const [date, setDate] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [duration, setDuration] = useState('60');
   const [agenda, setAgenda] = useState('');
   const [scheduledMeetings, setScheduledMeetings] = useState<any[]>([]);
