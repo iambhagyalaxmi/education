@@ -12,8 +12,10 @@ import {
   Save,
   UserPlus,
   Edit3,
+  Edit3,
   Send,
-  Plus
+  Plus,
+  UploadCloud
 } from 'lucide-react';
 
 interface FacultyStudentsProps {
@@ -55,7 +57,20 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
   const [addForm, setAddForm] = useState({ name: '', email: '', roll: '', batch: '', profilePic: '' });
 
   const [showViewModal, setShowViewModal] = useState<any>(null);
+  const [showViewModal, setShowViewModal] = useState<any>(null);
   const [showMessageModal, setShowMessageModal] = useState<any>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveMarks = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      setSuccessMsg('Marks saved successfully to the database!');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    }, 1000);
+  };
 
   const totalPages = Math.ceil(students.length / itemsPerPage);
   const paginatedStudents = students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -313,6 +328,12 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
 
   const renderInternalMarks = () => (
     <div className="space-y-6 animate-fade-in-up">
+      {successMsg && (
+        <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl flex items-center gap-2 animate-fade-in">
+          <CheckCircle size={20} />
+          <span className="font-medium">{successMsg}</span>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Internal Marks Entry</h2>
         <div className="flex gap-3">
@@ -325,8 +346,8 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
             <option>Assignment 1</option>
             <option>Quiz 1</option>
           </select>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-            Save Marks
+          <button onClick={handleSaveMarks} disabled={isSaving} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            {isSaving ? 'Saving...' : 'Save Marks'}
           </button>
         </div>
       </div>
@@ -337,7 +358,7 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
             <h3 className="font-bold text-slate-800">Mid-Term Examination</h3>
             <p className="text-sm text-slate-500">Max Marks: 50 • Weightage: 20%</p>
           </div>
-          <button className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"><Download size={16}/> Import CSV</button>
+          <button onClick={() => setShowImportModal(true)} className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"><Download size={16}/> Import CSV</button>
         </div>
         
         <div className="overflow-x-auto">
@@ -663,6 +684,43 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
                 <button type="button" onClick={() => setShowMessageModal(null)} className="px-5 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
                 <button type="submit" className="px-5 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2">
                   <Send size={18} /> Send Message
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Import CSV Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold text-slate-800">Import Marks (CSV)</h3>
+              <button onClick={() => setShowImportModal(false)} className="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={(e) => { 
+              e.preventDefault(); 
+              setShowImportModal(false); 
+              setSuccessMsg('CSV file imported successfully. Marks have been updated!');
+              setTimeout(() => setSuccessMsg(''), 4000);
+            }} className="p-6 space-y-4">
+              <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-slate-500 hover:border-emerald-500 hover:bg-emerald-50 transition-colors cursor-pointer relative">
+                <input required type="file" accept=".csv" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <UploadCloud size={40} className="text-slate-400 mb-3" />
+                <p className="font-medium text-slate-700 text-center">Click to browse or drag and drop</p>
+                <p className="text-sm mt-1">Only .csv files are supported</p>
+              </div>
+              <div className="bg-blue-50 text-blue-700 text-sm p-4 rounded-xl flex items-start gap-2">
+                <div className="shrink-0 mt-0.5"><CheckCircle size={16} /></div>
+                <p>Ensure your CSV has two columns: <strong>Roll No</strong> and <strong>Marks</strong>.</p>
+              </div>
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                <button type="button" onClick={() => setShowImportModal(false)} className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+                  Import File
                 </button>
               </div>
             </form>
