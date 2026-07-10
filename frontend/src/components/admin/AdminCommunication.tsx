@@ -266,7 +266,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Internal Chat System</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Monitor and manage internal messaging.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => alert('Opening group chat configuration...')} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <MessageSquare size={18} /> New Group Chat
         </button>
       </div>
@@ -285,7 +285,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Email Gateway Logs</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track automated and bulk email communications.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => alert('Opening SMTP gateway settings...')} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Mail size={18} /> SMTP Settings
         </button>
       </div>
