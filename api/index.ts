@@ -970,6 +970,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ---- LEAVE ----
+    if (route === 'leave') {
+      if (req.method === 'GET') {
+        const leaveRequests = await prisma.leaveRequest.findMany({ orderBy: { createdAt: 'desc' }, include: { user: true } });
+        return res.status(200).json(leaveRequests);
+      }
+      if (req.method === 'POST') {
+        const { type, duration, reason, fromDate, toDate, userId } = req.body;
+        let actualUserId = userId;
+        if (!actualUserId) {
+          const firstUser = await prisma.user.findFirst();
+          if (firstUser) actualUserId = firstUser.id;
+          else return res.status(400).json({ error: 'No user found' });
+        }
+        const formattedDuration = duration || `${fromDate} to ${toDate}`;
+        const leaveRequest = await prisma.leaveRequest.create({ data: { type, duration: formattedDuration, reason, userId: actualUserId, status: 'Pending' } });
+        return res.status(201).json(leaveRequest);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: 'Leave ID is required' });
+        const updatedLeave = await prisma.leaveRequest.update({ where: { id: String(id) }, data: { status: 'Withdrawn' } });
+        return res.status(200).json(updatedLeave);
+      }
+    }
+
+    // ---- MEETINGS ----
+    if (route === 'meetings') {
+      if (req.method === 'GET') {
+        const meetings = await prisma.meeting.findMany({ orderBy: { createdAt: 'desc' } });
+        return res.status(200).json(meetings);
+      }
+      if (req.method === 'POST') {
+        const { course, type, platform, link, date, startTime, duration } = req.body;
+        const firstUser = await prisma.user.findFirst();
+        if (!firstUser) return res.status(400).json({ error: 'No user found' });
+        const meeting = await prisma.meeting.create({ data: { course, type, platform, link, date, startTime, duration: String(duration), active: true, userId: firstUser.id } });
+        return res.status(201).json(meeting);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: 'Meeting ID is required' });
+        const deletedMeeting = await prisma.meeting.delete({ where: { id: String(id) } });
+        return res.status(200).json(deletedMeeting);
+      }
+    }
+
     // ---- UPLOAD ----
     if (route === 'upload') {
       if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
