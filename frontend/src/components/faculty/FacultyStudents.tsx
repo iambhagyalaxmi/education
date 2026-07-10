@@ -165,13 +165,13 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="View Profile">
+                      <button onClick={() => alert(`Viewing profile for ${student.name}...`)} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="View Profile">
                         <Eye size={18} />
                       </button>
-                      <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Message">
+                      <button onClick={() => alert(`Opening message window for ${student.name}...`)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Message">
                         <Mail size={18} />
                       </button>
-                      <button className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors">
+                      <button onClick={() => alert(`Opening context menu for ${student.name}...`)} className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors">
                         <MoreVertical size={18} />
                       </button>
                     </div>
