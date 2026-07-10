@@ -16,7 +16,11 @@ import {
   Printer
 } from 'lucide-react';
 
-export default function FacultyOverview() {
+interface FacultyOverviewProps {
+  setActiveTab: (tab: string) => void;
+}
+
+export default function FacultyOverview({ setActiveTab }: FacultyOverviewProps) {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 animate-fade-in-up">
       
@@ -113,37 +117,37 @@ export default function FacultyOverview() {
       <div>
         <h2 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <button className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-500 hover:shadow-md transition-all group">
+          <button onClick={() => setActiveTab('attendance-take')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-500 hover:shadow-md transition-all group">
             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full group-hover:bg-emerald-500 group-hover:text-white transition-colors">
               <CheckSquare size={24} />
             </div>
             <span className="text-sm font-medium text-slate-700 text-center">Take Attendance</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-500 hover:shadow-md transition-all group">
+          <button onClick={() => setActiveTab('assignments-create')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-500 hover:shadow-md transition-all group">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:bg-blue-500 group-hover:text-white transition-colors">
               <FileEdit size={24} />
             </div>
             <span className="text-sm font-medium text-slate-700 text-center">Create Assignment</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-purple-500 hover:shadow-md transition-all group">
+          <button onClick={() => setActiveTab('courses-materials')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-purple-500 hover:shadow-md transition-all group">
             <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:bg-purple-500 group-hover:text-white transition-colors">
               <Upload size={24} />
             </div>
             <span className="text-sm font-medium text-slate-700 text-center">Upload Notes</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-orange-500 hover:shadow-md transition-all group">
+          <button onClick={() => setActiveTab('exams-marks')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-orange-500 hover:shadow-md transition-all group">
             <div className="p-3 bg-orange-50 text-orange-600 rounded-full group-hover:bg-orange-500 group-hover:text-white transition-colors">
               <BarChart size={24} />
             </div>
             <span className="text-sm font-medium text-slate-700 text-center">Enter Marks</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-indigo-500 hover:shadow-md transition-all group">
+          <button onClick={() => setActiveTab('overview')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-indigo-500 hover:shadow-md transition-all group">
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-full group-hover:bg-indigo-500 group-hover:text-white transition-colors">
               <Megaphone size={24} />
             </div>
             <span className="text-sm font-medium text-slate-700 text-center">Post Notice</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-rose-500 hover:shadow-md transition-all group">
+          <button onClick={() => setActiveTab('comm-students')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-rose-500 hover:shadow-md transition-all group">
             <div className="p-3 bg-rose-50 text-rose-600 rounded-full group-hover:bg-rose-500 group-hover:text-white transition-colors">
               <MessageSquare size={24} />
             </div>

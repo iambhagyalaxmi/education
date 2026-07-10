@@ -36,7 +36,7 @@ export default function FacultyDashboard() {
     switch (activeTab) {
       case 'overview':
       case 'statistics':
-        return <FacultyOverview />;
+        return <FacultyOverview setActiveTab={setActiveTab} />;
       case 'courses-assigned':
       case 'courses-materials':
       case 'courses-syllabus':
