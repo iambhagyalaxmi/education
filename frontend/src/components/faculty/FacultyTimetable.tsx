@@ -445,17 +445,18 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     );
   };
 
-  switch (activeTab) {
-    case 'timetable':
-    case 'timetable-weekly':
-      return renderWeeklySchedule();
-    case 'timetable-today':
-      return renderTodaysClasses();
-    case 'timetable-exam':
-      return renderExamSchedule();
-    default:
-      return renderPlaceholder('Timetable Management', CalendarDays);
-  }
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'timetable':
+      case 'timetable-weekly':
+        return renderWeeklySchedule();
+      case 'timetable-today':
+        return renderTodaysClasses();
+      case 'timetable-exam':
+        return renderExamSchedule();
+      default:
+        return renderPlaceholder('Timetable Management', CalendarDays);
+    }
   };
 
   return (
