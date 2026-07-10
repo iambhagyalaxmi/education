@@ -14,7 +14,7 @@ export default function AdminReports({ activeTab }: { activeTab: string }) {
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{desc}</p>
       <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
         <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Format: {type}</span>
-        <button className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 text-sm font-bold flex items-center gap-1">
+        <button onClick={() => alert(`Report "${title}" generated successfully!`)} className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 text-sm font-bold flex items-center gap-1">
           Generate <Download size={14} />
         </button>
       </div>
