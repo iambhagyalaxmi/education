@@ -309,6 +309,16 @@ model GalleryImage {
   updatedAt   DateTime @updatedAt
 }
 
+model Assignment {
+  id          String   @id @default(uuid()) @db.Uuid
+  course      String
+  title       String
+  dueDate     DateTime
+  totalMarks  Int
+  status      String   @default("Published")
+  createdAt   DateTime @default(now())
+}
+
 model HostelRoom {
   id          String             @id @default(uuid()) @db.Uuid
   roomNumber  String

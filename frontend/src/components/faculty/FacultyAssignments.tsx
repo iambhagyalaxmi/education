@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   FileEdit, 
   Upload, 
@@ -19,8 +19,33 @@ interface FacultyAssignmentsProps {
 }
 
 export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Assignments Backend State
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [assignmentForm, setAssignmentForm] = useState({
+    course: 'CS401: Data Structures',
+    title: '',
+    dueDate: '',
+    totalMarks: '100'
+  });
+
+  const fetchAssignments = async () => {
+    try {
+      const res = await fetch('/api/assignments');
+      if (res.ok) {
+        const data = await res.json();
+        setAssignments(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch assignments', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -81,13 +106,32 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
   const [isPublishingAssignment, setIsPublishingAssignment] = useState(false);
   const [assignmentPublishedMsg, setAssignmentPublishedMsg] = useState('');
 
-  const handlePublishAssignment = () => {
+  const handlePublishAssignment = async () => {
+    if (!assignmentForm.title || !assignmentForm.dueDate) {
+      alert('Please fill out the Assignment Title and Due Date.');
+      return;
+    }
     setIsPublishingAssignment(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/assignments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(assignmentForm)
+      });
+      if (res.ok) {
+        setAssignmentPublishedMsg('Assignment published successfully!');
+        setAssignmentForm({ ...assignmentForm, title: '', dueDate: '' });
+        fetchAssignments();
+        setTimeout(() => setAssignmentPublishedMsg(''), 4000);
+      } else {
+        alert('Failed to publish assignment.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error publishing assignment.');
+    } finally {
       setIsPublishingAssignment(false);
-      setAssignmentPublishedMsg('Assignment published successfully!');
-      setTimeout(() => setAssignmentPublishedMsg(''), 4000);
-    }, 1000);
+    }
   };
 
   const renderCreateAssignment = () => (
@@ -118,22 +162,43 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Course</label>
-            <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option>CS401: Data Structures</option>
-              <option>CS402: Operating Systems</option>
+            <select 
+              value={assignmentForm.course}
+              onChange={(e) => setAssignmentForm({...assignmentForm, course: e.target.value})}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="CS401: Data Structures">CS401: Data Structures</option>
+              <option value="CS402: Operating Systems">CS402: Operating Systems</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Assignment Title</label>
-            <input type="text" placeholder="e.g. Implementation of AVL Trees" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <input 
+              type="text" 
+              value={assignmentForm.title}
+              onChange={(e) => setAssignmentForm({...assignmentForm, title: e.target.value})}
+              placeholder="e.g. Implementation of AVL Trees" 
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+            />
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Due Date</label>
-            <input type="datetime-local" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" />
+            <input 
+              type="datetime-local" 
+              value={assignmentForm.dueDate}
+              onChange={(e) => setAssignmentForm({...assignmentForm, dueDate: e.target.value})}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700" 
+            />
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Total Marks</label>
-            <input type="number" placeholder="100" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <input 
+              type="number" 
+              value={assignmentForm.totalMarks}
+              onChange={(e) => setAssignmentForm({...assignmentForm, totalMarks: e.target.value})}
+              placeholder="100" 
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+            />
           </div>
         </div>
 
@@ -183,6 +248,42 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
           </div>
         </div>
       </div>
+
+      {assignments.length > 0 && (
+        <div className="mt-8 animate-fade-in-up">
+          <h3 className="text-xl font-bold text-slate-800 mb-4">Published Assignments</h3>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
+                  <tr>
+                    <th className="px-6 py-4">Title</th>
+                    <th className="px-6 py-4">Course</th>
+                    <th className="px-6 py-4">Due Date</th>
+                    <th className="px-6 py-4 text-center">Marks</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {assignments.map((assignment: any) => (
+                    <tr key={assignment.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-slate-900">{assignment.title}</td>
+                      <td className="px-6 py-4 text-slate-600">{assignment.course}</td>
+                      <td className="px-6 py-4 text-slate-600">{new Date(assignment.dueDate).toLocaleString()}</td>
+                      <td className="px-6 py-4 text-center">{assignment.totalMarks}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                          {assignment.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
