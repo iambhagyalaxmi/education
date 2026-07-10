@@ -272,7 +272,15 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
             <option>CS401: Data Structures</option>
             <option>CS402: Operating Systems</option>
           </select>
-          <button onClick={() => alert('Downloading PDF syllabus...')} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+          <button onClick={() => {
+            const blob = new Blob(["This is a mockup course syllabus PDF for Faculty."], { type: 'application/pdf' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Course_Syllabus.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
             <Download size={18} /> Download PDF
           </button>
         </div>
