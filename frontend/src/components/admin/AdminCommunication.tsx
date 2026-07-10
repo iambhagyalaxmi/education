@@ -7,6 +7,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
   // Announcements State
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [showAnnModal, setShowAnnModal] = useState(false);
+  const [editAnnId, setEditAnnId] = useState<string | null>(null);
   const [annForm, setAnnForm] = useState({ title: '', audience: 'All Students & Staff', status: 'Published', content: '' });
   
   // Messages State
@@ -32,11 +33,24 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
   const saveAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(annForm) });
+    await fetch(editAnnId ? `/api/announcements?id=${editAnnId}` : '/api/announcements', { 
+      method: editAnnId ? 'PUT' : 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify(annForm) 
+    });
     setSaving(false);
     setShowAnnModal(false);
+    setEditAnnId(null);
     setAnnForm({ title: '', audience: 'All Students & Staff', status: 'Published', content: '' });
-    setSuccessMsg('Announcement published successfully!');
+    setSuccessMsg(editAnnId ? 'Announcement updated successfully!' : 'Announcement published successfully!');
+    setTimeout(() => setSuccessMsg(''), 3000);
+    fetchAnnouncements();
+  };
+
+  const deleteAnnouncement = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this announcement?')) return;
+    await fetch(`/api/announcements?id=${id}`, { method: 'DELETE' });
+    setSuccessMsg('Announcement deleted successfully!');
     setTimeout(() => setSuccessMsg(''), 3000);
     fetchAnnouncements();
   };
@@ -63,7 +77,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Announcements</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage and broadcast institutional notices.</p>
         </div>
-        <button onClick={() => setShowAnnModal(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button onClick={() => { setEditAnnId(null); setAnnForm({ title: '', audience: 'All Students & Staff', status: 'Published', content: '' }); setShowAnnModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
           <Plus size={18} /> New Announcement
         </button>
       </div>
@@ -79,7 +93,7 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg animate-fade-in-up">
             <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white">New Announcement</h3>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editAnnId ? 'Edit Announcement' : 'New Announcement'}</h3>
               <button onClick={() => setShowAnnModal(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"><X size={20} /></button>
             </div>
             <form onSubmit={saveAnnouncement} className="p-6 space-y-4">
@@ -159,9 +173,22 @@ export default function AdminCommunication({ activeTab }: { activeTab: string })
                     </span>
                   </td>
                   <td className="p-4 pr-6 text-right">
-                    <button className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
-                      <Edit size={18} />
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button 
+                        onClick={() => {
+                          setEditAnnId(ann.id);
+                          setAnnForm({ title: ann.title, audience: ann.audience, status: ann.status, content: ann.content || '' });
+                          setShowAnnModal(true);
+                        }}
+                        className="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors" title="Edit">
+                        <Edit size={18} />
+                      </button>
+                      <button 
+                        onClick={() => deleteAnnouncement(ann.id)}
+                        className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors" title="Delete">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
