@@ -12,7 +12,6 @@ import {
   Save,
   UserPlus,
   Edit3,
-  Edit3,
   Send,
   Plus,
   UploadCloud
@@ -56,7 +55,6 @@ export default function FacultyStudents({ activeTab }: FacultyStudentsProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({ name: '', email: '', roll: '', batch: '', profilePic: '' });
 
-  const [showViewModal, setShowViewModal] = useState<any>(null);
   const [showViewModal, setShowViewModal] = useState<any>(null);
   const [showMessageModal, setShowMessageModal] = useState<any>(null);
   const [showImportModal, setShowImportModal] = useState(false);
