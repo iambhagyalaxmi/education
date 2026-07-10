@@ -82,6 +82,11 @@ app.all('/api/materials', materialsHandler as any);
 import uploadHandler from './api/upload';
 app.all('/api/upload', uploadHandler as any);
 
+// Handle unknown API routes explicitly to prevent fallback to index.html
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'API Route Not Found' });
+});
+
 // For local development or non-Vercel deployments, serve the frontend
 import path from 'path';
 
