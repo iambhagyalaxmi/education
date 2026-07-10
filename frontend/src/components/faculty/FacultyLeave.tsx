@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   PlaneTakeoff, 
   Calendar,
@@ -17,6 +18,24 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [reason, setReason] = useState('');
+  const [leaveHistory, setLeaveHistory] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchLeaveHistory = async () => {
+    try {
+      const response = await axios.get('/api/leave');
+      setLeaveHistory(response.data);
+    } catch (error) {
+      console.error('Failed to fetch leave history:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeaveHistory();
+  }, []);
 
   const renderApplyLeave = () => (
     <div className="space-y-6 animate-fade-in-up">
@@ -83,21 +102,43 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
             <button 
-              onClick={() => {
+              disabled={isSubmitting}
+              onClick={async () => {
                 if (fromDate && toDate && reason) {
-                  alert('Leave Application Submitted Successfully!');
-                  setLeaveType('Casual Leave (CL)');
-                  setLeaveDays('1');
-                  setFromDate('');
-                  setToDate('');
-                  setReason('');
+                  setIsSubmitting(true);
+                  try {
+                    await axios.post('/api/leave', {
+                      type: leaveType,
+                      duration: `${fromDate} to ${toDate}`,
+                      fromDate,
+                      toDate,
+                      reason
+                    });
+                    
+                    alert('Leave Application Submitted Successfully!');
+                    
+                    // Reset form
+                    setLeaveType('Casual Leave (CL)');
+                    setLeaveDays('1');
+                    setFromDate('');
+                    setToDate('');
+                    setReason('');
+                    
+                    // Refresh history
+                    fetchLeaveHistory();
+                  } catch (error) {
+                    console.error('Error submitting leave:', error);
+                    alert('Failed to submit leave application.');
+                  } finally {
+                    setIsSubmitting(false);
+                  }
                 } else {
                   alert('Please fill out all fields before submitting.');
                 }
               }}
-              className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+              className={`px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-sm ${isSubmitting ? 'opacity-70 cursor-wait' : 'hover:bg-emerald-700'}`}
             >
-              Submit Leave Application
+              {isSubmitting ? 'Submitting...' : 'Submit Leave Application'}
             </button>
           </div>
         </div>
@@ -166,25 +207,47 @@ export default function FacultyLeave({ activeTab }: FacultyLeaveProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {[
-                { type: 'Casual Leave (CL)', duration: 'Oct 12, 2023 - Oct 13, 2023', days: 2, reason: 'Personal work', status: 'Approved', color: 'emerald' },
-                { type: 'Sick Leave (SL)', duration: 'Sep 05, 2023 - Sep 05, 2023', days: 1, reason: 'Fever', status: 'Approved', color: 'emerald' },
-                { type: 'On Duty (OD)', duration: 'Aug 20, 2023 - Aug 22, 2023', days: 3, reason: 'Conference in Delhi', status: 'Approved', color: 'emerald' },
-                { type: 'Casual Leave (CL)', duration: 'Nov 01, 2023 - Nov 01, 2023', days: 1, reason: 'Family function', status: 'Pending', color: 'orange' },
-              ].map((leave, i) => (
-                <tr key={i} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-800">{leave.type}</td>
-                  <td className="px-6 py-4 flex items-center gap-2"><Calendar size={14} className="text-slate-400"/> {leave.duration}</td>
-                  <td className="px-6 py-4 font-medium">{leave.days} Day(s)</td>
-                  <td className="px-6 py-4 truncate max-w-[200px]">{leave.reason}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-${leave.color}-50 text-${leave.color}-700`}>
-                      {leave.status === 'Approved' ? <CheckCircle2 size={14}/> : <Clock size={14}/>}
-                      {leave.status}
-                    </span>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                    <span className="inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
                   </td>
                 </tr>
-              ))}
+              ) : leaveHistory.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                    No leave history found.
+                  </td>
+                </tr>
+              ) : (
+                leaveHistory.map((leave, i) => {
+                  let color = 'slate';
+                  if (leave.status === 'Approved') color = 'emerald';
+                  else if (leave.status === 'Pending') color = 'orange';
+                  else if (leave.status === 'Rejected') color = 'rose';
+
+                  return (
+                    <tr key={i} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-800">{leave.type}</td>
+                      <td className="px-6 py-4 flex items-center gap-2"><Calendar size={14} className="text-slate-400"/> {leave.duration}</td>
+                      <td className="px-6 py-4 font-medium">
+                        {leave.days || (
+                          leave.duration.includes('to') ? 
+                          Math.max(1, Math.ceil((new Date(leave.duration.split(' to ')[1]).getTime() - new Date(leave.duration.split(' to ')[0]).getTime()) / (1000 * 3600 * 24)) + 1)
+                          : 1
+                        )} Day(s)
+                      </td>
+                      <td className="px-6 py-4 truncate max-w-[200px]" title={leave.reason}>{leave.reason}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-${color}-50 text-${color}-700`}>
+                          {leave.status === 'Approved' ? <CheckCircle2 size={14}/> : <Clock size={14}/>}
+                          {leave.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
