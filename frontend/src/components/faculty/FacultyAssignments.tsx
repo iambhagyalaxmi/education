@@ -9,7 +9,9 @@ import {
   AlertCircle,
   Download,
   FileText,
-  X
+  X,
+  FileCheck2,
+  CheckCircle
 } from 'lucide-react';
 
 interface FacultyAssignmentsProps {
@@ -76,12 +78,39 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
     }, 1500);
   };
 
+  const [isPublishingAssignment, setIsPublishingAssignment] = useState(false);
+  const [assignmentPublishedMsg, setAssignmentPublishedMsg] = useState('');
+
+  const handlePublishAssignment = () => {
+    setIsPublishingAssignment(true);
+    setTimeout(() => {
+      setIsPublishingAssignment(false);
+      setAssignmentPublishedMsg('Assignment published successfully!');
+      setTimeout(() => setAssignmentPublishedMsg(''), 4000);
+    }, 1000);
+  };
+
   const renderCreateAssignment = () => (
     <div className="space-y-6 animate-fade-in-up">
+      {assignmentPublishedMsg && (
+        <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl flex items-center gap-2 animate-fade-in">
+          <CheckCircle size={20} />
+          <span className="font-medium">{assignmentPublishedMsg}</span>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Create Assignment</h2>
-        <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-          Publish Assignment
+        <button 
+          onClick={handlePublishAssignment}
+          disabled={isPublishingAssignment}
+          className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {isPublishingAssignment ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Publishing...
+            </>
+          ) : 'Publish Assignment'}
         </button>
       </div>
 
