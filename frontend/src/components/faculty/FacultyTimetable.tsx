@@ -6,7 +6,8 @@ import {
   Users,
   Calendar,
   CheckCircle2,
-  Download
+  Download,
+  X
 } from 'lucide-react';
 
 interface FacultyTimetableProps {
@@ -46,6 +47,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
   const [attendanceTaken, setAttendanceTaken] = useState<number[]>([]);
   const [selectedDate, setSelectedDate] = useState('2026-10-19');
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [selectedDuty, setSelectedDuty] = useState<any>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const handleDateClick = () => {
@@ -414,7 +416,12 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
                   {duty.role}
                 </span>
-                <button className="text-sm font-bold text-emerald-600 hover:text-emerald-700">View Details</button>
+                <button 
+                  onClick={() => setSelectedDuty(duty)}
+                  className="text-sm font-bold text-emerald-600 hover:text-emerald-700"
+                >
+                  View Details
+                </button>
               </div>
             </div>
           ))}
@@ -449,4 +456,69 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     default:
       return renderPlaceholder('Timetable Management', CalendarDays);
   }
+  };
+
+  return (
+    <>
+      {renderContent()}
+      
+      {/* Duty Details Modal */}
+      {selectedDuty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-scale-in">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold text-slate-800">Duty Details</h3>
+              <button 
+                onClick={() => setSelectedDuty(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-500 mb-1">Examination</p>
+                <p className="font-bold text-slate-800 text-lg">{selectedDuty.exam}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-50 rounded-xl">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 flex items-center gap-1.5"><CalendarDays size={14}/> Date</p>
+                  <p className="font-bold text-slate-800">{selectedDuty.date}</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 flex items-center gap-1.5"><Clock size={14}/> Time</p>
+                  <p className="font-bold text-slate-800">{selectedDuty.time.split(' - ')[0]}</p>
+                </div>
+              </div>
+              <div className="p-4 border border-slate-100 rounded-xl space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-slate-500">Room Allocation</span>
+                  <span className="font-bold text-slate-800">{selectedDuty.room}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-slate-500">Assigned Role</span>
+                  <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">{selectedDuty.role}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-slate-500">Reporting Time</span>
+                  <span className="font-bold text-rose-600">{
+                    // calculate 30 mins before
+                    selectedDuty.time.split(' - ')[0].replace('10:00', '09:30').replace('09:00', '08:30').replace('02:00', '01:30')
+                  }</span>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <button 
+                onClick={() => setSelectedDuty(null)}
+                className="px-6 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors"
+              >
+                Acknowledge Duty
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
