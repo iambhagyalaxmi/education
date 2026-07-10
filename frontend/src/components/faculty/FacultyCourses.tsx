@@ -369,7 +369,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
             <option>CS401: Data Structures</option>
             <option>CS402: Operating Systems</option>
           </select>
-          <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+          <button onClick={() => alert('Opening Create Plan editor...')} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
             + Create Plan
           </button>
         </div>
