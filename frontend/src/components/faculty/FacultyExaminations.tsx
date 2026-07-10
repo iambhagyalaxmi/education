@@ -48,7 +48,38 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
 
   const [isLockingMarks, setIsLockingMarks] = useState(false);
   const [isMarksLocked, setIsMarksLocked] = useState(false);
-  const [isImportingCSV, setIsImportingCSV] = useState(false);
+  const [isCalculatingInternals, setIsCalculatingInternals] = useState(false);
+  const [isInternalsCalculated, setIsInternalsCalculated] = useState(false);
+
+  // Marks Entry State
+  const [marksData, setMarksData] = useState([
+    { roll: 'CS24-001', name: 'Alice Smith', p1: '8', p2: '16', total: 24, status: 'Saved' },
+    { roll: 'CS24-002', name: 'Bob Johnson', p1: '6', p2: '14', total: 20, status: 'Saved' },
+    { roll: 'CS24-003', name: 'Charlie Davis', p1: '', p2: '', total: 0, status: 'Pending' },
+  ]);
+
+  const handleMarkChange = (index: number, field: 'p1' | 'p2', value: string) => {
+    const updatedData = [...marksData];
+    updatedData[index][field] = value;
+    
+    // Calculate total
+    const p1Val = parseInt(updatedData[index].p1) || 0;
+    const p2Val = parseInt(updatedData[index].p2) || 0;
+    updatedData[index].total = p1Val + p2Val;
+    
+    // Set to saving
+    updatedData[index].status = 'Saving...';
+    setMarksData(updatedData);
+
+    // Simulate save completion
+    setTimeout(() => {
+      setMarksData(currentData => {
+        const newData = [...currentData];
+        newData[index].status = 'Saved';
+        return newData;
+      });
+    }, 1000);
+  };
 
   const handleLockMarks = () => {
     setIsLockingMarks(true);
@@ -280,26 +311,37 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {[
-                { roll: 'CS24-001', name: 'Alice Smith', p1: '8', p2: '16', total: 24, status: 'Saved' },
-                { roll: 'CS24-002', name: 'Bob Johnson', p1: '6', p2: '14', total: 20, status: 'Saved' },
-                { roll: 'CS24-003', name: 'Charlie Davis', p1: '', p2: '', total: 0, status: 'Pending' },
-              ].map((student, i) => (
+              {marksData.map((student, i) => (
                 <tr key={i} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 font-medium text-slate-700">{student.roll}</td>
                   <td className="px-6 py-4 font-semibold text-slate-900">{student.name}</td>
                   <td className="px-6 py-4">
-                    <input type="text" defaultValue={student.p1} className="w-16 px-2 py-1.5 border border-slate-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                    <input 
+                      type="text" 
+                      value={student.p1} 
+                      onChange={(e) => handleMarkChange(i, 'p1', e.target.value)}
+                      className="w-16 px-2 py-1.5 border border-slate-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                    />
                   </td>
                   <td className="px-6 py-4">
-                    <input type="text" defaultValue={student.p2} className="w-16 px-2 py-1.5 border border-slate-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                    <input 
+                      type="text" 
+                      value={student.p2} 
+                      onChange={(e) => handleMarkChange(i, 'p2', e.target.value)}
+                      className="w-16 px-2 py-1.5 border border-slate-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                    />
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">{student.total}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-                      ${student.status === 'Saved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}
+                      ${student.status === 'Saved' ? 'bg-emerald-50 text-emerald-700' : 
+                        student.status === 'Saving...' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-600'}`}
                     >
-                      {student.status === 'Saved' ? <CheckCircle2 size={14}/> : null}
+                      {student.status === 'Saving...' ? (
+                        <span className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+                      ) : student.status === 'Saved' ? (
+                        <CheckCircle2 size={14}/>
+                      ) : null}
                       {student.status}
                     </span>
                   </td>
