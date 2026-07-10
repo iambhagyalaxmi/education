@@ -36,6 +36,14 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
   const [announcementSubject, setAnnouncementSubject] = useState('');
   const [announcementContent, setAnnouncementContent] = useState('');
   const [isComposingEmail, setIsComposingEmail] = useState(false);
+  const [emailTo, setEmailTo] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [sentEmails, setSentEmails] = useState([
+    { subject: 'Important: Assignment 2 Deadline Extension', to: 'Batch B Students', time: '10:30 AM', preview: 'Dear Students, the deadline for...', read: false },
+    { subject: 'Mid-Term 1 Syllabus', to: 'CS401 All Students', time: 'Yesterday', preview: 'Please find attached the syllabus...', read: true },
+    { subject: 'Re: Attendance Query', to: 'Alice Smith', time: 'Oct 24', preview: 'Yes, your medical certificate has been...', read: true },
+  ]);
 
   const docInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -275,27 +283,61 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">To</label>
-                <input type="text" placeholder="Recipient email address" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input 
+                  type="text" 
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
+                  placeholder="Recipient email address" 
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Subject</label>
-                <input type="text" placeholder="Email subject" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input 
+                  type="text" 
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="Email subject" 
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Message</label>
-                <textarea rows={8} placeholder="Write your email here..." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                <textarea 
+                  rows={8} 
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  placeholder="Write your email here..." 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                ></textarea>
               </div>
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button 
-                onClick={() => setIsComposingEmail(false)}
+                onClick={() => {
+                  setIsComposingEmail(false);
+                  setEmailTo('');
+                  setEmailSubject('');
+                  setEmailMessage('');
+                }}
                 className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
               <button 
                 onClick={() => {
-                  alert('Email successfully sent!');
+                  if (emailTo || emailSubject || emailMessage) {
+                    setSentEmails([{
+                      subject: emailSubject || '(No Subject)',
+                      to: emailTo || 'Unknown',
+                      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                      preview: emailMessage.substring(0, 50) + '...',
+                      read: true
+                    }, ...sentEmails]);
+                  }
+                  setEmailTo('');
+                  setEmailSubject('');
+                  setEmailMessage('');
                   setIsComposingEmail(false);
                 }}
                 className="px-8 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-sm"
@@ -323,11 +365,7 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
             </div>
 
             <div className="divide-y divide-slate-100">
-              {[
-                { subject: 'Important: Assignment 2 Deadline Extension', to: 'Batch B Students', time: '10:30 AM', preview: 'Dear Students, the deadline for...', read: false },
-                { subject: 'Mid-Term 1 Syllabus', to: 'CS401 All Students', time: 'Yesterday', preview: 'Please find attached the syllabus...', read: true },
-                { subject: 'Re: Attendance Query', to: 'Alice Smith', time: 'Oct 24', preview: 'Yes, your medical certificate has been...', read: true },
-              ].map((email, i) => (
+              {sentEmails.map((email, i) => (
                 <div key={i} className={`p-4 flex flex-col md:flex-row md:items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors ${!email.read ? 'bg-slate-50/50' : ''}`}>
                   <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
                     <Mail size={20} />
