@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { try { const res = await prisma.leaveRequest.findMany(); console.log('Leave Requests:', res.length); } catch (e) { console.error('Error:', e); } } main();

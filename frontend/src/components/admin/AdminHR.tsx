@@ -53,6 +53,21 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
     }
   };
 
+  const handleUpdateLeaveStatus = async (id: string, status: string) => {
+    try {
+      const res = await fetch(`/api/hr/leave?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        fetch('/api/hr/leave').then(res => res.json()).then(data => setLeaves(data)).catch(console.error);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const renderSalary = () => (
     <div className="space-y-6 animate-fade-in-up pb-10">
       <div className="flex justify-between items-center">
@@ -275,10 +290,10 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
                   <td className="p-4 pr-6 text-right">
                     {req.status === 'Pending' ? (
                       <div className="flex justify-end gap-2">
-                        <button className="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 rounded transition-colors">
+                        <button onClick={() => handleUpdateLeaveStatus(req.id, 'Approved')} className="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 rounded transition-colors">
                           Approve
                         </button>
-                        <button className="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-400 rounded transition-colors">
+                        <button onClick={() => handleUpdateLeaveStatus(req.id, 'Rejected')} className="px-3 py-1 text-xs font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-400 rounded transition-colors">
                           Reject
                         </button>
                       </div>
