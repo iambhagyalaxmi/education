@@ -1,0 +1,1 @@
+import handler from './api/index'; const req = { url: '/api/announcements', method: 'POST', body: { title: 'Test 2', audience: 'All', content: 'hello', status: 'Draft' }, headers: {} }; const res = { setHeader: () => {}, status: (code) => ({ json: (data) => console.log('Status', code, data), end: () => console.log('Status', code, 'end') }) }; handler(req, res);

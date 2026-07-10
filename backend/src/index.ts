@@ -39,6 +39,8 @@ import syllabusHandler from './api/syllabus';
 import semestersHandler from './api/semesters';
 import classroomsHandler from './api/classrooms';
 import gradingHandler from './api/grading';
+import announcementsHandler from './api/announcements';
+import messagesHandler from './api/messages';
 
 app.use('/api/auth', authRoutes); // Keep legacy auth
 
@@ -56,6 +58,8 @@ app.all('/api/syllabus', syllabusHandler as any);
 app.all('/api/semesters', semestersHandler as any);
 app.all('/api/classrooms', classroomsHandler as any);
 app.all('/api/grading', gradingHandler as any);
+app.all('/api/announcements', announcementsHandler as any);
+app.all('/api/messages', messagesHandler as any);
 app.use('/api/hostel', hostelHandler as any);
 app.all('/api/batches', batchesHandler as any);
 app.all('/api/staff', staffHandler as any);
