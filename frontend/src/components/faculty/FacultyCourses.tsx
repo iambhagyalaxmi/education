@@ -23,6 +23,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
   const [materials, setMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCreatePlanModal, setShowCreatePlanModal] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [uploadForm, setUploadForm] = useState({ title: '', description: '', fileType: 'PDF', fileSize: '2048' });
   const [error, setError] = useState('');
@@ -369,7 +370,7 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
             <option>CS401: Data Structures</option>
             <option>CS402: Operating Systems</option>
           </select>
-          <button onClick={() => alert('Opening Create Plan editor...')} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
+          <button onClick={() => setShowCreatePlanModal(true)} className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-2">
             + Create Plan
           </button>
         </div>
@@ -422,6 +423,43 @@ export default function FacultyCourses({ activeTab }: FacultyCoursesProps) {
           </table>
         </div>
       </div>
+
+      {showCreatePlanModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-xl animate-fade-in-up">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-800">Create Lesson Plan</h3>
+              <button onClick={() => setShowCreatePlanModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); setShowCreatePlanModal(false); alert('Lesson plan created successfully!'); }} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Topic / Title</label>
+                <input type="text" placeholder="e.g. Introduction to Trees" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Date</label>
+                  <input type="date" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Duration (mins)</label>
+                  <input type="number" placeholder="60" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Objectives</label>
+                <textarea rows={3} placeholder="What will students learn?" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required></textarea>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowCreatePlanModal(false)} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" className="px-4 py-2 font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">Save Plan</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
