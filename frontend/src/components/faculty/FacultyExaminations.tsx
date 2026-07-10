@@ -48,8 +48,7 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
 
   const [isLockingMarks, setIsLockingMarks] = useState(false);
   const [isMarksLocked, setIsMarksLocked] = useState(false);
-  const [isCalculatingInternals, setIsCalculatingInternals] = useState(false);
-  const [isInternalsCalculated, setIsInternalsCalculated] = useState(false);
+
 
   // Marks Entry State
   const [marksData, setMarksData] = useState([
