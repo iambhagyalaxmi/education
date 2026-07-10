@@ -10,7 +10,6 @@ import {
   Download,
   FileText,
   X,
-  FileCheck2,
   CheckCircle
 } from 'lucide-react';
 

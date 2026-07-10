@@ -13,7 +13,6 @@ import {
   UserPlus,
   Edit3,
   Send,
-  Plus,
   UploadCloud,
   CheckCircle
 } from 'lucide-react';
