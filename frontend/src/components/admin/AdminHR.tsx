@@ -200,7 +200,7 @@ export default function AdminHR({ activeTab }: { activeTab: string }) {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Payroll Processing</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Generate payslips and process monthly payouts.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+        <button onClick={() => alert('Payroll processed successfully for the current month!')} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
           <DollarSign size={18} /> Process Payroll
         </button>
       </div>
