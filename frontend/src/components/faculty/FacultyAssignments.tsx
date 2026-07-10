@@ -376,7 +376,10 @@ export default function FacultyAssignments({ activeTab }: FacultyAssignmentsProp
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-700">{student.grade}</td>
                   <td className="px-6 py-4 text-center">
-                    <button className="px-3 py-1.5 bg-white border border-slate-200 rounded text-emerald-600 text-xs font-semibold hover:bg-emerald-50 transition-colors">
+                    <button 
+                      onClick={() => alert(student.status === 'Pending Review' ? `Opening grading interface for ${student.name}...` : `Viewing assignment for ${student.name}...`)}
+                      className="px-3 py-1.5 bg-white border border-slate-200 rounded text-emerald-600 text-xs font-semibold hover:bg-emerald-50 transition-colors"
+                    >
                       {student.status === 'Pending Review' ? 'Grade Now' : 'View'}
                     </button>
                   </td>
