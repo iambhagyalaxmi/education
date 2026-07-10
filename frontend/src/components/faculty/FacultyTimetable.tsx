@@ -48,6 +48,12 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
   const [selectedDate, setSelectedDate] = useState('2026-10-19');
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [selectedDuty, setSelectedDuty] = useState<any>(null);
+  const [editingDuty, setEditingDuty] = useState<any>(null);
+  const [examDuties, setExamDuties] = useState([
+    { date: 'Mon, Nov 12', time: '09:00 AM - 12:00 PM', exam: 'Mid-Term 2: Data Structures', room: 'Main Hall A', role: 'Chief Invigilator', active: false },
+    { date: 'Wed, Nov 14', time: '02:00 PM - 05:00 PM', exam: 'Mid-Term 2: Operating Systems', room: 'Room 304', role: 'Invigilator', active: false },
+    { date: 'Fri, Nov 16', time: '10:00 AM - 01:00 PM', exam: 'Mid-Term 2: Computer Networks', room: 'Room 201', role: 'Reliever', active: false },
+  ]);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const handleDateClick = () => {
@@ -389,11 +395,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
         <h3 className="font-bold text-slate-800 mb-6 text-lg">Upcoming Invigilation Duties</h3>
         
         <div className="space-y-4">
-          {[
-            { date: 'Mon, Nov 12', time: '09:00 AM - 12:00 PM', exam: 'Mid-Term 2: Data Structures', room: 'Main Hall A', role: 'Chief Invigilator', active: false },
-            { date: 'Wed, Nov 14', time: '02:00 PM - 05:00 PM', exam: 'Mid-Term 2: Operating Systems', room: 'Room 304', role: 'Invigilator', active: false },
-            { date: 'Fri, Nov 16', time: '10:00 AM - 01:00 PM', exam: 'Mid-Term 2: Computer Networks', room: 'Room 201', role: 'Reliever', active: false },
-          ].map((duty, i) => (
+          {examDuties.map((duty, i) => (
             <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors gap-4">
               <div className="flex items-center gap-4">
                 <div className="bg-blue-50 text-blue-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-bold shrink-0">
@@ -419,7 +421,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
                 <div className="flex gap-3">
                   <button 
                     onClick={() => {
-                      alert('Edit mode initiated.');
+                      setEditingDuty({ ...duty, index: i });
                     }}
                     className="text-sm font-bold text-slate-500 hover:text-slate-700"
                   >
@@ -534,6 +536,94 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
                 className="px-6 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors"
               >
                 Acknowledge Duty
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Duty Modal */}
+      {editingDuty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-scale-in">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-xl font-bold text-slate-800">Edit Duty Details</h3>
+              <button 
+                onClick={() => setEditingDuty(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Examination Name</label>
+                <input 
+                  type="text" 
+                  value={editingDuty.exam} 
+                  onChange={(e) => setEditingDuty({ ...editingDuty, exam: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Date</label>
+                  <input 
+                    type="text" 
+                    value={editingDuty.date} 
+                    onChange={(e) => setEditingDuty({ ...editingDuty, date: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Time</label>
+                  <input 
+                    type="text" 
+                    value={editingDuty.time} 
+                    onChange={(e) => setEditingDuty({ ...editingDuty, time: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Room Allocation</label>
+                  <input 
+                    type="text" 
+                    value={editingDuty.room} 
+                    onChange={(e) => setEditingDuty({ ...editingDuty, room: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Assigned Role</label>
+                  <input 
+                    type="text" 
+                    value={editingDuty.role} 
+                    onChange={(e) => setEditingDuty({ ...editingDuty, role: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+              <button 
+                onClick={() => setEditingDuty(null)}
+                className="px-6 py-2.5 bg-white text-slate-700 border border-slate-200 font-medium rounded-xl hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  const updatedDuties = [...examDuties];
+                  const { index, ...updatedDuty } = editingDuty;
+                  updatedDuties[index] = updatedDuty;
+                  setExamDuties(updatedDuties);
+                  setEditingDuty(null);
+                }}
+                className="px-6 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors"
+              >
+                Save Changes
               </button>
             </div>
           </div>
