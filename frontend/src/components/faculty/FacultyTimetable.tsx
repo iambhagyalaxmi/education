@@ -416,12 +416,22 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
                   {duty.role}
                 </span>
-                <button 
-                  onClick={() => setSelectedDuty(duty)}
-                  className="text-sm font-bold text-emerald-600 hover:text-emerald-700"
-                >
-                  View Details
-                </button>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => {
+                      alert('Edit mode initiated.');
+                    }}
+                    className="text-sm font-bold text-slate-500 hover:text-slate-700"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => setSelectedDuty(duty)}
+                    className="text-sm font-bold text-emerald-600 hover:text-emerald-700"
+                  >
+                    View Details
+                  </button>
+                </div>
               </div>
             </div>
           ))}
