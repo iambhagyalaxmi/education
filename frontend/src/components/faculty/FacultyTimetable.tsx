@@ -236,7 +236,47 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
     </div>
   );
 
-  const renderTodaysClasses = () => (
+  const getClassesForDate = (dateString: string) => {
+    const day = new Date(dateString).getDay();
+    // Provide different mock routines based on day of week
+    switch(day) {
+      case 1: // Monday
+        return [
+          { time: '09:00 AM - 10:30 AM', course: 'CS301: Database Systems', type: 'Lecture', room: 'Room 201', batch: 'Batch C', active: true },
+          { time: '11:00 AM - 01:00 PM', course: 'CS401: Data Structures Lab', type: 'Practical', room: 'Lab 3', batch: 'Batch A2', active: false },
+        ];
+      case 2: // Tuesday
+        return [
+          { time: '10:00 AM - 11:00 AM', course: 'CS402: Operating Systems', type: 'Lecture', room: 'Room 304', batch: 'Batch B', active: true },
+          { time: '02:00 PM - 03:00 PM', course: 'Project Mentoring', type: 'Administrative', room: 'Staff Room', batch: 'Final Year', active: false },
+        ];
+      case 3: // Wednesday
+        return [
+          { time: '08:00 AM - 10:00 AM', course: 'CS401: Data Structures Lab', type: 'Practical', room: 'Computer Lab 2', batch: 'Batch A1', active: false },
+          { time: '10:30 AM - 11:30 AM', course: 'CS402: Operating Systems', type: 'Lecture', room: 'Room 304', batch: 'Batch B', active: true },
+          { time: '12:00 PM - 01:00 PM', course: 'CS505: Machine Learning', type: 'Lecture', room: 'Room 401', batch: 'Masters', active: false },
+        ];
+      case 4: // Thursday
+        return [
+          { time: '09:00 AM - 11:00 AM', course: 'CS505: Machine Learning Lab', type: 'Practical', room: 'AI Lab', batch: 'Masters', active: true },
+          { time: '01:00 PM - 02:00 PM', course: 'Faculty Meeting', type: 'Administrative', room: 'Conference Hall', batch: 'All CS Faculty', active: false }
+        ];
+      case 5: // Friday
+        return [
+          { time: '10:00 AM - 12:00 PM', course: 'CS301: Database Systems', type: 'Lecture', room: 'Room 201', batch: 'Batch C', active: false },
+          { time: '02:00 PM - 04:00 PM', course: 'Weekly Seminar', type: 'Administrative', room: 'Auditorium', batch: 'All Students', active: true },
+        ];
+      default: // Weekend
+        return [
+          { time: '09:00 AM - 12:00 PM', course: 'Extra Classes', type: 'Lecture', room: 'Room 101', batch: 'Remedial', active: false }
+        ];
+    }
+  };
+
+  const renderTodaysClasses = () => {
+    const todayClasses = getClassesForDate(selectedDate);
+    
+    return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Today's Schedule</h2>
@@ -256,11 +296,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[
-          { time: '10:00 AM - 11:00 AM', course: 'CS402: Operating Systems', type: 'Lecture', room: 'Room 304', batch: 'Batch B (60 Students)', active: true },
-          { time: '11:00 AM - 12:30 PM', course: 'CS401: Data Structures Lab', type: 'Practical', room: 'Computer Lab 2', batch: 'Batch A1 (30 Students)', active: false },
-          { time: '02:00 PM - 03:00 PM', course: 'Faculty Meeting', type: 'Administrative', room: 'Conference Hall', batch: 'All CS Faculty', active: false }
-        ].map((cls, i) => (
+        {todayClasses.map((cls, i) => (
           <div key={i} className={`bg-white rounded-2xl border p-6 flex flex-col relative overflow-hidden transition-all
             ${cls.active ? 'border-emerald-200 shadow-md ring-1 ring-emerald-500' : 'border-slate-100 shadow-sm'}
           `}>
@@ -320,6 +356,7 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
       </div>
     </div>
   );
+  };
 
   const renderExamSchedule = () => (
     <div className="space-y-6 animate-fade-in-up">
