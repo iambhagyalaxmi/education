@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   CalendarDays, 
   Clock, 
@@ -18,6 +18,31 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [isRescheduleRequested, setIsRescheduleRequested] = useState(false);
+
+  // Load timetable entries from DB
+  const [timetableEntries, setTimetableEntries] = useState<any[]>([]);
+  const [examDuties, setExamDuties] = useState<any[]>([]);
+
+  const fetchTimetable = async () => {
+    try {
+      const res = await fetch('/api/timetable');
+      const data = await res.json();
+      if (Array.isArray(data)) setTimetableEntries(data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchExamDuties = async () => {
+    try {
+      const res = await fetch('/api/examinations');
+      const data = await res.json();
+      if (Array.isArray(data)) setExamDuties(data);
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => {
+    fetchTimetable();
+    fetchExamDuties();
+  }, []);
 
   const handleDownloadPDF = () => {
     setIsDownloading(true);
@@ -49,11 +74,6 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [selectedDuty, setSelectedDuty] = useState<any>(null);
   const [editingDuty, setEditingDuty] = useState<any>(null);
-  const [examDuties, setExamDuties] = useState([
-    { date: 'Mon, Nov 12', time: '09:00 AM - 12:00 PM', exam: 'Mid-Term 2: Data Structures', room: 'Main Hall A', role: 'Chief Invigilator', active: false },
-    { date: 'Wed, Nov 14', time: '02:00 PM - 05:00 PM', exam: 'Mid-Term 2: Operating Systems', room: 'Room 304', role: 'Invigilator', active: false },
-    { date: 'Fri, Nov 16', time: '10:00 AM - 01:00 PM', exam: 'Mid-Term 2: Computer Networks', room: 'Room 201', role: 'Reliever', active: false },
-  ]);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const handleDateClick = () => {
@@ -154,89 +174,36 @@ export default function FacultyTimetable({ activeTab }: FacultyTimetableProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {[
-                { 
-                  time: '09:00 AM', 
-                  mon: { subject: 'CS401', room: 'Room 302', type: 'Lecture' },
-                  tue: null,
-                  wed: { subject: 'CS401', room: 'Room 302', type: 'Lecture' },
-                  thu: { subject: 'CS402', room: 'Room 304', type: 'Lecture' },
-                  fri: null
-                },
-                { 
-                  time: '10:00 AM', 
-                  mon: null,
-                  tue: { subject: 'CS402', room: 'Room 304', type: 'Lecture', current: true },
-                  wed: null,
-                  thu: null,
-                  fri: { subject: 'CS401', room: 'Room 302', type: 'Lecture' }
-                },
-                { 
-                  time: '11:00 AM', 
-                  mon: { subject: 'CS401 Lab', room: 'Lab 2', type: 'Practical' },
-                  tue: { subject: 'CS401 Lab', room: 'Lab 2', type: 'Practical' },
-                  wed: null,
-                  thu: { subject: 'Meeting', room: 'Faculty Room', type: 'Admin' },
-                  fri: null
-                }
-              ].map((slot, i) => (
-                <tr key={i} className="hover:bg-slate-50/50">
-                  <td className="px-4 py-4 font-bold text-slate-500 border-r border-slate-200 text-center">{slot.time}</td>
-                  
-                  {/* Monday */}
-                  <td className="px-2 py-2">
-                    {slot.mon && (
-                      <div className={`p-3 rounded-xl border h-full flex flex-col justify-center items-center text-center
-                        ${slot.mon.type === 'Practical' ? 'bg-purple-50 border-purple-200 text-purple-800' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
-                        <span className="font-bold">{slot.mon.subject}</span>
-                        <span className="text-xs opacity-80 mt-1">{slot.mon.room}</span>
-                      </div>
-                    )}
-                  </td>
+              {timetableEntries.length === 0 ? (
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-500">No timetable entries found in database.</td></tr>
+              ) : (
+                // Group entries by time slot and show across days
+                Array.from(new Set(timetableEntries.map(e => e.time))).sort().map((timeSlot, i) => {
+                  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+                  const todayDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+                  return (
+                    <tr key={i} className="hover:bg-slate-50/50">
+                      <td className="px-4 py-4 font-bold text-slate-500 border-r border-slate-200 text-center">{timeSlot}</td>
+                      {days.map(day => {
+                        const entry = timetableEntries.find(e => e.time === timeSlot && e.day === day);
+                        const isToday = day === todayDay;
+                        return (
+                          <td key={day} className={`px-2 py-2 ${isToday ? 'bg-emerald-50/30 border-x border-emerald-50' : ''}`}>
+                            {entry ? (
+                              <div className={`p-3 rounded-xl border h-full flex flex-col justify-center items-center text-center
+                                ${isToday ? 'bg-emerald-500 border-emerald-600 text-white' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
+                                <span className="font-bold">{entry.subject}</span>
+                                <span className={`text-xs mt-1 ${isToday ? 'text-emerald-100' : 'opacity-80'}`}>{entry.room}</span>
+                              </div>
+                            ) : null}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })
+              )}
 
-                  {/* Tuesday */}
-                  <td className="px-2 py-2 bg-emerald-50/30 border-x border-emerald-50">
-                    {slot.tue && (
-                      <div className={`p-3 rounded-xl border h-full flex flex-col justify-center items-center text-center shadow-sm
-                        ${slot.tue.current ? 'bg-emerald-500 border-emerald-600 text-white ring-2 ring-emerald-200 ring-offset-1' : slot.tue.type === 'Practical' ? 'bg-purple-50 border-purple-200 text-purple-800' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
-                        <span className="font-bold">{slot.tue.subject}</span>
-                        <span className={`text-xs mt-1 ${slot.tue.current ? 'text-emerald-100' : 'opacity-80'}`}>{slot.tue.room}</span>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Wednesday */}
-                  <td className="px-2 py-2">
-                    {slot.wed && (
-                      <div className="p-3 rounded-xl border bg-blue-50 border-blue-200 text-blue-800 h-full flex flex-col justify-center items-center text-center">
-                        <span className="font-bold">{slot.wed.subject}</span>
-                        <span className="text-xs opacity-80 mt-1">{slot.wed.room}</span>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Thursday */}
-                  <td className="px-2 py-2">
-                    {slot.thu && (
-                      <div className={`p-3 rounded-xl border h-full flex flex-col justify-center items-center text-center
-                        ${slot.thu.type === 'Admin' ? 'bg-orange-50 border-orange-200 text-orange-800' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
-                        <span className="font-bold">{slot.thu.subject}</span>
-                        <span className="text-xs opacity-80 mt-1">{slot.thu.room}</span>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Friday */}
-                  <td className="px-2 py-2">
-                    {slot.fri && (
-                      <div className="p-3 rounded-xl border bg-blue-50 border-blue-200 text-blue-800 h-full flex flex-col justify-center items-center text-center">
-                        <span className="font-bold">{slot.fri.subject}</span>
-                        <span className="text-xs opacity-80 mt-1">{slot.fri.room}</span>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
             </tbody>
           </table>
         </div>

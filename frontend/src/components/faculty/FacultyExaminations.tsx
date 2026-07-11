@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   FileText, 
   Upload, 
@@ -52,11 +52,27 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
 
 
   // Marks Entry State
-  const [marksData, setMarksData] = useState([
-    { roll: 'CS24-001', name: 'Alice Smith', p1: '8', p2: '16', total: 24, status: 'Saved' },
-    { roll: 'CS24-002', name: 'Bob Johnson', p1: '6', p2: '14', total: 20, status: 'Saved' },
-    { roll: 'CS24-003', name: 'Charlie Davis', p1: '', p2: '', total: 0, status: 'Pending' },
-  ]);
+  const [marksData, setMarksData] = useState<any[]>([]);
+
+  // Load students from DB on mount
+  useEffect(() => {
+    fetch('/api/students')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMarksData(data.map((s: any) => ({
+            id: s.id,
+            roll: s.id.slice(0, 8).toUpperCase(),
+            name: `${s.firstName} ${s.lastName}`,
+            p1: '',
+            p2: '',
+            total: 0,
+            status: 'Pending',
+          })));
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleMarkChange = (index: number, field: 'p1' | 'p2', value: string) => {
     const updatedData = [...marksData];
@@ -66,19 +82,29 @@ export default function FacultyExaminations({ activeTab }: FacultyExaminationsPr
     const p1Val = parseInt(updatedData[index].p1) || 0;
     const p2Val = parseInt(updatedData[index].p2) || 0;
     updatedData[index].total = p1Val + p2Val;
-    
-    // Set to saving
     updatedData[index].status = 'Saving...';
     setMarksData(updatedData);
 
-    // Simulate save completion
-    setTimeout(() => {
-      setMarksData(currentData => {
-        const newData = [...currentData];
+    // Auto-save to DB
+    const studentId = updatedData[index].id;
+    const marks = { p1: updatedData[index].p1, p2: updatedData[index].p2, total: updatedData[index].total };
+    fetch('/api/examinations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'SAVE_MARKS', studentId, marks }),
+    }).then(() => {
+      setMarksData(current => {
+        const newData = [...current];
         newData[index].status = 'Saved';
         return newData;
       });
-    }, 1000);
+    }).catch(() => {
+      setMarksData(current => {
+        const newData = [...current];
+        newData[index].status = 'Error';
+        return newData;
+      });
+    });
   };
 
   const handleLockMarks = () => {

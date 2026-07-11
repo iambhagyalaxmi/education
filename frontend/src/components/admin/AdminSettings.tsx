@@ -1,4 +1,14 @@
+import { useState, useEffect } from 'react';
 import { Shield, Settings, Database, Key, Server, RefreshCw } from 'lucide-react';
+
+interface AuditLog {
+  id: string;
+  actionType: string;
+  tableName: string;
+  recordId: string;
+  createdAt: string;
+  user?: { name: string; email: string };
+}
 
 export default function AdminSettings({ activeTab }: { activeTab: string }) {
 
@@ -31,54 +41,107 @@ export default function AdminSettings({ activeTab }: { activeTab: string }) {
     </div>
   );
 
-  const renderAuditLogs = () => (
-    <div className="space-y-6 animate-fade-in-up pb-10">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Audit Logs</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track system activity and user actions.</p>
-        </div>
-        <button onClick={() => alert('Audit logs refreshed!')} className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-          <RefreshCw size={18} /> Refresh
-        </button>
-      </div>
+  const AuditLogsView = () => {
+    const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [page] = useState(1);
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-4 pl-6">Timestamp</th>
-                <th className="p-4">User</th>
-                <th className="p-4">Action</th>
-                <th className="p-4">IP Address</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {[
-                { time: '2024-10-22 14:30:05', user: 'admin@institute.edu', action: 'Updated Fee Structure', ip: '192.168.1.45' },
-                { time: '2024-10-22 12:15:22', user: 'hr@institute.edu', action: 'Processed September Payroll', ip: '192.168.1.112' },
-                { time: '2024-10-22 09:05:10', user: 'admin@institute.edu', action: 'System Login', ip: '192.168.1.45' },
-              ].map((log, i) => (
-                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors font-mono text-sm">
-                  <td className="p-4 pl-6 text-slate-500 dark:text-slate-400">{log.time}</td>
-                  <td className="p-4 font-bold text-slate-700 dark:text-slate-300">{log.user}</td>
-                  <td className="p-4 text-emerald-600 dark:text-emerald-400">{log.action}</td>
-                  <td className="p-4 text-slate-500 dark:text-slate-400">{log.ip}</td>
+    const fetchAuditLogs = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/audit?page=${page}&limit=20`);
+        if (res.ok) {
+          const data = await res.json();
+          // API returns { logs, total, page, totalPages } or array
+          const logs = Array.isArray(data) ? data : (data.logs || []);
+          setAuditLogs(logs);
+        }
+      } catch (e) { console.error(e); }
+      setIsLoading(false);
+    };
+
+    useEffect(() => { fetchAuditLogs(); }, [page]);
+
+    return (
+      <div className="space-y-6 animate-fade-in-up pb-10">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Audit Logs</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track system activity and user actions — live from NeonDB.</p>
+          </div>
+          <button
+            onClick={fetchAuditLogs}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          >
+            <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} /> Refresh
+          </button>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                  <th className="p-4 pl-6">Timestamp</th>
+                  <th className="p-4">User</th>
+                  <th className="p-4">Action</th>
+                  <th className="p-4">Table</th>
+                  <th className="p-4">Record ID</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {isLoading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="p-4 pl-6"><div className="h-4 bg-slate-200 rounded w-40"></div></td>
+                      <td className="p-4"><div className="h-4 bg-slate-200 rounded w-32"></div></td>
+                      <td className="p-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                      <td className="p-4"><div className="h-4 bg-slate-200 rounded w-24"></div></td>
+                      <td className="p-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                    </tr>
+                  ))
+                ) : auditLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-12 text-center text-slate-500">
+                      No audit logs found in the database.
+                    </td>
+                  </tr>
+                ) : (
+                  auditLogs.map((log, i) => (
+                    <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors font-mono text-sm">
+                      <td className="p-4 pl-6 text-slate-500 dark:text-slate-400">
+                        {new Date(log.createdAt).toLocaleString('en-IN')}
+                      </td>
+                      <td className="p-4 font-bold text-slate-700 dark:text-slate-300">
+                        {log.user?.email || log.user?.name || 'System'}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded text-xs font-bold
+                          ${log.actionType === 'INSERT' ? 'bg-emerald-100 text-emerald-700' :
+                            log.actionType === 'DELETE' ? 'bg-red-100 text-red-700' :
+                            'bg-blue-100 text-blue-700'}`}>
+                          {log.actionType}
+                        </span>
+                      </td>
+                      <td className="p-4 text-slate-600 dark:text-slate-400">{log.tableName}</td>
+                      <td className="p-4 text-slate-400 text-xs">{log.recordId?.slice(0, 8)}...</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   switch (activeTab) {
     case 'settings':
       return renderSettings();
     case 'audit-logs':
-      return renderAuditLogs();
+      return <AuditLogsView />;
     default:
       return renderSettings();
   }

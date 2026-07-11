@@ -561,3 +561,28 @@ model Meeting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Attendance {
+  id         String   @id @default(uuid()) @db.Uuid
+  studentId  String?
+  studentName String
+  rollNo     String
+  course     String
+  date       String
+  timeSlot   String
+  status     String   @default("present")
+  percent    Float    @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([course, date])
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  desc      String
+  type      String   @default("info")
+  unread    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

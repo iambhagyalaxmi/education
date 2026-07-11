@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   MessageSquare, 
   Search,
@@ -39,11 +39,12 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
   const [emailTo, setEmailTo] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
-  const [sentEmails, setSentEmails] = useState([
-    { subject: 'Important: Assignment 2 Deadline Extension', to: 'Batch B Students', time: '10:30 AM', preview: 'Dear Students, the deadline for...', read: false },
-    { subject: 'Mid-Term 1 Syllabus', to: 'CS401 All Students', time: 'Yesterday', preview: 'Please find attached the syllabus...', read: true },
-    { subject: 'Re: Attendance Query', to: 'Alice Smith', time: 'Oct 24', preview: 'Yes, your medical certificate has been...', read: true },
-  ]);
+  const [sentEmails, setSentEmails] = useState<any[]>([]);
+
+  // Load messages from DB
+  useEffect(() => {
+    fetch('/api/messages').then(r => r.json()).then(data => { if (Array.isArray(data)) setSentEmails(data); }).catch(console.error);
+  }, []);
 
   const docInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -247,11 +248,18 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
             Discard
           </button>
           <button 
-            onClick={() => {
+            onClick={async () => {
               if (announcementSubject || announcementContent) {
-                alert('Announcement successfully broadcasted to selected students!');
-                setAnnouncementSubject('');
-                setAnnouncementContent('');
+                try {
+                  await fetch('/api/announcements', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: announcementSubject, content: announcementContent, status: 'Published' }),
+                  });
+                  setAnnouncementSubject('');
+                  setAnnouncementContent('');
+                  alert('Announcement saved to database and broadcasted!');
+                } catch (e) { console.error(e); }
               }
             }}
             className="px-8 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-sm"
@@ -325,15 +333,22 @@ export default function FacultyCommunication({ activeTab }: FacultyCommunication
                 Cancel
               </button>
               <button 
-                onClick={() => {
+                onClick={async () => {
                   if (emailTo || emailSubject || emailMessage) {
-                    setSentEmails([{
-                      subject: emailSubject || '(No Subject)',
-                      to: emailTo || 'Unknown',
-                      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                      preview: emailMessage.substring(0, 50) + '...',
-                      read: true
-                    }, ...sentEmails]);
+                    try {
+                      const res = await fetch('/api/messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          subject: emailSubject || '(No Subject)',
+                          content: emailMessage,
+                          recipientEmail: emailTo,
+                          type: 'email',
+                        }),
+                      });
+                      const saved = await res.json();
+                      setSentEmails(prev => [saved, ...prev]);
+                    } catch (e) { console.error(e); }
                   }
                   setEmailTo('');
                   setEmailSubject('');

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Video, 
   Link as LinkIcon,
@@ -22,9 +22,9 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch meetings on mount
-  useState(() => {
+  useEffect(() => {
     fetchMeetings();
-  });
+  }, []);
 
   async function fetchMeetings() {
     try {

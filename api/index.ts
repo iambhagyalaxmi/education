@@ -1017,6 +1017,140 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ---- ATTENDANCE ----
+    if (route === 'attendance') {
+      if (req.method === 'GET') {
+        const { course, date, studentId } = req.query;
+        const where: any = {};
+        if (course) where.course = String(course);
+        if (date) where.date = String(date);
+        if (studentId) where.studentId = String(studentId);
+        const records = await prisma.attendance.findMany({ where, orderBy: { createdAt: 'desc' } });
+        return res.status(200).json(records);
+      }
+      if (req.method === 'POST') {
+        const { records } = req.body;
+        if (Array.isArray(records) && records.length > 0) {
+          const created = await prisma.attendance.createMany({
+            data: records.map((r: any) => ({
+              studentId: r.studentId || null,
+              studentName: r.studentName || r.name,
+              rollNo: r.rollNo || r.roll,
+              course: r.course,
+              date: r.date,
+              timeSlot: r.timeSlot,
+              status: r.status || 'present',
+              percent: r.percent || 0,
+            })),
+            skipDuplicates: true,
+          });
+          return res.status(201).json({ success: true, count: created.count });
+        }
+        const { studentId, studentName, rollNo, course, date, timeSlot, status, percent } = req.body;
+        const record = await prisma.attendance.create({
+          data: { studentId: studentId || null, studentName, rollNo, course, date, timeSlot, status: status || 'present', percent: percent || 0 },
+        });
+        return res.status(201).json(record);
+      }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: 'Attendance ID required' });
+        const { status } = req.body;
+        const updated = await prisma.attendance.update({ where: { id: String(id) }, data: { status } });
+        return res.status(200).json(updated);
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: 'Attendance ID required' });
+        await prisma.attendance.delete({ where: { id: String(id) } });
+        return res.status(204).end();
+      }
+    }
+
+    // ---- NOTIFICATIONS ----
+    if (route === 'notifications') {
+      if (req.method === 'GET') {
+        const notifs = await prisma.notification.findMany({ orderBy: { createdAt: 'desc' }, take: 50 });
+        return res.status(200).json(notifs);
+      }
+      if (req.method === 'POST') {
+        const { title, desc, type } = req.body;
+        if (!title || !desc) return res.status(400).json({ error: 'Missing required fields' });
+        const notif = await prisma.notification.create({ data: { title, desc, type: type || 'info', unread: true } });
+        return res.status(201).json(notif);
+      }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        if (id) {
+          const updated = await prisma.notification.update({ where: { id: String(id) }, data: { unread: false } });
+          return res.status(200).json(updated);
+        }
+        // Mark ALL as read
+        await prisma.notification.updateMany({ data: { unread: false } });
+        return res.status(200).json({ success: true });
+      }
+      if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: 'Notification ID required' });
+        await prisma.notification.delete({ where: { id: String(id) } });
+        return res.status(204).end();
+      }
+    }
+
+    // ---- PROFILE ----
+    if (route === 'profile') {
+      if (req.method === 'GET') {
+        const { email, id } = req.query;
+        let user = null;
+        if (id) user = await prisma.user.findUnique({ where: { id: String(id) } });
+        else if (email) user = await prisma.user.findUnique({ where: { email: String(email) } });
+        else user = await prisma.user.findFirst({ where: { role: 'faculty' } });
+        if (!user) return res.status(404).json({ error: 'Profile not found' });
+        return res.status(200).json(user);
+      }
+      if (req.method === 'PUT') {
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: 'User ID required' });
+        const { name, phone, department } = req.body;
+        const dataToUpdate: any = {};
+        if (name !== undefined) dataToUpdate.name = name;
+        if (phone !== undefined) dataToUpdate.phone = phone;
+        if (department !== undefined) dataToUpdate.department = department;
+        const updated = await prisma.user.update({ where: { id: String(id) }, data: dataToUpdate });
+        return res.status(200).json(updated);
+      }
+    }
+
+    // ---- ADMIN STATS ----
+    if (route === 'admin-stats') {
+      if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+      const [studentCount, facultyCount, staffCount, courseCount, admissionCount, announcementCount, timetableCount] = await Promise.all([
+        prisma.student.count(),
+        prisma.user.count({ where: { role: 'faculty' } }),
+        prisma.user.count({ where: { role: 'staff' } }),
+        prisma.course.count(),
+        prisma.admissionApplication.count({ where: { status: 'Pending' } }),
+        prisma.announcement.count({ where: { status: 'Published' } }),
+        prisma.timetableEntry.count(),
+      ]);
+      const today = new Date().toLocaleDateString('en-CA');
+      const pendingFees = await prisma.feeRecord.count({ where: { status: 'Pending' } });
+      const leaveRequests = await prisma.leaveRequest.count({ where: { status: 'Pending' } });
+      const auditLogs = await prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { user: { select: { name: true, email: true } } } });
+      return res.status(200).json({
+        totalStudents: studentCount,
+        totalFaculty: facultyCount,
+        totalStaff: staffCount,
+        totalCourses: courseCount,
+        pendingAdmissions: admissionCount,
+        activeAnnouncements: announcementCount,
+        todaysClasses: timetableCount,
+        pendingFees,
+        pendingLeaveRequests: leaveRequests,
+        recentAuditLogs: auditLogs,
+      });
+    }
+
     // ---- UPLOAD ----
     if (route === 'upload') {
       if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
