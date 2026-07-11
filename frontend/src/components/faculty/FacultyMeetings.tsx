@@ -162,7 +162,29 @@ export default function FacultyMeetings({ activeTab }: FacultyMeetingsProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">{platform} Links</h2>
         <button 
-          onClick={() => alert(`A new persistent ${platform} link has been generated and copied to your clipboard!`)}
+          onClick={async () => {
+            const newLink = platform === 'Google Meet' 
+              ? `meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 6)}-${Math.random().toString(36).substring(2, 5)}` 
+              : `zoom.us/j/${Math.floor(Math.random() * 1000000000)}`;
+            
+            try {
+              await navigator.clipboard.writeText(`https://${newLink}`);
+              await axios.post('/api/meetings', {
+                course: 'Persistent Room',
+                type: 'General',
+                link: newLink,
+                platform: platform,
+                date: new Date().toISOString().split('T')[0],
+                startTime: '00:00',
+                duration: '24h'
+              });
+              await fetchMeetings();
+              alert(`A new persistent ${platform} link has been generated and copied to your clipboard!`);
+            } catch (error) {
+              console.error('Failed to generate link', error);
+              alert('Failed to generate persistent link');
+            }
+          }}
           className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
         >
           Generate Persistent Link

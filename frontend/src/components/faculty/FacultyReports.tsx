@@ -31,7 +31,18 @@ export default function FacultyReports({ activeTab }: FacultyReportsProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">{title}</h2>
         <button 
-          onClick={() => alert(`Starting download for ${title} full report...`)}
+          onClick={() => {
+            const csvContent = "data:text/csv;charset=utf-8," 
+              + "Metric,Value\n"
+              + data.stats.map((stat: any) => `"${stat.label}","${stat.value}"`).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${title.replace(/\s+/g, '_')}_Report.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
           className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
         >
           <Download size={18} /> Export Full Report
